@@ -20,7 +20,6 @@ final class Highlighter extends TextAreaExtension {
   private final Segment seg;
   private final Point point;
   private final FontMetrics fm;
-  private final Color highlightColor = new Color(153, 255, 204);
 
   private Highlight highlight;
 
@@ -151,7 +150,7 @@ final class Highlighter extends TextAreaExtension {
       endX = textArea.offsetToXY(physicalLine, end, point).x;
     }
 
-    gfx.setColor(highlightColor);
+    gfx.setColor(highlight.getColor());
     gfx.fillRect(startX, y, endX - startX, fm.getHeight());
   }
 }

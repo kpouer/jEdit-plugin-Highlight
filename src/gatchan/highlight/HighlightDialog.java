@@ -7,10 +7,13 @@ import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.util.Log;
 
 import javax.swing.*;
+import javax.swing.text.Keymap;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import gnu.regexp.REException;
 
@@ -24,6 +27,7 @@ public class HighlightDialog extends EnhancedDialog {
   private final JButton cancel;
 
   private Highlight highlight;
+  private final JTextField colorField = new JTextField(6);
 
   public HighlightDialog(View owner, Highlight highlight) {
     super(owner, "Highlight", false);
@@ -45,7 +49,7 @@ public class HighlightDialog extends EnhancedDialog {
     getContentPane().add(field, cons);
     cons.gridy = 1;
     getContentPane().add(regex, cons);
-
+    getContentPane().add(colorField, cons);
     JPanel buttonsPanel = new JPanel();
     BoxLayout layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
     buttonsPanel.setLayout(layout);
@@ -70,7 +74,15 @@ public class HighlightDialog extends EnhancedDialog {
 
   public void ok() {
     try {
-      highlight.init(field.getText().trim(),regex.isSelected());
+      //todo add a color
+
+      Color color;
+      try {
+        color = new Color(Integer.parseInt(colorField.getText(), 16));
+      } catch (NumberFormatException e) {
+        color = Highlight.DEFAULT_COLOR;
+      }
+      highlight.init(field.getText().trim(),regex.isSelected(),color);
       HighlightPlugin.highlight(textArea, highlight);
       dispose();
     } catch (REException e) {

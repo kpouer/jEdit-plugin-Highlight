@@ -4,8 +4,11 @@ import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.search.RESearchMatcher;
 import gnu.regexp.REException;
 
+import java.awt.*;
+
 /**
  * A Highlight defines the string to highlight.
+ *
  * @author Matthieu Casanova
  */
 public class Highlight {
@@ -18,20 +21,29 @@ public class Highlight {
 
   private SearchMatcher searchMatcher;
 
-  public Highlight(String s, boolean regexp) throws REException {
-    init(s,regexp);
+  public static final Color DEFAULT_COLOR = new Color(153, 255, 204);
+
+  private Color color;
+
+  public Highlight(String s) throws REException {
+    init(s, false, DEFAULT_COLOR);
   }
 
   public Highlight() throws REException {
-    this(null,false);
+    this(null);
   }
 
-  public void init(String s, boolean regexp) throws REException {
+  public void init(String s, boolean regexp, Color color) throws REException {
     if (regexp) {
-      searchMatcher = new RESearchMatcher(s,false);
+      if (!s.equals(stringToHighlight)) {
+        searchMatcher = new RESearchMatcher(s, false);
+      }
+    } else {
+      searchMatcher = null;
     }
     this.stringToHighlight = s;
     this.regexp = regexp;
+    this.color = color;
   }
 
   public String getStringToHighlight() {
@@ -48,6 +60,15 @@ public class Highlight {
 
   public SearchMatcher getSearchMatcher() {
     return searchMatcher;
+  }
+
+  /**
+   * Returns the color of the highlight.
+   *
+   * @return the color
+   */
+  public Color getColor() {
+    return color;
   }
 
   public boolean equals(Object obj) {

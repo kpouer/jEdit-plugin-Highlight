@@ -109,7 +109,7 @@ public final class HighlightPlugin extends EBPlugin {
     }
 
     try {
-      Highlight h = new Highlight(text, false);
+      Highlight h = new Highlight(text);
       highlight(textArea, h);
     } catch (REException e) {
       Log.log(Log.MESSAGE, HighlightPlugin.class, "This should never happens here " + e.getMessage());
