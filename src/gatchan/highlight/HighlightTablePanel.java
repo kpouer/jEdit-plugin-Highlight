@@ -1,13 +1,11 @@
 package gatchan.highlight;
 
+import gnu.regexp.REException;
 import org.gjt.sp.jedit.gui.ColorWellButton;
 import org.gjt.sp.util.Log;
 
 import javax.swing.*;
-import javax.swing.border.EtchedBorder;
 import java.awt.*;
-
-import gnu.regexp.REException;
 
 /**
  * This panel will be used to display and edit an Highlight in the JTable.
@@ -26,7 +24,7 @@ public final class HighlightTablePanel extends JPanel {
     cons.gridy = 0;
 
     cons.anchor = GridBagConstraints.WEST;
-    final JLabel exprLabel = new JLabel("exp1");
+    final JLabel exprLabel = new JLabel("expr");
     add(exprLabel, cons);
     cons.fill = GridBagConstraints.HORIZONTAL;
     cons.weightx = 1;
@@ -42,9 +40,7 @@ public final class HighlightTablePanel extends JPanel {
     setBorder(BorderFactory.createEtchedBorder());
   }
 
-  public void setHighlight(Color background, Highlight highlight) {
-    setBackground(background);
-    regexp.setBackground(background);
+  public void setHighlight(Highlight highlight) {
     expressionField.setText(highlight.getStringToHighlight());
     regexp.setSelected(highlight.isRegexp());
     colorBox.setSelectedColor(highlight.getColor());

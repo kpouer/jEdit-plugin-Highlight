@@ -11,7 +11,7 @@ import java.awt.*;
  *
  * @author Matthieu Casanova
  */
-public class Highlight {
+public final class Highlight {
 
   private String stringToHighlight;
 
@@ -25,6 +25,8 @@ public class Highlight {
 
   private Color color;
 
+  private boolean enabled = true;
+
   public Highlight(String s) throws REException {
     init(s, false, DEFAULT_COLOR);
   }
@@ -35,13 +37,13 @@ public class Highlight {
 
   public void init(String s, boolean regexp, Color color) throws REException {
     if (regexp) {
-      if (!s.equals(stringToHighlight)) {
+      if (!s.equals(stringToHighlight) || !this.regexp) {
         searchMatcher = new RESearchMatcher(s, false);
       }
     } else {
       searchMatcher = null;
     }
-    this.stringToHighlight = s;
+    stringToHighlight = s;
     this.regexp = regexp;
     this.color = color;
   }
@@ -73,9 +75,17 @@ public class Highlight {
 
   public boolean equals(Object obj) {
     if (obj instanceof Highlight) {
-      Highlight highlight = (Highlight) obj;
+      final Highlight highlight = (Highlight) obj;
       return highlight.getStringToHighlight().equals(stringToHighlight) && highlight.isRegexp() == regexp;
     }
     return false;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 }

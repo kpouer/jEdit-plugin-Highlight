@@ -7,23 +7,29 @@ import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.CharIndexedSegment;
 
 import javax.swing.text.Segment;
+import javax.swing.event.TableModelListener;
+import javax.swing.event.TableModelEvent;
 import java.awt.*;
 
 /**
- * The Highlighter is the TextAreaExtension that will look for some String to highlight in the textarea and draw a
+ * The Highlighter is the TextAreaExtension that will look for some String to highlightList in the textarea and draw a
  * rectangle in it's background.
  *
  * @author Matthieu Casanova
  */
-final class Highlighter extends TextAreaExtension {
+final class Highlighter extends TextAreaExtension implements HighlightChangeListener {
   private final JEditTextArea textArea;
   private final Segment seg;
   private final Point point;
   private final FontMetrics fm;
 
-  private Highlight highlight;
+  //private Highlight highlight;
+
+  private HighlightManagerTableModel highlightManagerTableModel;
 
   Highlighter(JEditTextArea textArea) {
+    highlightManagerTableModel = HighlightManagerTableModel.getInstance();
+    highlightManagerTableModel.addHighlightChangeListener(this);
     this.textArea = textArea;
     final TextAreaPainter painter = textArea.getPainter();
     fm = painter.getFontMetrics();
@@ -31,11 +37,8 @@ final class Highlighter extends TextAreaExtension {
     point = new Point();
   }
 
-  public void setHighlight(Highlight highlight) {
-    if (highlight == null || !highlight.equals(this.highlight)) {
-      this.highlight = highlight;
-      textArea.invalidateLineRange(0, textArea.getLineCount());
-    }
+  protected void finalize() throws Throwable {
+    highlightManagerTableModel.removeHighlightChangeListener(this);
   }
 
   public void paintValidLine(Graphics2D gfx,
@@ -44,14 +47,29 @@ final class Highlighter extends TextAreaExtension {
                              int start,
                              int end,
                              int y) {
-    if (highlight != null) {
-      highlight(gfx, physicalLine, start, end, y);
+    if (highlightManagerTableModel.getRowCount() != 0) {
+      highlightList(gfx, physicalLine, start, end, y);
     }
   }
 
 
-  private void highlight(Graphics2D gfx, int physicalLine, int lineStartOffset, int lineEndOffset, int y) {
+  private void highlightList(Graphics2D gfx, int physicalLine, int lineStartOffset, int lineEndOffset, int y) {
     String lineContent = textArea.getLineText(physicalLine);
+    for (int i = 0; i < highlightManagerTableModel.getRowCount(); i++) {
+      Highlight highlight = highlightManagerTableModel.getHighlight(i);
+      if (highlight.isEnabled()) {
+        highlight(highlight, lineContent, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
+      }
+    }
+  }
+
+  private void highlight(Highlight highlight,
+                         String lineContent,
+                         int physicalLine,
+                         int lineStartOffset,
+                         int lineEndOffset,
+                         Graphics2D gfx,
+                         int y) {
     if (highlight.isRegexp()) {
       final SearchMatcher searchMatcher = highlight.getSearchMatcher();
       Segment segment = new Segment(lineContent.toCharArray(), 0, lineContent.length());
@@ -67,7 +85,7 @@ final class Highlighter extends TextAreaExtension {
           break;
         }
         final String s = lineContent.substring(match.start, match.end);
-        _highlight(s, match.start + i, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
+        _highlight(highlight.getColor(), s, match.start + i, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
 
         if (match.end == lineContent.length()) {
           break;
@@ -75,10 +93,10 @@ final class Highlighter extends TextAreaExtension {
         lineContent = lineContent.substring(match.end);
         i += match.end;
         segment = new Segment(lineContent.toCharArray(), 0, lineContent.length());
-
       }
     } else {
-      highlightStringInLine(lineContent,
+      highlightStringInLine(highlight.getColor(),
+                            lineContent,
                             highlight.getStringToHighlight(),
                             physicalLine,
                             lineStartOffset,
@@ -88,7 +106,8 @@ final class Highlighter extends TextAreaExtension {
     }
   }
 
-  private void highlightStringInLine(String lineString,
+  private void highlightStringInLine(Color highlightColor,
+                                     String lineString,
                                      String stringToHighlight,
                                      int physicalLine,
                                      int lineStartOffset,
@@ -97,15 +116,16 @@ final class Highlighter extends TextAreaExtension {
                                      int y) {
     int start = lineString.indexOf(stringToHighlight);
     if (start == -1) return;
-    _highlight(stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
+    _highlight(highlightColor, stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     while (true) {
       start = lineString.indexOf(stringToHighlight, start + 1);
       if (start == -1) return;
-      _highlight(stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
+      _highlight(highlightColor, stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     }
   }
 
-  private void _highlight(String stringToHighlight,
+  private void _highlight(Color highlightColor,
+                          String stringToHighlight,
                           int start,
                           int physicalLine,
                           int lineStartOffset,
@@ -131,10 +151,6 @@ final class Highlighter extends TextAreaExtension {
       return;
     }
 
-    //  Gutter gutter = textArea.getGutter();
-    // gutter.setBorder(20,Color.red,Color.green,Color.blue);
-
-
     final int startX;
 
     if (start + lineStartOffset >= lineStartOffset) {
@@ -150,7 +166,11 @@ final class Highlighter extends TextAreaExtension {
       endX = textArea.offsetToXY(physicalLine, end, point).x;
     }
 
-    gfx.setColor(highlight.getColor());
+    gfx.setColor(highlightColor);
     gfx.fillRect(startX, y, endX - startX, fm.getHeight());
+  }
+
+  public void highlightUpdated() {
+    textArea.invalidateLineRange(0, textArea.getLineCount());
   }
 }

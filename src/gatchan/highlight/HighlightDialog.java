@@ -78,7 +78,7 @@ public class HighlightDialog extends EnhancedDialog {
   public void ok() {
     try {
       highlight.init(field.getText().trim(),regex.isSelected(),colorChooser.getSelectedColor());
-      HighlightPlugin.highlight(textArea, highlight);
+      HighlightManagerTableModel.getInstance().addElement(highlight);
       dispose();
     } catch (REException e) {
       final String message = "Invalid regexp " + e.getMessage();

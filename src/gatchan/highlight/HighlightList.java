@@ -1,11 +1,9 @@
 package gatchan.highlight;
 
 import org.gjt.sp.jedit.GUIUtilities;
-import org.gjt.sp.jedit.View;
-import org.gjt.sp.jedit.jEdit;
-import org.gjt.sp.jedit.textarea.JEditTextArea;
 
 import javax.swing.*;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,30 +21,40 @@ public class HighlightList extends JPanel {
   private JMenuItem remove;
 
   private JTable table;
-  public static OneColumnTableModel tableModel;
+  public static HighlightManagerTableModel tableModel;
   public HighlightList.RemoveAction removeAction;
 
   public HighlightList() {
     super(new BorderLayout());
 
 
-    tableModel = getTableModel();
+    tableModel = HighlightManagerTableModel.getInstance();
     table = new JTable(tableModel);
+    table.setDragEnabled(false);
     final HighlightCellRenderer renderer = new HighlightCellRenderer();
     table.setRowHeight(renderer.getPreferredSize().height);
     table.setDefaultRenderer(Highlight.class, renderer);
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    table.setDefaultEditor(Highlight.class, new HighlightCellEditor());
+    table.setShowGrid(false);
+    table.setIntercellSpacing(new Dimension(0,0));
+    TableColumn col1 = table.getColumnModel().getColumn(0);
+    col1.setPreferredWidth(26);
+    col1.setMinWidth(26);
+    col1.setMaxWidth(26);
+    col1.setResizable(false);
+
+    table.setDefaultEditor(Highlight.class,new HighlightCellEditor());
+    table.setDefaultEditor(Boolean.class,table.getDefaultEditor(Boolean.class));
+    table.setTableHeader(null);
+
     table.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         int row = table.rowAtPoint(e.getPoint());
         if (row == -1) return;
 
         if (e.getButton() == MouseEvent.BUTTON1) {
-          final View view = jEdit.getActiveView();
-          JEditTextArea textArea = view.getTextArea();
-          final Highlight highlight = (Highlight) table.getValueAt(table.getSelectedRow(), 0);
-          HighlightPlugin.highlight(textArea, highlight);
+          final Highlight highlight = (Highlight) table.getValueAt(table.getSelectedRow(), 1);
+          tableModel.addElement(highlight);
           if (e.getClickCount() == 2) {
             /* HighlightDialog d = null;
              try {
@@ -73,7 +81,8 @@ public class HighlightList extends JPanel {
     });
     toolBar.add(clear);
     add(toolBar, BorderLayout.NORTH);
-    add(new JScrollPane(table));
+    final JScrollPane scroll = new JScrollPane(table);
+    add(scroll);
   }
 
   private void showPopupMenu(MouseEvent e, int row) {
@@ -86,35 +95,6 @@ public class HighlightList extends JPanel {
     removeAction.setRow(row);
     GUIUtilities.showPopupMenu(popupMenu, e.getComponent(), e.getX(), e.getY());
     e.consume();
-  }
-
-  public static OneColumnTableModel getTableModel() {
-    if (tableModel == null) {
-      tableModel = new OneColumnTableModel();
-    }
-    return tableModel;
-  }
-
-  public static void push(Highlight highlight) {
-    final OneColumnTableModel tableModel = getTableModel();
-    if (!tableModel.contains(highlight)) {
-      tableModel.addElement(highlight);
-    }
-  }
-
-  public void remove(Object highlight) {
-    final int selectedRow = table.getSelectedRow();
-    if (selectedRow != -1) {
-      final Object selectedObject = table.getValueAt(selectedRow, 0);
-      if (selectedObject == highlight) {
-        final View view = jEdit.getActiveView();
-        JEditTextArea textArea = view.getTextArea();
-        HighlightPlugin.highlight(textArea, null);
-      }
-    }
-    final OneColumnTableModel tableModel = getTableModel();
-    tableModel.removeElement(highlight);
-
   }
 
   public class RemoveAction extends AbstractAction {
@@ -131,7 +111,7 @@ public class HighlightList extends JPanel {
 
     public void actionPerformed(ActionEvent e) {
       Object s = table.getValueAt(row, 0);
-      remove(s);
+      tableModel.removeElement(s);
     }
   }
 }

@@ -11,21 +11,26 @@ import java.awt.*;
  */
 public final class HighlightCellRenderer implements TableCellRenderer {
 
-    private final HighlightTablePanel highlightTablePanel = new HighlightTablePanel();
+  private final HighlightTablePanel highlightTablePanel = new HighlightTablePanel();
+  private JCheckBox enabled = new JCheckBox();
 
-    public Component getTableCellRendererComponent(JTable table,
-                                                   Object value,
-                                                   boolean isSelected,
-                                                   boolean hasFocus,
-                                                   int row,
-                                                   int column) {
-      final Highlight highlight = (Highlight) value;
-      final Color background = isSelected ? table.getSelectionBackground() : table.getBackground();
-      highlightTablePanel.setHighlight(background, highlight);
-      return highlightTablePanel;
-    }
 
-    public Dimension getPreferredSize() {
-      return highlightTablePanel.getPreferredSize();
+  public Component getTableCellRendererComponent(JTable table,
+                                                 Object value,
+                                                 boolean isSelected,
+                                                 boolean hasFocus,
+                                                 int row,
+                                                 int column) {
+    final Highlight highlight = (Highlight) value;
+    if (column == 0) {
+      enabled.setSelected(highlight.isEnabled());
+      return enabled;
     }
+    highlightTablePanel.setHighlight(highlight);
+    return highlightTablePanel;
   }
+
+  public Dimension getPreferredSize() {
+    return highlightTablePanel.getPreferredSize();
+  }
+}

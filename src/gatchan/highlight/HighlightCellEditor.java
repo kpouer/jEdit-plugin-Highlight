@@ -2,9 +2,9 @@ package gatchan.highlight;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
-import java.util.EventObject;
-import java.awt.event.MouseEvent;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
 
 /**
  * The highlight cell editor used by the JTable containing Highlights.
@@ -14,14 +14,17 @@ import java.awt.*;
 public final class HighlightCellEditor extends AbstractCellEditor implements TableCellEditor {
   private Highlight highlight;
   private final HighlightTablePanel renderer = new HighlightTablePanel();
-  private final Color background = new Color(0xcc, 0xcc, 0xff);
 
   public Object getCellEditorValue() {
     return highlight;
   }
 
   public boolean stopCellEditing() {
-    return renderer.save(highlight);
+    final boolean ret = renderer.save(highlight);
+    if (ret) {
+      HighlightManagerTableModel.getInstance().fireHighlightChangeListener();
+    }
+    return ret;
   }
 
   public boolean isCellEditable(EventObject e) {
@@ -33,9 +36,9 @@ public final class HighlightCellEditor extends AbstractCellEditor implements Tab
   }
 
   public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-    renderer.setBorder(BorderFactory.createLoweredBevelBorder());
     highlight = (Highlight) value;
-    renderer.setHighlight(background, highlight);
+    renderer.setBorder(BorderFactory.createLoweredBevelBorder());
+    renderer.setHighlight(highlight);
     return renderer;
   }
 }

@@ -7,16 +7,14 @@ import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.Log;
 
-import javax.swing.*;
-import javax.swing.border.EtchedBorder;
-import java.awt.*;
-
 /**
  * The HighlightPlugin. This is my first plugin for jEdit, some parts of my code were inspired by the ErrorList plugin
  *
  * @author Matthieu Casanova
  */
 public final class HighlightPlugin extends EBPlugin {
+
+  private static HighlightManagerTableModel highlightManagerTableModel;
 
   public static final String NAME = "highlight";
   public static final String PROPERTY_PREFIX = "plugin.Highlight.";
@@ -25,6 +23,7 @@ public final class HighlightPlugin extends EBPlugin {
 
   /** Initialize the plugin. When starting this plugin will add an Highlighter on each text area */
   public void start() {
+    highlightManagerTableModel = HighlightManagerTableModel.getInstance();
     View view = jEdit.getFirstView();
     while (view != null) {
       final EditPane[] panes = view.getEditPanes();
@@ -39,7 +38,8 @@ public final class HighlightPlugin extends EBPlugin {
 
   /** uninitialize the plugin. we will remove the Highlighter on each text area */
   public void stop() {
-    Log.log(Log.DEBUG,HighlightPlugin.class,"HighlightPlugin will be unloaded");
+    highlightManagerTableModel.dispose();
+    highlightManagerTableModel = null;
     View view = jEdit.getFirstView();
     while (view != null) {
       final EditPane[] panes = view.getEditPanes();
@@ -93,7 +93,6 @@ public final class HighlightPlugin extends EBPlugin {
     } else if (what == EditPaneUpdate.DESTROYED) {
       uninitTextArea(textArea);
     }
-
   }
 
   /**
@@ -110,8 +109,7 @@ public final class HighlightPlugin extends EBPlugin {
     }
 
     try {
-      Highlight h = new Highlight(text);
-      highlight(textArea, h);
+      highlightManagerTableModel.addElement(new Highlight(text));
     } catch (REException e) {
       Log.log(Log.MESSAGE, HighlightPlugin.class, "This should never happens here " + e.getMessage());
     }
@@ -126,32 +124,14 @@ public final class HighlightPlugin extends EBPlugin {
     }
   }
 
-  public static void highlight(JEditTextArea textArea, Highlight h) {
-    final Highlighter highlighter = getHighlighterForTextArea(textArea);
-    HighlightList.push(h);
-    highlighter.setHighlight(h);
-  }
-
   /**
    * Cancels the highlight on a textarea.
    *
    * @param textArea the textarea
    */
   public static void cancelHighlight(JEditTextArea textArea) {
-    final Highlighter highlighter = getHighlighterForTextArea(textArea);
-    highlighter.setHighlight(null);
+  /*  final Highlighter highlighter = getHighlighterForTextArea(textArea);
+    highlighter.setHighlight(null);     */
   }
 
-  /**
-   * Returns the Highlighter for a JEditTextArea. if there is no highlighter an error log is set and one Highlighter is
-   * created.
-   *
-   * @param textArea the JEditTextArea
-   *
-   * @return a Highlighter
-   */
-  private static Highlighter getHighlighterForTextArea(JEditTextArea textArea) {
-    final Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
-    return highlighter;
-  }
 }
