@@ -1,6 +1,7 @@
 package gatchan.highlight;
 
 import org.gjt.sp.jedit.gui.EnhancedDialog;
+import org.gjt.sp.jedit.gui.ColorWellButton;
 import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
@@ -27,7 +28,7 @@ public class HighlightDialog extends EnhancedDialog {
   private final JButton cancel;
 
   private Highlight highlight;
-  private final JTextField colorField = new JTextField(6);
+  private final ColorWellButton colorChooser = new ColorWellButton(Highlight.DEFAULT_COLOR);
 
   public HighlightDialog(View owner, Highlight highlight) {
     super(owner, "Highlight", false);
@@ -49,7 +50,9 @@ public class HighlightDialog extends EnhancedDialog {
     getContentPane().add(field, cons);
     cons.gridy = 1;
     getContentPane().add(regex, cons);
-    getContentPane().add(colorField, cons);
+    getContentPane().add(colorChooser, cons);
+
+
     JPanel buttonsPanel = new JPanel();
     BoxLayout layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
     buttonsPanel.setLayout(layout);
@@ -74,15 +77,7 @@ public class HighlightDialog extends EnhancedDialog {
 
   public void ok() {
     try {
-      //todo add a color
-
-      Color color;
-      try {
-        color = new Color(Integer.parseInt(colorField.getText(), 16));
-      } catch (NumberFormatException e) {
-        color = Highlight.DEFAULT_COLOR;
-      }
-      highlight.init(field.getText().trim(),regex.isSelected(),color);
+      highlight.init(field.getText().trim(),regex.isSelected(),colorChooser.getSelectedColor());
       HighlightPlugin.highlight(textArea, highlight);
       dispose();
     } catch (REException e) {

@@ -4,6 +4,7 @@ import org.gjt.sp.util.Log;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.GUIUtilities;
+import org.gjt.sp.jedit.gui.ColorWellButton;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 
 import javax.swing.*;
@@ -107,6 +108,7 @@ public class HighlightList extends JPanel {
   private class HighlightCellRenderer extends JPanel implements ListCellRenderer {
     private final JTextField expressionField = new JTextField();
     private final JCheckBox regexp = new JCheckBox("regexp");
+    private final ColorWellButton colorBox = new ColorWellButton(Color.black);
 
     public HighlightCellRenderer() {
       super(new GridBagLayout());
@@ -118,12 +120,15 @@ public class HighlightList extends JPanel {
       add(exprLabel, cons);
       cons.fill = GridBagConstraints.HORIZONTAL;
       cons.weightx = 1;
+      cons.gridwidth = 2;
       add(expressionField, cons);
       cons.weightx = 0;
       cons.fill = GridBagConstraints.NONE;
       cons.gridy = 1;
       cons.gridwidth = 2;
       add(regexp, cons);
+      cons.gridwidth = 1;
+      add(colorBox, cons);
       setBorder(new EtchedBorder());
     }
 
@@ -140,6 +145,7 @@ public class HighlightList extends JPanel {
       regexp.setBackground(background);
       expressionField.setText(highlight.getStringToHighlight());
       regexp.setSelected(highlight.isRegexp());
+      colorBox.setSelectedColor(highlight.getColor());
       return this;
     }
   }
