@@ -105,7 +105,7 @@ public final class Highlight {
   }
 
   public static Color getNextColor() {
-    colorIndex = colorIndex++ % COLORS.length;
+    colorIndex = ++colorIndex % COLORS.length;
     return COLORS[colorIndex];
   }
 }
