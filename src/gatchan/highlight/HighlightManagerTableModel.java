@@ -57,7 +57,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @return 2
    */
   public int getColumnCount() {
-    return 2;
+    return 3;
   }
 
   public Class getColumnClass(int columnIndex) {

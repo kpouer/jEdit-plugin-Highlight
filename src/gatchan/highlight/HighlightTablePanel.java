@@ -2,14 +2,13 @@ package gatchan.highlight;
 
 import gnu.regexp.REException;
 import org.gjt.sp.jedit.gui.ColorWellButton;
-import org.gjt.sp.jedit.gui.HistoryTextField;
 import org.gjt.sp.jedit.gui.EnhancedDialog;
-import org.gjt.sp.jedit.GUIUtilities;
+import org.gjt.sp.jedit.gui.HistoryTextField;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * This panel will be used to display and edit an Highlight in the JTable and in a dialog to add highlight.

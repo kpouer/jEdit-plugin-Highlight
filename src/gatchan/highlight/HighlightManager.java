@@ -66,4 +66,6 @@ public interface HighlightManager {
 
   /** remove all Highlights. */
   void removeAll();
+
+  void removeRow(int index);
 }

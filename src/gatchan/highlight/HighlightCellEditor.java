@@ -1,5 +1,8 @@
 package gatchan.highlight;
 
+import org.gjt.sp.jedit.GUIUtilities;
+import org.gjt.sp.jedit.jEdit;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -34,16 +37,12 @@ public final class HighlightCellEditor extends AbstractCellEditor implements Tab
       fireEditingStopped();
       return true;
     } catch (InvalidHighlightException e) {
-      JOptionPane.showMessageDialog(renderer, e.getMessage(), "Invalid highlight", JOptionPane.ERROR_MESSAGE);
+      GUIUtilities.error(jEdit.getActiveView(), "gatchan-highlight.errordialog.invalidHighlight", null);
       return false;
     }
   }
 
   public boolean isCellEditable(EventObject e) {
-    /* if (e instanceof MouseEvent) {
-       final MouseEvent mouseEvent = (MouseEvent) e;
-       return mouseEvent.getClickCount() == 2;
-     }   */
     return true;
   }
 

@@ -4,6 +4,7 @@ import org.gjt.sp.jedit.*;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,15 +35,27 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
     table.setDragEnabled(false);
     final HighlightCellRenderer renderer = new HighlightCellRenderer();
     table.setRowHeight(renderer.getPreferredSize().height);
+
     table.setDefaultRenderer(Highlight.class, renderer);
+
+    final TableColumnModel columnModel = table.getColumnModel();
+
+    columnModel.getColumn(2).setCellEditor(new ButtonCellEditor(tableModel));
+
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     table.setShowGrid(false);
     table.setIntercellSpacing(new Dimension(0, 0));
-    final TableColumn col1 = table.getColumnModel().getColumn(0);
+    final TableColumn col1 = columnModel.getColumn(0);
     col1.setPreferredWidth(26);
     col1.setMinWidth(26);
     col1.setMaxWidth(26);
     col1.setResizable(false);
+
+    final TableColumn col3 = columnModel.getColumn(2);
+    col3.setPreferredWidth(26);
+    col3.setMinWidth(26);
+    col3.setMaxWidth(26);
+    col3.setResizable(false);
 
     table.setDefaultEditor(Highlight.class, new HighlightCellEditor());
     table.setDefaultEditor(Boolean.class, table.getDefaultEditor(Boolean.class));

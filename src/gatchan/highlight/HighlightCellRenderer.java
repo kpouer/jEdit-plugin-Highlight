@@ -1,5 +1,7 @@
 package gatchan.highlight;
 
+import org.gjt.sp.jedit.GUIUtilities;
+
 import javax.swing.table.TableCellRenderer;
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +15,7 @@ public final class HighlightCellRenderer implements TableCellRenderer {
 
   private final HighlightTablePanel highlightTablePanel = new HighlightTablePanel();
   private JCheckBox enabled = new JCheckBox();
+  private JButton remove = new JButton(GUIUtilities.loadIcon("Clear.png"));
 
 
   public Component getTableCellRendererComponent(JTable table,
@@ -25,9 +28,12 @@ public final class HighlightCellRenderer implements TableCellRenderer {
     if (column == 0) {
       enabled.setSelected(highlight.isEnabled());
       return enabled;
-    }
+    } else if (column == 1) {
     highlightTablePanel.setHighlight(highlight);
     return highlightTablePanel;
+    } else {
+      return remove;
+    }
   }
 
   public Dimension getPreferredSize() {

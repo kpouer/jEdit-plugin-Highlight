@@ -2,6 +2,7 @@ package gatchan.highlight;
 
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.View;
+import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.gui.EnhancedDialog;
 
 import javax.swing.*;
@@ -11,7 +12,6 @@ import java.awt.event.ActionListener;
 
 /** @author Matthieu Casanova */
 public final class HighlightDialog extends EnhancedDialog {
-
   private final JButton ok = new JButton("ok");
   private final JButton cancel = new JButton("Cancel");
 
@@ -51,7 +51,7 @@ public final class HighlightDialog extends EnhancedDialog {
       HighlightManagerTableModel.getManager().addElement(highlight);
       dispose();
     } catch (InvalidHighlightException e) {
-      JOptionPane.showMessageDialog(panel, e.getMessage(), "Invalid highlight", JOptionPane.ERROR_MESSAGE);
+      GUIUtilities.error(jEdit.getActiveView(), "gatchan-highlight.errordialog.invalidHighlight", null);
       panel.focus();
     }
   }
