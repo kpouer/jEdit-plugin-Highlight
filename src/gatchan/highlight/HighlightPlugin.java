@@ -79,7 +79,7 @@ public final class HighlightPlugin extends EBPlugin {
   private static Highlighter initTextArea(JEditTextArea textArea) {
     final Highlighter highlighter = new Highlighter(textArea);
     final TextAreaPainter painter = textArea.getPainter();
-    painter.addExtension(TextAreaPainter.BELOW_SELECTION_LAYER, highlighter);
+    painter.addExtension(TextAreaPainter.HIGHEST_LAYER, highlighter);
     textArea.putClientProperty(Highlighter.class, highlighter);
     return highlighter;
   }
