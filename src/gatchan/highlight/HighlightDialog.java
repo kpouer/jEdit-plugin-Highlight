@@ -71,7 +71,15 @@ public class HighlightDialog extends EnhancedDialog {
 
   public void ok() {
     try {
-      highlight.init(field.getText().trim(),regex.isSelected(),colorChooser.getSelectedColor());
+      final String stringToHighlight = field.getText().trim();
+      if ("".equals(stringToHighlight)) {
+        final String message = "String cannot be empty";
+        JOptionPane.showMessageDialog(this,message,"Invalid string",JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+      final boolean regexp = regex.isSelected();
+      final Color color = colorChooser.getSelectedColor();
+      highlight.init(stringToHighlight,regexp,color);
       HighlightManagerTableModel.getManager().addElement(highlight);
       dispose();
     } catch (REException e) {
