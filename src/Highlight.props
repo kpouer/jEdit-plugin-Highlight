@@ -4,9 +4,13 @@
 plugin.gatchan.highlight.HighlightPlugin.activate=defer
 plugin.gatchan.highlight.HighlightPlugin.name=Highlight
 plugin.gatchan.highlight.HighlightPlugin.author=Matthieu Casanova
-plugin.gatchan.highlight.HighlightPlugin.version=1.0.0
+plugin.gatchan.highlight.HighlightPlugin.version=1.0.1
+plugin.gatchan.highlight.HighlightPlugin.docs=Highlight.html
+plugin.gatchan.highlight.HighlightPlugin.depend.0=jdk 1.4
+plugin.gatchan.highlight.HighlightPlugin.1=jedit 04.02.11.00
+plugin.gatchan.highlight.HighlightPlugin.menu=\
+                                                gatchan-highlight \
+                                                gatchan-cancelHighlight
 
-plugin.gatchan.phpparser.depend.0=jedit 04.02.11.00
-
-gatchan-highlight.label=highlight
-gatchan-cancelHighlight.label=cancel highlight
+gatchan-highlight.label=Highlight
+gatchan-cancelHighlight.label=Cancel highlight
