@@ -8,15 +8,15 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * This panel will be used to display and edit an Highlight in the JTable.
+ * This panel will be used to display and edit an Highlight in the JTable and in a dialog to add highlight.
  *
  * @author Matthieu Casanova
  */
 public final class HighlightTablePanel extends JPanel {
 
-  private final JTextField expressionField = new JTextField();
+  private final JTextField expressionField = new JTextField(40);
   private final JCheckBox regexp = new JCheckBox("regexp");
-  private final ColorWellButton colorBox = new ColorWellButton(Color.black);
+  private final ColorWellButton colorBox = new ColorWellButton(Highlight.getNextColor());
 
   public HighlightTablePanel() {
     super(new GridBagLayout());
@@ -46,6 +46,16 @@ public final class HighlightTablePanel extends JPanel {
     colorBox.setSelectedColor(highlight.getColor());
   }
 
+  public void focus() {
+    expressionField.requestFocus();
+  }
+
+  /**
+   * Save the fields in the Highlight.
+   *
+   * @param highlight the highlight where we want to save
+   * @return true if it was saved, false otherwise
+   */
   public boolean save(Highlight highlight) {
       try {
         final String stringToHighlight = expressionField.getText().trim();
