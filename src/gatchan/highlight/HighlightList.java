@@ -1,5 +1,6 @@
 package gatchan.highlight;
 
+import gnu.regexp.REException;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.gui.ColorWellButton;
@@ -10,15 +11,15 @@ import org.gjt.sp.util.Log;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.ArrayList;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.EventObject;
 import java.util.Vector;
-
-import gnu.regexp.REException;
 
 /**
  * The dockable panel that will contains a list of all your highlights.
@@ -47,7 +48,7 @@ public class HighlightList extends JPanel {
     table.setRowHeight(renderer.getPreferredSize().height);
     table.setDefaultRenderer(Highlight.class, renderer);
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    table.setDefaultEditor(Highlight.class,new HighlightCellEditor());
+    table.setDefaultEditor(Highlight.class, new HighlightCellEditor());
     table.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         int row = table.rowAtPoint(e.getPoint());
@@ -128,7 +129,7 @@ public class HighlightList extends JPanel {
       }
     });
     toolBar.add(clear);
-    add(toolBar,BorderLayout.NORTH);
+    add(toolBar, BorderLayout.NORTH);
     add(new JScrollPane(table));
   }
 
@@ -169,11 +170,14 @@ public class HighlightList extends JPanel {
 
   public void remove(Object highlight) {
     //  DefaultListModel listModel = getModel();
-    final Object selectedObject = table.getValueAt(table.getSelectedRow(), 0);
-    if (selectedObject == highlight) {
-      final View view = jEdit.getActiveView();
-      JEditTextArea textArea = view.getTextArea();
-      HighlightPlugin.highlight(textArea, null);
+    final int selectedRow = table.getSelectedRow();
+    if (selectedRow != -1) {
+      final Object selectedObject = table.getValueAt(selectedRow, 0);
+      if (selectedObject == highlight) {
+        final View view = jEdit.getActiveView();
+        JEditTextArea textArea = view.getTextArea();
+        HighlightPlugin.highlight(textArea, null);
+      }
     }
     final OneColumnTableModel tableModel = getTableModel();
     //  listModel.removeElement(highlight);
@@ -253,7 +257,7 @@ public class HighlightList extends JPanel {
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
       renderer.setBorder(BorderFactory.createEtchedBorder());
       this.highlight = (Highlight) value;
-      renderer.setHighlight(new Color(0xcc,0xcc,0xff), highlight);
+      renderer.setHighlight(new Color(0xcc, 0xcc, 0xff), highlight);
       return renderer;
     }
   }
@@ -306,7 +310,7 @@ public class HighlightList extends JPanel {
         highlight.init(expressionField.getText().trim(), regexp.isSelected(), colorBox.getSelectedColor());
         return true;
       } catch (REException e) {
-        Log.log(Log.ERROR,this,"Unable to save the highlgiht");
+        Log.log(Log.ERROR, this, "Unable to save the highlgiht");
         return false;
       }
     }
@@ -386,7 +390,7 @@ public class HighlightList extends JPanel {
     public void removeAll() {
       final int rowMax = datas.size();
       datas.removeAllElements();
-      fireTableRowsDeleted(0,rowMax-1);
+      fireTableRowsDeleted(0, rowMax - 1);
     }
   }
 }
