@@ -2,6 +2,9 @@ package gatchan.highlight;
 
 import gnu.regexp.REException;
 import org.gjt.sp.jedit.gui.ColorWellButton;
+import org.gjt.sp.jedit.gui.HistoryTextField;
+import org.gjt.sp.jedit.gui.EnhancedDialog;
+import org.gjt.sp.jedit.GUIUtilities;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +19,8 @@ import java.awt.event.ActionEvent;
 public final class HighlightTablePanel extends JPanel {
 
   /** The field where the searched expression will be. */
-  private final JTextField expressionField = new JTextField(40);
+  private final HistoryTextField expressionField = new HistoryTextField("gatchan-highlight.expression");
+  //private final JTextField expressionField = new JTextField(40);
 
   /** This checkbox indicate if highlight is a regexp. */
   private final JCheckBox regexp = new JCheckBox("regexp");
@@ -53,6 +57,10 @@ public final class HighlightTablePanel extends JPanel {
     cons.gridwidth = GridBagConstraints.REMAINDER;
     add(colorBox, cons);
     setBorder(BorderFactory.createEtchedBorder());
+  }
+
+  public void setDialog(EnhancedDialog dialog) {
+    expressionField.addActionListener(new MyActionListener(dialog));
   }
 
   /**
@@ -93,7 +101,7 @@ public final class HighlightTablePanel extends JPanel {
    */
   public void save(Highlight highlight) throws InvalidHighlightException {
     try {
-      final String stringToHighlight = expressionField.getText().trim();
+      final String stringToHighlight = expressionField.getText();
       if (stringToHighlight.length() == 0) {
         throw new InvalidHighlightException("String cannot be empty");
       }
@@ -101,6 +109,7 @@ public final class HighlightTablePanel extends JPanel {
     } catch (REException e) {
       throw new InvalidHighlightException("Invalid regexp " + e.getMessage());
     }
+    expressionField.addCurrentToHistory();
   }
 
   public void stopEdition() {
@@ -126,6 +135,18 @@ public final class HighlightTablePanel extends JPanel {
     public void actionPerformed(ActionEvent e) {
       actionListener.actionPerformed(e);
       highlightCellEditor.stopCellEditing();
+    }
+  }
+
+  private static class MyActionListener implements ActionListener {
+    private final EnhancedDialog dialog;
+
+    public MyActionListener(EnhancedDialog dialog) {
+      this.dialog = dialog;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      dialog.ok();
     }
   }
 }

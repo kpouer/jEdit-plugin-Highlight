@@ -21,7 +21,7 @@ public final class HighlightDialog extends EnhancedDialog {
   public HighlightDialog(View owner, Highlight highlight) {
     super(owner, "Highlight", false);
     this.highlight = highlight;
-
+    panel.setDialog(this);
     getContentPane().add(panel);
 
     final MyActionListener myActionListener = new MyActionListener();
