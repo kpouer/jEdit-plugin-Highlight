@@ -24,7 +24,7 @@ final class Highlighter extends TextAreaExtension {
 
   private Highlight highlight;
 
-  public Highlighter(JEditTextArea textArea) {
+  Highlighter(JEditTextArea textArea) {
     this.textArea = textArea;
     final TextAreaPainter painter = textArea.getPainter();
     fm = painter.getFontMetrics();
@@ -54,7 +54,7 @@ final class Highlighter extends TextAreaExtension {
   private void highlight(Graphics2D gfx, int physicalLine, int lineStartOffset, int lineEndOffset, int y) {
     String lineContent = textArea.getLineText(physicalLine);
     if (highlight.isRegexp()) {
-      SearchMatcher searchMatcher = highlight.getSearchMatcher();
+      final SearchMatcher searchMatcher = highlight.getSearchMatcher();
       Segment segment = new Segment(lineContent.toCharArray(), 0, lineContent.length());
       SearchMatcher.Match match = null;
       int i = 0;
@@ -67,43 +67,48 @@ final class Highlighter extends TextAreaExtension {
         if (match == null) {
           break;
         }
-        String s = lineContent.substring(match.start, match.end);
-        _highlight(s, match.start, physicalLine, lineStartOffset + i, lineStartOffset, lineEndOffset, gfx, y);
+        final String s = lineContent.substring(match.start, match.end);
+        _highlight(s, match.start + i, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
 
         if (match.end == lineContent.length()) {
           break;
         }
         lineContent = lineContent.substring(match.end);
-        i+= match.end;
-        segment = new Segment(lineContent.toCharArray(),0,lineContent.length());
+        i += match.end;
+        segment = new Segment(lineContent.toCharArray(), 0, lineContent.length());
 
       }
     } else {
-      highlightStringInLine(lineContent, highlight.getStringToHighlight(), physicalLine, lineStartOffset, lineStartOffset, lineEndOffset, gfx, y);
+      highlightStringInLine(lineContent,
+                            highlight.getStringToHighlight(),
+                            physicalLine,
+                            lineStartOffset,
+                            lineEndOffset,
+                            gfx,
+                            y);
     }
   }
 
   private void highlightStringInLine(String lineString,
                                      String stringToHighlight,
                                      int physicalLine,
-                                     int lineStart,
-                                     int lineStartOffset, int lineEndOffset,
+                                     int lineStartOffset,
+                                     int lineEndOffset,
                                      Graphics2D gfx,
                                      int y) {
     int start = lineString.indexOf(stringToHighlight);
     if (start == -1) return;
-    _highlight(stringToHighlight, start, physicalLine, lineStart, lineStartOffset, lineEndOffset, gfx, y);
+    _highlight(stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     while (true) {
       start = lineString.indexOf(stringToHighlight, start + 1);
       if (start == -1) return;
-      _highlight(stringToHighlight, start, physicalLine, lineStart, lineStartOffset, lineEndOffset, gfx, y);
+      _highlight(stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     }
   }
 
   private void _highlight(String stringToHighlight,
                           int start,
                           int physicalLine,
-                          int lineStart,
                           int lineStartOffset,
                           int lineEndOffset,
                           Graphics2D gfx,
@@ -123,7 +128,7 @@ final class Highlighter extends TextAreaExtension {
       end = seg.count;
     }
 
-    if (start + lineStart >= lineEndOffset || end + lineStart <= lineStartOffset) {
+    if (start + lineStartOffset >= lineEndOffset || end + lineStartOffset <= lineStartOffset) {
       return;
     }
 
@@ -133,15 +138,15 @@ final class Highlighter extends TextAreaExtension {
 
     final int startX;
 
-    if (start + lineStart >= lineStartOffset) {
+    if (start + lineStartOffset >= lineStartOffset) {
       startX = textArea.offsetToXY(physicalLine, start, point).x;
     } else {
       startX = 0;
     }
     final int endX;
 
-    if (end + lineStart >= lineEndOffset) {
-      endX = textArea.offsetToXY(physicalLine, lineEndOffset - lineStart - 1, point).x;
+    if (end + lineStartOffset >= lineEndOffset) {
+      endX = textArea.offsetToXY(physicalLine, lineEndOffset - lineStartOffset - 1, point).x;
     } else {
       endX = textArea.offsetToXY(physicalLine, end, point).x;
     }
