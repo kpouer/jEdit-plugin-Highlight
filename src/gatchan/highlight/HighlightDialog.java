@@ -23,8 +23,11 @@ public class HighlightDialog extends EnhancedDialog {
   private final JButton ok;
   private final JButton cancel;
 
-  public HighlightDialog(View owner) {
+  private Highlight highlight;
+
+  public HighlightDialog(View owner, Highlight highlight) {
     super(owner, "Highlight", false);
+    this.highlight = highlight;
     textArea = owner.getTextArea();
     getContentPane().setLayout(new GridBagLayout());
     field = new JTextField(40);
@@ -42,6 +45,7 @@ public class HighlightDialog extends EnhancedDialog {
     getContentPane().add(field, cons);
     cons.gridy = 1;
     getContentPane().add(regex, cons);
+
     JPanel buttonsPanel = new JPanel();
     BoxLayout layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
     buttonsPanel.setLayout(layout);
@@ -53,13 +57,20 @@ public class HighlightDialog extends EnhancedDialog {
     getContentPane().add(buttonsPanel, cons);
     pack();
     GUIUtilities.centerOnScreen(this);
-    setVisible(true);
+  }
+
+  public HighlightDialog(View owner) throws REException {
+    this(owner,new Highlight());
+  }
+
+  public void init(Highlight highlight) {
+    field.setText(highlight.getStringToHighlight());
+    regex.setSelected(highlight.isRegexp());
   }
 
   public void ok() {
-    final Highlight highlight;
     try {
-      highlight = new Highlight(field.getText(), regex.isSelected());
+      highlight.init(field.getText().trim(),regex.isSelected());
       HighlightPlugin.highlight(textArea, highlight);
       dispose();
     } catch (REException e) {

@@ -19,6 +19,14 @@ public class Highlight {
   private SearchMatcher searchMatcher;
 
   public Highlight(String s, boolean regexp) throws REException {
+    init(s,regexp);
+  }
+
+  public Highlight() throws REException {
+    this(null,false);
+  }
+
+  public void init(String s, boolean regexp) throws REException {
     if (regexp) {
       searchMatcher = new RESearchMatcher(s,false);
     }

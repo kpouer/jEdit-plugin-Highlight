@@ -1,11 +1,15 @@
 package gatchan.highlight;
 
+import gnu.regexp.REException;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.msg.EditPaneUpdate;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.Log;
-import gnu.regexp.REException;
+
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import java.awt.*;
 
 /**
  * The HighlightPlugin. This is my first plugin for jEdit, some parts of my code were inspired by the ErrorList plugin
@@ -30,7 +34,6 @@ public final class HighlightPlugin extends EBPlugin {
       }
       view = view.getNext();
     }
-
   }
 
 
@@ -114,11 +117,17 @@ public final class HighlightPlugin extends EBPlugin {
   }
 
   public static void highlightDialog(View view) {
-    HighlightDialog d = new HighlightDialog(view);
+    try {
+      HighlightDialog d = new HighlightDialog(view);
+      d.setVisible(true);
+    } catch (REException e) {
+      Log.log(Log.ERROR,HighlightPlugin.class,e);
+    }
   }
 
   public static void highlight(JEditTextArea textArea, Highlight h) {
     final Highlighter highlighter = getHighlighterForTextArea(textArea);
+    HighlightList.push(h);
     highlighter.setHighlight(h);
   }
 

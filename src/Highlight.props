@@ -11,7 +11,13 @@ plugin.gatchan.highlight.HighlightPlugin.1=jedit 04.02.11.00
 plugin.gatchan.highlight.HighlightPlugin.menu=\
                                                 gatchan-highlight \
                                                 gatchan-highlight-dialog \
-                                                gatchan-cancelHighlight
+                                                gatchan-cancelHighlight \
+                                                - \
+                                                highlighter-panel \
 
 gatchan-highlight.label=Highlight
 gatchan-cancelHighlight.label=Cancel highlight
+
+
+highlighter-panel.title=Highlighter
+highlighter-panel.label=Highlighter panel
