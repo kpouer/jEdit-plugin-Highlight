@@ -1,11 +1,15 @@
 <!DOCTYPE ACTIONS SYSTEM "actions.dtd">
-
-
 <ACTIONS>
   <ACTION NAME="gatchan-highlight">
     <CODE>
 			textArea.requestFocus();
 			gatchan.highlight.HighlightPlugin.highlightThis(textArea);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlight-entireword">
+    <CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.highlightEntireWord(textArea);
     </CODE>
   </ACTION>
   <ACTION NAME="gatchan-highlight-dialog">
@@ -36,13 +40,10 @@
     <IS_SELECTED>                
       return (gatchan.highlight.HighlightPlugin.isHighlightEnable());
     </IS_SELECTED>
-
   </ACTION>
   <ACTION NAME="gatchan-highlightcurrentSearch">
     <CODE>
-      gatchan.highlight.Highlight h = new gatchan.highlight.Highlight();
-      h.init(SearchAndReplace.getSearchString(),SearchAndReplace.getRegexp(),gatchan.highlight.Highlight.DEFAULT_COLOR);
-      gatchan.highlight.HighlightPlugin.addHighlight(h);
+      gatchan.highlight.HighlightPlugin.highlightCurrentSearch();
     </CODE>
   </ACTION>
 </ACTIONS>
