@@ -48,7 +48,13 @@ public final class HighlightTablePanel extends JPanel {
 
   public boolean save(Highlight highlight) {
       try {
-        highlight.init(expressionField.getText().trim(), regexp.isSelected(), colorBox.getSelectedColor());
+        final String stringToHighlight = expressionField.getText().trim();
+        if ("".equals(stringToHighlight)) {
+          final String message = "String cannot be empty";
+          JOptionPane.showMessageDialog(this,message,"Invalid string",JOptionPane.ERROR_MESSAGE);
+          return false;
+        }
+        highlight.init(stringToHighlight, regexp.isSelected(), colorBox.getSelectedColor());
         return true;
       } catch (REException e) {
         final String message = "Invalid regexp " + e.getMessage();

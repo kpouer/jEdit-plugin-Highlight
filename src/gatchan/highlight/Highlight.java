@@ -36,6 +36,9 @@ public final class Highlight {
   }
 
   public void init(String s, boolean regexp, Color color) throws REException {
+    if ("".equals(s)) {
+      throw new IllegalArgumentException("The search string cannot be empty");
+    }
     if (regexp) {
       if (!s.equals(stringToHighlight) || !this.regexp) {
         searchMatcher = new RESearchMatcher(s, false);
