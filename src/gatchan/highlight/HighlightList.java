@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.Vector;
 
 import gnu.regexp.REException;
 
@@ -118,6 +119,16 @@ public class HighlightList extends JPanel {
    }
  });    */
     //add(new JScrollPane(list));
+
+    JToolBar toolBar = new JToolBar();
+    JButton clear = new JButton(GUIUtilities.loadIcon("Clear.png"));
+    clear.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        tableModel.removeAll();
+      }
+    });
+    toolBar.add(clear);
+    add(toolBar,BorderLayout.NORTH);
     add(new JScrollPane(table));
   }
 
@@ -321,7 +332,7 @@ public class HighlightList extends JPanel {
   }
 
   private static class OneColumnTableModel extends AbstractTableModel {
-    private java.util.List datas = new ArrayList();
+    private Vector datas = new Vector();
 
     public int getRowCount() {
       return datas.size();
@@ -370,6 +381,12 @@ public class HighlightList extends JPanel {
 
     public boolean contains(Object o) {
       return datas.contains(o);
+    }
+
+    public void removeAll() {
+      final int rowMax = datas.size();
+      datas.removeAllElements();
+      fireTableRowsDeleted(0,rowMax-1);
     }
   }
 }
