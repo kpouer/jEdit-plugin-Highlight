@@ -11,6 +11,7 @@ plugin.gatchan.highlight.HighlightPlugin.1=jedit 04.02.11.00
 plugin.gatchan.highlight.HighlightPlugin.menu=\
                                                 gatchan-highlight-dialog \
                                                 gatchan-highlight \
+                                                gatchan-highlightcurrentSearch \
                                                 - \
                                                 gatchan-removeAllHighlights \
                                                 gatchan-enableHighlights \

@@ -8,9 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The tableModel that will contains the highlights.
- * It got two columns, the first is a checkbox to enable/disable the highlight, the
- * second is the highlight view
+ * The tableModel that will contains the highlights. It got two columns, the first is a checkbox to enable/disable the
+ * highlight, the second is the highlight view
  *
  * @author Matthieu Casanova
  */
@@ -91,6 +90,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * Return the Highlight at index i.
    *
    * @param i the index of the highlight
+   *
    * @return a highlight
    */
   public Highlight getHighlight(int i) {
@@ -142,7 +142,9 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   public void removeAll() {
     final int rowMax = datas.size();
     datas.clear();
-    fireTableRowsDeleted(0, rowMax - 1);
+    if (rowMax != 0) {
+      fireTableRowsDeleted(0, rowMax - 1);
+    }
   }
 
   public void dispose() {

@@ -113,7 +113,7 @@ public class HighlightList extends JPanel {
     }
 
     public void actionPerformed(ActionEvent e) {
-      final Object s = table.getValueAt(row, 0);
+      final Object s = tableModel.getHighlight(row);
       tableModel.removeElement(s);
     }
   }

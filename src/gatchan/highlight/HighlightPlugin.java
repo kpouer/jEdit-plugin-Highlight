@@ -71,7 +71,7 @@ public final class HighlightPlugin extends EBPlugin {
   private static Highlighter initTextArea(JEditTextArea textArea) {
     final Highlighter highlighter = new Highlighter(textArea);
     final TextAreaPainter painter = textArea.getPainter();
-    painter.addExtension(TextAreaPainter.BELOW_SELECTION_LAYER,highlighter);
+    painter.addExtension(TextAreaPainter.BELOW_SELECTION_LAYER, highlighter);
     textArea.putClientProperty(Highlighter.class, highlighter);
     return highlighter;
   }
@@ -120,8 +120,12 @@ public final class HighlightPlugin extends EBPlugin {
       final HighlightDialog d = new HighlightDialog(view);
       d.setVisible(true);
     } catch (REException e) {
-      Log.log(Log.ERROR,HighlightPlugin.class,e);
+      Log.log(Log.ERROR, HighlightPlugin.class, e);
     }
+  }
+
+  public static void addHighlight(Highlight highlight) {
+    highlightManager.addElement(highlight);
   }
 
   public static void removeAllHighlights() {
