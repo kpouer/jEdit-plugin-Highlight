@@ -21,14 +21,26 @@ public final class Highlight {
 
   private SearchMatcher searchMatcher;
 
-  public static final Color DEFAULT_COLOR = new Color(153, 255, 204);
+  private static final Color[] COLORS = {new Color(153, 255, 204),
+                                        new Color(0x66, 0x66, 0xff),
+                                        new Color(0xff, 0x66, 0x66),
+                                        new Color(0xff, 0xcc, 0x66),
+                                        new Color(0xcc, 0xff, 0x66),
+                                        new Color(0xff, 0x33, 0x99),
+                                        new Color(0xff, 0x33, 0x00),
+                                        new Color(0x66, 0xff, 0x00),
+                                        new Color(0x99, 0x00, 0x99),
+                                        new Color(0x99, 0x99, 0x00),
+                                        new Color(0x00, 0x99, 0x66)};
+
+  private static int colorIndex;
 
   private Color color;
 
   private boolean enabled = true;
 
   public Highlight(String s) throws REException {
-    init(s, false, DEFAULT_COLOR);
+    init(s, false, getNextColor());
   }
 
   public Highlight() throws REException {
@@ -90,5 +102,10 @@ public final class Highlight {
 
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
+  }
+
+  public static Color getNextColor() {
+    colorIndex = colorIndex++ % COLORS.length;
+    return COLORS[colorIndex];
   }
 }
