@@ -21,9 +21,8 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
   private final Point point;
   private final FontMetrics fm;
 
-  //private Highlight highlight;
-
   private final HighlightManager highlightManager;
+  private final AlphaComposite blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
 
   Highlighter(JEditTextArea textArea) {
     highlightManager = HighlightManagerTableModel.getManager();
@@ -36,11 +35,11 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
   }
 
   /**
-   * The Highlighter must be removed from the highlight listeners because they can
-   * be destroyed when a JEditTextAera is destroyed.
-   *
-   * @throws Throwable
-   */
+     * The Highlighter must be removed from the highlight listeners because they can be destroyed when a JEditTextAera is
+     * destroyed.
+     *
+     * @throws Throwable
+     */
   protected void finalize() throws Throwable {
     highlightManager.removeHighlightChangeListener(this);
   }
@@ -180,12 +179,18 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
     } else {
       endX = textArea.offsetToXY(physicalLine, end, point).x;
     }
-
+    Color oldColor = gfx.getColor();
+    Composite oldComposite = gfx.getComposite();
     gfx.setColor(highlightColor);
+    gfx.setComposite(blend);
     gfx.fillRect(startX, y, endX - startX, fm.getHeight());
+
+    gfx.setColor(oldColor);
+    gfx.setComposite(oldComposite);
   }
 
   public void highlightUpdated(boolean highlightEnable) {
-    textArea.invalidateLineRange(0, textArea.getLineCount());
+    int firstLine = textArea.getFirstLine();
+    textArea.invalidateLineRange(firstLine, firstLine + textArea.getVisibleLines());
   }
 }
