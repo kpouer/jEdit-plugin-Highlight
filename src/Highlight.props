@@ -2,7 +2,7 @@
 # Author: Matthieu Casanova
 
 plugin.gatchan.highlight.HighlightPlugin.activate=defer
-plugin.gatchan.highlight.HighlightPlugin.name=HighlightPlugin
+plugin.gatchan.highlight.HighlightPlugin.name=Highlight
 plugin.gatchan.highlight.HighlightPlugin.author=Matthieu Casanova
 plugin.gatchan.highlight.HighlightPlugin.version=1.0.0
 
