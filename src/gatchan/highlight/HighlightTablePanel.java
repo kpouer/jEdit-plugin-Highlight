@@ -2,7 +2,6 @@ package gatchan.highlight;
 
 import gnu.regexp.REException;
 import org.gjt.sp.jedit.gui.ColorWellButton;
-import org.gjt.sp.util.Log;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +24,7 @@ public final class HighlightTablePanel extends JPanel {
 
   /** This button allow to choose the color of the highlight. */
   private final ColorWellButton colorBox = new ColorWellButton(Highlight.getNextColor());
+  private HighlightCellEditor highlightCellEditor;
 
   /** Instantiate the panel. */
   public HighlightTablePanel() {
@@ -61,6 +61,12 @@ public final class HighlightTablePanel extends JPanel {
     regexp.setSelected(highlight.isRegexp());
     ignoreCase.setSelected(highlight.isIgnoreCase());
     colorBox.setSelectedColor(highlight.getColor());
+    if (highlightCellEditor != null) {
+      expressionField.getDocument().addDocumentListener(highlightCellEditor);
+      regexp.addActionListener(highlightCellEditor);
+      ignoreCase.addActionListener(highlightCellEditor);
+      colorBox.addActionListener(highlightCellEditor);
+    }
   }
 
   /** The panel will request focus for expressionfield. */
@@ -72,23 +78,29 @@ public final class HighlightTablePanel extends JPanel {
    * Save the fields in the Highlight.
    *
    * @param highlight the highlight where we want to save
-   *
-   * @return true if it was saved, false otherwise
    */
-  public boolean save(Highlight highlight) {
+  public void save(Highlight highlight) throws InvalidHighlightException {
     try {
       final String stringToHighlight = expressionField.getText().trim();
       if (stringToHighlight.length() == 0) {
-        JOptionPane.showMessageDialog(this, "String cannot be empty", "Invalid string", JOptionPane.ERROR_MESSAGE);
-        return false;
+        throw new InvalidHighlightException("String cannot be empty");
       }
       highlight.init(stringToHighlight, regexp.isSelected(), ignoreCase.isSelected(), colorBox.getSelectedColor());
-      return true;
     } catch (REException e) {
-      final String message = "Invalid regexp " + e.getMessage();
-      JOptionPane.showMessageDialog(this, message, "Invalid regexp", JOptionPane.ERROR_MESSAGE);
-      Log.log(Log.MESSAGE, this, message);
-      return false;
+      throw new InvalidHighlightException("Invalid regexp " + e.getMessage());
     }
+  }
+
+  public void stopEdition() {
+    if (highlightCellEditor != null) {
+      expressionField.getDocument().removeDocumentListener(highlightCellEditor);
+      regexp.removeActionListener(highlightCellEditor);
+      ignoreCase.removeActionListener(highlightCellEditor);
+      colorBox.removeActionListener(highlightCellEditor);
+    }
+  }
+
+  public void setCellEditor(HighlightCellEditor highlightCellEditor) {
+    this.highlightCellEditor = highlightCellEditor;
   }
 }

@@ -42,14 +42,16 @@ public final class HighlightDialog extends EnhancedDialog {
   }
 
   public HighlightDialog(View owner) {
-    this(owner,new Highlight());
+    this(owner, new Highlight());
   }
 
   public void ok() {
-    if (panel.save(highlight)) {
+    try {
+      panel.save(highlight);
       HighlightManagerTableModel.getManager().addElement(highlight);
       dispose();
-    } else {
+    } catch (InvalidHighlightException e) {
+      JOptionPane.showMessageDialog(panel, e.getMessage(), "Invalid highlight", JOptionPane.ERROR_MESSAGE);
       panel.focus();
     }
   }
