@@ -73,6 +73,7 @@ public final class HighlightPlugin extends EBPlugin {
    * Initialize the textarea with a highlight painter.
    *
    * @param textArea the textarea to initialize
+   *
    * @return the new highlighter for the textArea
    */
   private static Highlighter initTextArea(JEditTextArea textArea) {
@@ -110,7 +111,6 @@ public final class HighlightPlugin extends EBPlugin {
    */
   public static void highlightThis(JEditTextArea textArea) {
     final String text = getCurrentWord(textArea);
-
     try {
       highlightManager.addElement(new Highlight(text));
     } catch (REException e) {
@@ -122,6 +122,7 @@ public final class HighlightPlugin extends EBPlugin {
    * Get the current word. If nothing is selected, it will select it.
    *
    * @param textArea the textArea
+   *
    * @return the current word
    */
   private static String getCurrentWord(JEditTextArea textArea) {
@@ -143,8 +144,7 @@ public final class HighlightPlugin extends EBPlugin {
     final String text = getCurrentWord(textArea);
 
     try {
-      final Highlight highlight = new Highlight();
-      highlight.init("\\<"+text+"\\>",true,Highlight.getNextColor());
+      final Highlight highlight = new Highlight("\\<" + text + "\\>", true, false);
       highlightManager.addElement(highlight);
     } catch (REException e) {
       Log.log(Log.MESSAGE, HighlightPlugin.class, "This should never happens here " + e.getMessage());
@@ -154,11 +154,11 @@ public final class HighlightPlugin extends EBPlugin {
   public static void highlightCurrentSearch() {
     try {
       Highlight h = new Highlight();
-      h.init(SearchAndReplace.getSearchString(),SearchAndReplace.getRegexp(),Highlight.getNextColor());
-      HighlightPlugin.addHighlight(h);
+      h.init(SearchAndReplace.getSearchString(), SearchAndReplace.getRegexp(), false, Highlight.getNextColor());
+      addHighlight(h);
     } catch (REException e) {
-      Log.log(Log.WARNING,HighlightPlugin.class,"This should never happens");
-      Log.log(Log.WARNING,HighlightPlugin.class,e);
+      Log.log(Log.WARNING, HighlightPlugin.class, "This should never happens");
+      Log.log(Log.WARNING, HighlightPlugin.class, e);
     }
   }
 
@@ -168,12 +168,8 @@ public final class HighlightPlugin extends EBPlugin {
    * @param view the current view
    */
   public static void highlightDialog(View view) {
-    try {
-      final HighlightDialog d = new HighlightDialog(view);
-      d.setVisible(true);
-    } catch (REException e) {
-      Log.log(Log.ERROR, HighlightPlugin.class, e);
-    }
+    final HighlightDialog d = new HighlightDialog(view);
+    d.setVisible(true);
   }
 
   public static void addHighlight(Highlight highlight) {

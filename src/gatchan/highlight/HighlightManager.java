@@ -24,7 +24,7 @@ public interface HighlightManager {
   /**
    * alert the listeners that the highlights changed
    */
-  void fireHighlightChangeListener();
+  void fireHighlightChangeListener(boolean highlightEnable);
 
   /**
    * Returns the number of highlights.

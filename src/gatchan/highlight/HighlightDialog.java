@@ -1,6 +1,5 @@
 package gatchan.highlight;
 
-import gnu.regexp.REException;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.gui.EnhancedDialog;
@@ -8,28 +7,26 @@ import org.gjt.sp.jedit.gui.EnhancedDialog;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /** @author Matthieu Casanova */
-public class HighlightDialog extends EnhancedDialog {
+public final class HighlightDialog extends EnhancedDialog {
 
-  private final JButton ok;
-  private final JButton cancel;
+  private final JButton ok = new JButton("ok");
+  private final JButton cancel = new JButton("Cancel");
 
-  private Highlight highlight;
-  private HighlightTablePanel panel;
+  private final Highlight highlight;
+  private final HighlightTablePanel panel = new HighlightTablePanel();
 
   public HighlightDialog(View owner, Highlight highlight) {
     super(owner, "Highlight", false);
     this.highlight = highlight;
 
-    panel = new HighlightTablePanel();
     getContentPane().add(panel);
 
-    final ActionListener actionListener = new ActionListener();
-    ok = new JButton("ok");
-    cancel = new JButton("Cancel");
-    ok.addActionListener(actionListener);
-    cancel.addActionListener(actionListener);
+    final MyActionListener myActionListener = new MyActionListener();
+    ok.addActionListener(myActionListener);
+    cancel.addActionListener(myActionListener);
     final JPanel buttonsPanel = new JPanel();
 
     final BoxLayout layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
@@ -44,12 +41,8 @@ public class HighlightDialog extends EnhancedDialog {
     GUIUtilities.centerOnScreen(this);
   }
 
-  public HighlightDialog(View owner) throws REException {
+  public HighlightDialog(View owner) {
     this(owner,new Highlight());
-  }
-
-  public void init(Highlight highlight) {
-    panel.setHighlight(highlight);
   }
 
   public void ok() {
@@ -65,7 +58,7 @@ public class HighlightDialog extends EnhancedDialog {
     dispose();
   }
 
-  private class ActionListener implements java.awt.event.ActionListener {
+  private final class MyActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       if (e.getSource() == ok) {
         ok();

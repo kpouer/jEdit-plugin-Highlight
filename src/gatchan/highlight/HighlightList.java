@@ -1,6 +1,6 @@
 package gatchan.highlight;
 
-import org.gjt.sp.jedit.GUIUtilities;
+import org.gjt.sp.jedit.*;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -15,14 +15,15 @@ import java.awt.event.MouseEvent;
  *
  * @author Matthieu Casanova
  */
-public class HighlightList extends JPanel {
+public final class HighlightList extends JPanel implements HighlightChangeListener {
 
   private JPopupMenu popupMenu;
   private JMenuItem remove;
 
-  private JTable table;
-  public static HighlightManagerTableModel tableModel;
-  public HighlightList.RemoveAction removeAction;
+  private final JTable table;
+  private final HighlightManagerTableModel tableModel;
+  private HighlightList.RemoveAction removeAction;
+  private final JCheckBox enableHighlights = new JCheckBox("enable");
 
   public HighlightList() {
     super(new BorderLayout());
@@ -36,36 +37,22 @@ public class HighlightList extends JPanel {
     table.setDefaultRenderer(Highlight.class, renderer);
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     table.setShowGrid(false);
-    table.setIntercellSpacing(new Dimension(0,0));
+    table.setIntercellSpacing(new Dimension(0, 0));
     final TableColumn col1 = table.getColumnModel().getColumn(0);
     col1.setPreferredWidth(26);
     col1.setMinWidth(26);
     col1.setMaxWidth(26);
     col1.setResizable(false);
 
-    table.setDefaultEditor(Highlight.class,new HighlightCellEditor());
-    table.setDefaultEditor(Boolean.class,table.getDefaultEditor(Boolean.class));
+    table.setDefaultEditor(Highlight.class, new HighlightCellEditor());
+    table.setDefaultEditor(Boolean.class, table.getDefaultEditor(Boolean.class));
     table.setTableHeader(null);
 
     table.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         final int row = table.rowAtPoint(e.getPoint());
         if (row == -1) return;
-
-        if (e.getButton() == MouseEvent.BUTTON1) {
-          final Highlight highlight = (Highlight) table.getValueAt(table.getSelectedRow(), 1);
-          tableModel.addElement(highlight);
-          if (e.getClickCount() == 2) {
-            /* HighlightDialog d = null;
-             try {
-               d = new HighlightDialog(view);
-               d.init(highlight);
-               d.setVisible(true);
-             } catch (REException e1) {
-               Log.log(Log.ERROR,this,e);
-             } */
-          }
-        } else {
+        if (GUIUtilities.isRightButton(e.getModifiers())) {
           showPopupMenu(e, row);
         }
       }
@@ -74,10 +61,9 @@ public class HighlightList extends JPanel {
     final JToolBar toolBar = new JToolBar();
     toolBar.setFloatable(false);
     final JButton clear = new JButton(GUIUtilities.loadIcon("Clear.png"));
-    final JCheckBox enableHighlights = new JCheckBox("enable");
     enableHighlights.setSelected(true);
 
-    final MyActionListener actionListener = new MyActionListener(clear, enableHighlights);
+    final MyActionListener actionListener = new MyActionListener(tableModel, clear, enableHighlights);
     clear.addActionListener(actionListener);
     enableHighlights.addActionListener(actionListener);
     toolBar.add(clear);
@@ -88,10 +74,16 @@ public class HighlightList extends JPanel {
     add(scroll);
   }
 
+  /**
+   * Show the popup menu of the highlight panel.
+   *
+   * @param e   the mouse event
+   * @param row the selected row
+   */
   private void showPopupMenu(MouseEvent e, int row) {
     if (popupMenu == null) {
       popupMenu = new JPopupMenu();
-      removeAction = new RemoveAction();
+      removeAction = new RemoveAction(tableModel);
       remove = popupMenu.add(removeAction);
     }
     remove.setEnabled(tableModel.getRowCount() > 0);
@@ -100,37 +92,67 @@ public class HighlightList extends JPanel {
     e.consume();
   }
 
-  public class RemoveAction extends AbstractAction {
+  public void addNotify() {
+    super.addNotify();
+    HighlightManagerTableModel.getManager().addHighlightChangeListener(this);
+  }
+
+  public void removeNotify() {
+    super.removeNotify();
+    HighlightManagerTableModel.getManager().removeHighlightChangeListener(this);
+  }
+
+  public void highlightUpdated(boolean highlightEnable) {
+    enableHighlights.setSelected(highlightEnable);
+  }
+
+  /**
+   * The remove action that will remove an highlight from the table.
+   *
+   * @author Matthieu Casanova
+   */
+  public static final class RemoveAction extends AbstractAction {
 
     private int row;
 
-    public RemoveAction() {
+    private final HighlightManagerTableModel tableModel;
+
+    private RemoveAction(HighlightManagerTableModel tableModel) {
       super("remove");
+      this.tableModel = tableModel;
     }
 
-    public void setRow(int row) {
+    private final void setRow(int row) {
       this.row = row;
     }
 
-    public void actionPerformed(ActionEvent e) {
-      final Object s = tableModel.getHighlight(row);
-      tableModel.removeElement(s);
+    public final void actionPerformed(ActionEvent e) {
+      tableModel.removeRow(row);
     }
   }
 
-  private class MyActionListener implements ActionListener {
-    private JButton clear;
-    private JCheckBox enableHighlights;
+  /**
+   * The actionListener that will handle buttons and checkbox of the HighlightList.
+   *
+   * @author Matthieu Casanova
+   */
+  private static final class MyActionListener implements ActionListener {
+    private final JButton clear;
+    private final JCheckBox enableHighlights;
 
-    public MyActionListener(JButton clear, JCheckBox enableHighlights) {
+    private final HighlightManagerTableModel tableModel;
+
+    private MyActionListener(HighlightManagerTableModel tableModel, JButton clear, JCheckBox enableHighlights) {
+      this.tableModel = tableModel;
       this.clear = clear;
       this.enableHighlights = enableHighlights;
     }
 
-    public void actionPerformed(ActionEvent e) {
-      if (clear.equals(e.getSource())) {
+    public final void actionPerformed(ActionEvent e) {
+      final Object source = e.getSource();
+      if (clear.equals(source)) {
         tableModel.removeAll();
-      } else if (enableHighlights.equals(e.getSource())) {
+      } else if (enableHighlights.equals(source)) {
         tableModel.setHighlightEnable(enableHighlights.isSelected());
       }
     }

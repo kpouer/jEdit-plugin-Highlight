@@ -102,6 +102,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
       highlightStringInLine(highlight.getColor(),
                             lineContent,
                             highlight.getStringToHighlight(),
+                            highlight.isIgnoreCase(),
                             physicalLine,
                             lineStartOffset,
                             lineEndOffset,
@@ -111,13 +112,23 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
   }
 
   private void highlightStringInLine(Color highlightColor,
-                                     String lineString,
-                                     String stringToHighlight,
+                                     String lineStringParam,
+                                     String stringToHighlightParam,
+                                     boolean ignoreCase,
                                      int physicalLine,
                                      int lineStartOffset,
                                      int lineEndOffset,
                                      Graphics2D gfx,
                                      int y) {
+    String stringToHighlight;
+    String lineString;
+    if (ignoreCase) {
+      lineString = lineStringParam.toLowerCase();
+      stringToHighlight = stringToHighlightParam.toLowerCase();
+    } else {
+      lineString = lineStringParam;
+      stringToHighlight = stringToHighlightParam;
+    }
     int start = lineString.indexOf(stringToHighlight);
     if (start == -1) return;
     _highlight(highlightColor, stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
@@ -174,7 +185,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
     gfx.fillRect(startX, y, endX - startX, fm.getHeight());
   }
 
-  public void highlightUpdated() {
+  public void highlightUpdated(boolean highlightEnable) {
     textArea.invalidateLineRange(0, textArea.getLineCount());
   }
 }

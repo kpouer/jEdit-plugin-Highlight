@@ -1,9 +1,7 @@
 package gatchan.highlight;
 
-import org.gjt.sp.util.Log;
-
-import javax.swing.table.AbstractTableModel;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +15,14 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   private final List datas = new ArrayList();
   private static HighlightManagerTableModel highlightManagerTableModel;
 
-  private List highlightChangeListeners = new ArrayList(2);
+  private final List highlightChangeListeners = new ArrayList(2);
   private boolean highlightEnable = true;
 
+  /**
+   * Returns the instance of the HighlightManagerTableModel.
+   *
+   * @return the instance
+   */
   public static HighlightManagerTableModel getInstance() {
     if (highlightManagerTableModel == null) {
       highlightManagerTableModel = new HighlightManagerTableModel();
@@ -27,6 +30,11 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     return highlightManagerTableModel;
   }
 
+  /**
+   * Returns the HighlightManager.
+   *
+   * @return the HighlightManager
+   */
   public static HighlightManager getManager() {
     return getInstance();
   }
@@ -83,7 +91,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     } else {
       datas.set(rowIndex, aValue);
     }
-    fireTableCellUpdated(rowIndex, 0);
+    fireTableCellUpdated(rowIndex, columnIndex);
   }
 
   /**
@@ -108,34 +116,17 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       final int firstRow = datas.size() - 1;
       fireTableRowsInserted(firstRow, firstRow);
     }
+    setHighlightEnable(true);
   }
 
   /**
-   * Remove a highlight from the list.
+   * Remove an element at the specified index.
    *
-   * @param o the highlight to be removed
+   * @param index the index
    */
-  public void removeElement(Object o) {
-    for (int i = 0; i < datas.size(); i++) {
-      final Highlight highlight = (Highlight) datas.get(i);
-      if (highlight.equals(o)) {
-        datas.remove(o);
-        fireTableRowsDeleted(i, i);
-        break;
-      }
-    }
-    Log.log(Log.WARNING, this, "An unknown highlight was asked to be removed from list" + o);
-  }
-
-  /**
-   * Check if the list contains a highlight.
-   *
-   * @param o the highlight
-   *
-   * @return true if the highlight is in the list
-   */
-  public boolean contains(Object o) {
-    return datas.contains(o);
+  public void removeRow(int index) {
+    datas.remove(index);
+    fireTableRowsDeleted(index, index);
   }
 
   /** remove all Highlights. */
@@ -153,7 +144,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   public void fireTableChanged(TableModelEvent e) {
     super.fireTableChanged(e);
-    fireHighlightChangeListener();
+    fireHighlightChangeListener(highlightEnable);
   }
 
   public void addHighlightChangeListener(HighlightChangeListener listener) {
@@ -167,11 +158,10 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   }
 
 
-  public void fireHighlightChangeListener() {
+  public void fireHighlightChangeListener(boolean highlightEnabled) {
     for (int i = 0; i < highlightChangeListeners.size(); i++) {
       final HighlightChangeListener listener = (HighlightChangeListener) highlightChangeListeners.get(i);
-      listener.highlightUpdated();
-
+      listener.highlightUpdated(highlightEnabled);
     }
   }
 
@@ -200,6 +190,6 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    */
   public void setHighlightEnable(boolean highlightEnable) {
     this.highlightEnable = highlightEnable;
-    fireHighlightChangeListener();
+    fireHighlightChangeListener(highlightEnable);
   }
 }

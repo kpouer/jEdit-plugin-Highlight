@@ -17,21 +17,21 @@ public final class Highlight {
 
   private boolean regexp;
 
-  private boolean ignoreCase;
+  private boolean ignoreCase = true;
 
   private SearchMatcher searchMatcher;
 
   private static final Color[] COLORS = {new Color(153, 255, 204),
-                                        new Color(0x66, 0x66, 0xff),
-                                        new Color(0xff, 0x66, 0x66),
-                                        new Color(0xff, 0xcc, 0x66),
-                                        new Color(0xcc, 0xff, 0x66),
-                                        new Color(0xff, 0x33, 0x99),
-                                        new Color(0xff, 0x33, 0x00),
-                                        new Color(0x66, 0xff, 0x00),
-                                        new Color(0x99, 0x00, 0x99),
-                                        new Color(0x99, 0x99, 0x00),
-                                        new Color(0x00, 0x99, 0x66)};
+                                         new Color(0x66, 0x66, 0xff),
+                                         new Color(0xff, 0x66, 0x66),
+                                         new Color(0xff, 0xcc, 0x66),
+                                         new Color(0xcc, 0xff, 0x66),
+                                         new Color(0xff, 0x33, 0x99),
+                                         new Color(0xff, 0x33, 0x00),
+                                         new Color(0x66, 0xff, 0x00),
+                                         new Color(0x99, 0x00, 0x99),
+                                         new Color(0x99, 0x99, 0x00),
+                                         new Color(0x00, 0x99, 0x66)};
 
   private static int colorIndex;
 
@@ -39,27 +39,31 @@ public final class Highlight {
 
   private boolean enabled = true;
 
+  public Highlight(String stringToHighlight, boolean regexp, boolean ignoreCase) throws REException {
+    init(stringToHighlight, regexp, ignoreCase, getNextColor());
+  }
+
   public Highlight(String s) throws REException {
-    init(s, false, getNextColor());
+    this(s,false,true);
   }
 
-  public Highlight() throws REException {
-    this(null);
+  public Highlight() {
   }
 
-  public void init(String s, boolean regexp, Color color) throws REException {
-    if ("".equals(s)) {
+  public void init(String s, boolean regexp, boolean ignoreCase, Color color) throws REException {
+    if (s.length() == 0) {
       throw new IllegalArgumentException("The search string cannot be empty");
     }
     if (regexp) {
-      if (!s.equals(stringToHighlight) || !this.regexp) {
-        searchMatcher = new RESearchMatcher(s, false);
+      if (!s.equals(stringToHighlight) || !this.regexp || ignoreCase != this.ignoreCase) {
+        searchMatcher = new RESearchMatcher(s, ignoreCase);
       }
     } else {
       searchMatcher = null;
     }
     stringToHighlight = s;
     this.regexp = regexp;
+    this.ignoreCase = ignoreCase;
     this.color = color;
   }
 
@@ -91,7 +95,7 @@ public final class Highlight {
   public boolean equals(Object obj) {
     if (obj instanceof Highlight) {
       final Highlight highlight = (Highlight) obj;
-      return highlight.getStringToHighlight().equals(stringToHighlight) && highlight.isRegexp() == regexp;
+      return highlight.getStringToHighlight().equals(stringToHighlight) && highlight.isRegexp() == regexp && highlight.isIgnoreCase() == ignoreCase;
     }
     return false;
   }

@@ -8,5 +8,5 @@ import java.util.EventListener;
  */
 public interface HighlightChangeListener extends EventListener {
 
-  void highlightUpdated();
+  void highlightUpdated(boolean highlightEnabled);
 }
