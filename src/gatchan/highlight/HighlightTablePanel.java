@@ -93,8 +93,6 @@ public final class HighlightTablePanel extends JPanel {
    */
   public void save(Highlight highlight) throws InvalidHighlightException {
     try {
-      JButton b = null;
-      b.setText("");
       final String stringToHighlight = expressionField.getText().trim();
       if (stringToHighlight.length() == 0) {
         throw new InvalidHighlightException("String cannot be empty");
