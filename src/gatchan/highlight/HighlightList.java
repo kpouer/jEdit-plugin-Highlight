@@ -60,12 +60,17 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 
     final JToolBar toolBar = new JToolBar();
     toolBar.setFloatable(false);
+    final JButton newButton = new JButton(GUIUtilities.loadIcon("New.png"));
+    newButton.setToolTipText("Add an highlight");
     final JButton clear = new JButton(GUIUtilities.loadIcon("Clear.png"));
+    clear.setToolTipText("Remove all highlights");
     enableHighlights.setSelected(true);
-
-    final MyActionListener actionListener = new MyActionListener(tableModel, clear, enableHighlights);
+    enableHighlights.setToolTipText("Enable / disable highlights");
+    final MyActionListener actionListener = new MyActionListener(tableModel, newButton, clear, enableHighlights);
+    newButton.addActionListener(actionListener);
     clear.addActionListener(actionListener);
     enableHighlights.addActionListener(actionListener);
+    toolBar.add(newButton);
     toolBar.add(clear);
     toolBar.add(enableHighlights);
 
@@ -137,13 +142,18 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
    * @author Matthieu Casanova
    */
   private static final class MyActionListener implements ActionListener {
+    private final JButton newButton;
     private final JButton clear;
     private final JCheckBox enableHighlights;
 
     private final HighlightManagerTableModel tableModel;
 
-    private MyActionListener(HighlightManagerTableModel tableModel, JButton clear, JCheckBox enableHighlights) {
+    private MyActionListener(HighlightManagerTableModel tableModel,
+                             JButton newButton,
+                             JButton clear,
+                             JCheckBox enableHighlights) {
       this.tableModel = tableModel;
+      this.newButton = newButton;
       this.clear = clear;
       this.enableHighlights = enableHighlights;
     }
@@ -152,6 +162,8 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
       final Object source = e.getSource();
       if (clear.equals(source)) {
         tableModel.removeAll();
+      } else if (newButton.equals(source)) {
+        HighlightPlugin.highlightDialog(jEdit.getActiveView());
       } else if (enableHighlights.equals(source)) {
         tableModel.setHighlightEnable(enableHighlights.isSelected());
       }
