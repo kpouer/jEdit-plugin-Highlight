@@ -5,6 +5,8 @@ import org.gjt.sp.jedit.gui.ColorWellButton;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * This panel will be used to display and edit an Highlight in the JTable and in a dialog to add highlight.
@@ -25,6 +27,8 @@ public final class HighlightTablePanel extends JPanel {
   /** This button allow to choose the color of the highlight. */
   private final ColorWellButton colorBox = new ColorWellButton(Highlight.getNextColor());
   private HighlightCellEditor highlightCellEditor;
+
+  private boolean initialized;
 
   /** Instantiate the panel. */
   public HighlightTablePanel() {
@@ -63,9 +67,17 @@ public final class HighlightTablePanel extends JPanel {
     colorBox.setSelectedColor(highlight.getColor());
     if (highlightCellEditor != null) {
       expressionField.getDocument().addDocumentListener(highlightCellEditor);
+      if (!initialized) {
       regexp.addActionListener(highlightCellEditor);
       ignoreCase.addActionListener(highlightCellEditor);
-    //  colorBox.addActionListener(highlightCellEditor);
+      ActionListener[] actionListeners = colorBox.getActionListeners();
+      if (actionListeners.length == 1) {
+        final ActionListener actionListener = actionListeners[0];
+        colorBox.removeActionListener(actionListener);
+        colorBox.addActionListener(new SpecialColorWellButtonActionListener(actionListener,highlightCellEditor));
+      }
+        initialized = true;
+      }
     }
   }
 
@@ -81,6 +93,8 @@ public final class HighlightTablePanel extends JPanel {
    */
   public void save(Highlight highlight) throws InvalidHighlightException {
     try {
+      JButton b = null;
+      b.setText("");
       final String stringToHighlight = expressionField.getText().trim();
       if (stringToHighlight.length() == 0) {
         throw new InvalidHighlightException("String cannot be empty");
@@ -94,13 +108,26 @@ public final class HighlightTablePanel extends JPanel {
   public void stopEdition() {
     if (highlightCellEditor != null) {
       expressionField.getDocument().removeDocumentListener(highlightCellEditor);
-      regexp.removeActionListener(highlightCellEditor);
-      ignoreCase.removeActionListener(highlightCellEditor);
-     // colorBox.removeActionListener(highlightCellEditor);
     }
   }
 
   public void setCellEditor(HighlightCellEditor highlightCellEditor) {
     this.highlightCellEditor = highlightCellEditor;
+  }
+
+  private static class SpecialColorWellButtonActionListener implements ActionListener {
+    private final ActionListener actionListener;
+    private final HighlightCellEditor highlightCellEditor;
+
+    public SpecialColorWellButtonActionListener(ActionListener actionListener,
+                                                HighlightCellEditor highlightCellEditor) {
+      this.actionListener = actionListener;
+      this.highlightCellEditor = highlightCellEditor;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      actionListener.actionPerformed(e);
+      highlightCellEditor.stopCellEditing();
+    }
   }
 }
