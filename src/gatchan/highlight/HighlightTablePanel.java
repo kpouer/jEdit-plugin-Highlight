@@ -51,7 +51,9 @@ public final class HighlightTablePanel extends JPanel {
         highlight.init(expressionField.getText().trim(), regexp.isSelected(), colorBox.getSelectedColor());
         return true;
       } catch (REException e) {
-        Log.log(Log.ERROR, this, "Unable to save the highlight");
+        final String message = "Invalid regexp " + e.getMessage();
+        JOptionPane.showMessageDialog(this,message,"Invalid regexp",JOptionPane.ERROR_MESSAGE);
+        Log.log(Log.MESSAGE, this, message);
         return false;
       }
     }

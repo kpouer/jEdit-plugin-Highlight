@@ -14,7 +14,7 @@ import org.gjt.sp.util.Log;
  */
 public final class HighlightPlugin extends EBPlugin {
 
-  private static HighlightManagerTableModel highlightManagerTableModel;
+  private static HighlightManager highlightManager;
 
   public static final String NAME = "highlight";
   public static final String PROPERTY_PREFIX = "plugin.Highlight.";
@@ -23,7 +23,7 @@ public final class HighlightPlugin extends EBPlugin {
 
   /** Initialize the plugin. When starting this plugin will add an Highlighter on each text area */
   public void start() {
-    highlightManagerTableModel = HighlightManagerTableModel.getInstance();
+    highlightManager = HighlightManagerTableModel.getManager();
     View view = jEdit.getFirstView();
     while (view != null) {
       final EditPane[] panes = view.getEditPanes();
@@ -38,8 +38,8 @@ public final class HighlightPlugin extends EBPlugin {
 
   /** uninitialize the plugin. we will remove the Highlighter on each text area */
   public void stop() {
-    highlightManagerTableModel.dispose();
-    highlightManagerTableModel = null;
+    highlightManager.dispose();
+    highlightManager = null;
     View view = jEdit.getFirstView();
     while (view != null) {
       final EditPane[] panes = view.getEditPanes();
@@ -71,7 +71,7 @@ public final class HighlightPlugin extends EBPlugin {
   private static Highlighter initTextArea(JEditTextArea textArea) {
     final Highlighter highlighter = new Highlighter(textArea);
     final TextAreaPainter painter = textArea.getPainter();
-    painter.addExtension(highlighter);
+    painter.addExtension(TextAreaPainter.BELOW_SELECTION_LAYER,highlighter);
     textArea.putClientProperty(Highlighter.class, highlighter);
     return highlighter;
   }
@@ -109,7 +109,7 @@ public final class HighlightPlugin extends EBPlugin {
     }
 
     try {
-      highlightManagerTableModel.addElement(new Highlight(text));
+      highlightManager.addElement(new Highlight(text));
     } catch (REException e) {
       Log.log(Log.MESSAGE, HighlightPlugin.class, "This should never happens here " + e.getMessage());
     }
@@ -117,21 +117,30 @@ public final class HighlightPlugin extends EBPlugin {
 
   public static void highlightDialog(View view) {
     try {
-      HighlightDialog d = new HighlightDialog(view);
+      final HighlightDialog d = new HighlightDialog(view);
       d.setVisible(true);
     } catch (REException e) {
       Log.log(Log.ERROR,HighlightPlugin.class,e);
     }
   }
 
-  /**
-   * Cancels the highlight on a textarea.
-   *
-   * @param textArea the textarea
-   */
-  public static void cancelHighlight(JEditTextArea textArea) {
-  /*  final Highlighter highlighter = getHighlighterForTextArea(textArea);
-    highlighter.setHighlight(null);     */
+  public static void removeAllHighlights() {
+    highlightManager.removeAll();
   }
 
+  public static void enableHighlights() {
+    highlightManager.setHighlightEnable(true);
+  }
+
+  public static void disableHighlights() {
+    highlightManager.setHighlightEnable(false);
+  }
+
+  public static void toggleHighlights() {
+    highlightManager.setHighlightEnable(!highlightManager.isHighlightEnable());
+  }
+
+  public static boolean isHighlightEnable() {
+    return highlightManager.isHighlightEnable();
+  }
 }

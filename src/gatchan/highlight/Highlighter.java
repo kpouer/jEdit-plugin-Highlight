@@ -7,8 +7,6 @@ import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.CharIndexedSegment;
 
 import javax.swing.text.Segment;
-import javax.swing.event.TableModelListener;
-import javax.swing.event.TableModelEvent;
 import java.awt.*;
 
 /**
@@ -25,11 +23,11 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
 
   //private Highlight highlight;
 
-  private HighlightManagerTableModel highlightManagerTableModel;
+  private final HighlightManager highlightManager;
 
   Highlighter(JEditTextArea textArea) {
-    highlightManagerTableModel = HighlightManagerTableModel.getInstance();
-    highlightManagerTableModel.addHighlightChangeListener(this);
+    highlightManager = HighlightManagerTableModel.getManager();
+    highlightManager.addHighlightChangeListener(this);
     this.textArea = textArea;
     final TextAreaPainter painter = textArea.getPainter();
     fm = painter.getFontMetrics();
@@ -37,8 +35,14 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
     point = new Point();
   }
 
+  /**
+   * The Highlighter must be removed from the highlight listeners because they can
+   * be destroyed when a JEditTextAera is destroyed.
+   *
+   * @throws Throwable
+   */
   protected void finalize() throws Throwable {
-    highlightManagerTableModel.removeHighlightChangeListener(this);
+    highlightManager.removeHighlightChangeListener(this);
   }
 
   public void paintValidLine(Graphics2D gfx,
@@ -47,16 +51,16 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
                              int start,
                              int end,
                              int y) {
-    if (highlightManagerTableModel.getRowCount() != 0) {
+    if (highlightManager.isHighlightEnable() && highlightManager.countHighlights() != 0) {
       highlightList(gfx, physicalLine, start, end, y);
     }
   }
 
 
   private void highlightList(Graphics2D gfx, int physicalLine, int lineStartOffset, int lineEndOffset, int y) {
-    String lineContent = textArea.getLineText(physicalLine);
-    for (int i = 0; i < highlightManagerTableModel.getRowCount(); i++) {
-      Highlight highlight = highlightManagerTableModel.getHighlight(i);
+    final String lineContent = textArea.getLineText(physicalLine);
+    for (int i = 0; i < highlightManager.countHighlights(); i++) {
+      final Highlight highlight = highlightManager.getHighlight(i);
       if (highlight.isEnabled()) {
         highlight(highlight, lineContent, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
       }

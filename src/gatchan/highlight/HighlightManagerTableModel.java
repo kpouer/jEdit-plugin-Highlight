@@ -14,17 +14,22 @@ import java.util.List;
  *
  * @author Matthieu Casanova
  */
-public final class HighlightManagerTableModel extends AbstractTableModel {
+public final class HighlightManagerTableModel extends AbstractTableModel implements HighlightManager {
   private final List datas = new ArrayList();
   private static HighlightManagerTableModel highlightManagerTableModel;
 
   private List highlightChangeListeners = new ArrayList(2);
+  private boolean highlightEnable = true;
 
   public static HighlightManagerTableModel getInstance() {
     if (highlightManagerTableModel == null) {
       highlightManagerTableModel = new HighlightManagerTableModel();
     }
     return highlightManagerTableModel;
+  }
+
+  public static HighlightManager getManager() {
+    return getInstance();
   }
 
   private HighlightManagerTableModel() {
@@ -67,14 +72,14 @@ public final class HighlightManagerTableModel extends AbstractTableModel {
 
   public Object getValueAt(int rowIndex, int columnIndex) {
     if (columnIndex == 0) {
-      return new Boolean(((Highlight) datas.get(rowIndex)).isEnabled());
+      return Boolean.valueOf(((Highlight) datas.get(rowIndex)).isEnabled());
     }
     return datas.get(rowIndex);
   }
 
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     if (columnIndex == 0) {
-      Highlight highlight = (Highlight) datas.get(rowIndex);
+      final Highlight highlight = (Highlight) datas.get(rowIndex);
       highlight.setEnabled(((Boolean) aValue).booleanValue());
     } else {
       datas.set(rowIndex, aValue);
@@ -82,6 +87,12 @@ public final class HighlightManagerTableModel extends AbstractTableModel {
     fireTableCellUpdated(rowIndex, 0);
   }
 
+  /**
+   * Return the Highlight at index i.
+   *
+   * @param i the index of the highlight
+   * @return a highlight
+   */
   public Highlight getHighlight(int i) {
     return (Highlight) datas.get(i);
   }
@@ -156,9 +167,37 @@ public final class HighlightManagerTableModel extends AbstractTableModel {
 
   public void fireHighlightChangeListener() {
     for (int i = 0; i < highlightChangeListeners.size(); i++) {
-      HighlightChangeListener listener = (HighlightChangeListener) highlightChangeListeners.get(i);
+      final HighlightChangeListener listener = (HighlightChangeListener) highlightChangeListeners.get(i);
       listener.highlightUpdated();
 
     }
+  }
+
+  /**
+   * Returns the number of highlights.
+   *
+   * @return how many highlights are in
+   */
+  public int countHighlights() {
+    return getRowCount();
+  }
+
+  /**
+   * If the highlights must not be displayed it will returns false.
+   *
+   * @return returns true if highlights are displayed, false otherwise
+   */
+  public boolean isHighlightEnable() {
+    return highlightEnable;
+  }
+
+  /**
+   * Enable or disable the highlights.
+   *
+   * @param highlightEnable the news status
+   */
+  public void setHighlightEnable(boolean highlightEnable) {
+    this.highlightEnable = highlightEnable;
+    fireHighlightChangeListener();
   }
 }

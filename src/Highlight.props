@@ -9,15 +9,22 @@ plugin.gatchan.highlight.HighlightPlugin.docs=Highlight.html
 plugin.gatchan.highlight.HighlightPlugin.depend.0=jdk 1.4
 plugin.gatchan.highlight.HighlightPlugin.1=jedit 04.02.11.00
 plugin.gatchan.highlight.HighlightPlugin.menu=\
-                                                gatchan-highlight \
                                                 gatchan-highlight-dialog \
-                                                gatchan-cancelHighlight \
+                                                gatchan-highlight \
+                                                - \
+                                                gatchan-removeAllHighlights \
+                                                gatchan-enableHighlights \
+                                                gatchan-disableHighlights \
+                                                gatchan-toggleHighlights \
                                                 - \
                                                 highlighter-panel \
 
 gatchan-highlight.label=Highlight
-gatchan-cancelHighlight.label=Cancel highlight
-
+gatchan-highlight-dialog.label=Highlight dialog
+gatchan-removeAllHighlights.label=Remove all
+gatchan-enableHighlights.label=Enable highlights
+gatchan-disableHighlights.label=Disable highlights
+gatchan-toggleHighlights.label=Toggle highlights on/off
 
 highlighter-panel.title=Highlighter
 highlighter-panel.label=Highlighter panel

@@ -1,22 +1,16 @@
 package gatchan.highlight;
 
-import org.gjt.sp.jedit.gui.EnhancedDialog;
-import org.gjt.sp.jedit.gui.ColorWellButton;
-import org.gjt.sp.jedit.View;
+import gnu.regexp.REException;
 import org.gjt.sp.jedit.GUIUtilities;
+import org.gjt.sp.jedit.View;
+import org.gjt.sp.jedit.gui.ColorWellButton;
+import org.gjt.sp.jedit.gui.EnhancedDialog;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.util.Log;
 
 import javax.swing.*;
-import javax.swing.text.Keymap;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-
-import gnu.regexp.REException;
 
 /** @author Matthieu Casanova */
 public class HighlightDialog extends EnhancedDialog {
@@ -37,12 +31,12 @@ public class HighlightDialog extends EnhancedDialog {
     getContentPane().setLayout(new GridBagLayout());
     field = new JTextField(40);
     regex = new JCheckBox("regex");
-    ActionListener actionListener = new ActionListener();
+    final ActionListener actionListener = new ActionListener();
     ok = new JButton("ok");
     cancel = new JButton("Cancel");
     ok.addActionListener(actionListener);
     cancel.addActionListener(actionListener);
-    GridBagConstraints cons = new GridBagConstraints();
+    final GridBagConstraints cons = new GridBagConstraints();
     cons.gridy = 0;
     cons.gridheight = 1;
     cons.insets = new Insets(1, 1, 1, 1);
@@ -53,8 +47,8 @@ public class HighlightDialog extends EnhancedDialog {
     getContentPane().add(colorChooser, cons);
 
 
-    JPanel buttonsPanel = new JPanel();
-    BoxLayout layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
+    final JPanel buttonsPanel = new JPanel();
+    final BoxLayout layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
     buttonsPanel.setLayout(layout);
     buttonsPanel.add(ok);
     buttonsPanel.add(Box.createHorizontalStrut(6));
@@ -78,7 +72,7 @@ public class HighlightDialog extends EnhancedDialog {
   public void ok() {
     try {
       highlight.init(field.getText().trim(),regex.isSelected(),colorChooser.getSelectedColor());
-      HighlightManagerTableModel.getInstance().addElement(highlight);
+      HighlightManagerTableModel.getManager().addElement(highlight);
       dispose();
     } catch (REException e) {
       final String message = "Invalid regexp " + e.getMessage();

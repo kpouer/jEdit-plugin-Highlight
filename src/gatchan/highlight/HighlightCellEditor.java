@@ -22,7 +22,7 @@ public final class HighlightCellEditor extends AbstractCellEditor implements Tab
   public boolean stopCellEditing() {
     final boolean ret = renderer.save(highlight);
     if (ret) {
-      HighlightManagerTableModel.getInstance().fireHighlightChangeListener();
+      HighlightManagerTableModel.getManager().fireHighlightChangeListener();
     }
     return ret;
   }

@@ -37,7 +37,7 @@ public class HighlightList extends JPanel {
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     table.setShowGrid(false);
     table.setIntercellSpacing(new Dimension(0,0));
-    TableColumn col1 = table.getColumnModel().getColumn(0);
+    final TableColumn col1 = table.getColumnModel().getColumn(0);
     col1.setPreferredWidth(26);
     col1.setMinWidth(26);
     col1.setMaxWidth(26);
@@ -49,7 +49,7 @@ public class HighlightList extends JPanel {
 
     table.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        int row = table.rowAtPoint(e.getPoint());
+        final int row = table.rowAtPoint(e.getPoint());
         if (row == -1) return;
 
         if (e.getButton() == MouseEvent.BUTTON1) {
@@ -71,15 +71,18 @@ public class HighlightList extends JPanel {
       }
     });
 
-    JToolBar toolBar = new JToolBar();
+    final JToolBar toolBar = new JToolBar();
     toolBar.setFloatable(false);
-    JButton clear = new JButton(GUIUtilities.loadIcon("Clear.png"));
-    clear.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        tableModel.removeAll();
-      }
-    });
+    final JButton clear = new JButton(GUIUtilities.loadIcon("Clear.png"));
+    final JCheckBox enableHighlights = new JCheckBox("enable");
+    enableHighlights.setSelected(true);
+
+    MyActionListener actionListener = new MyActionListener(clear, enableHighlights);
+    clear.addActionListener(actionListener);
+    enableHighlights.addActionListener(actionListener);
     toolBar.add(clear);
+    toolBar.add(enableHighlights);
+
     add(toolBar, BorderLayout.NORTH);
     final JScrollPane scroll = new JScrollPane(table);
     add(scroll);
@@ -110,8 +113,26 @@ public class HighlightList extends JPanel {
     }
 
     public void actionPerformed(ActionEvent e) {
-      Object s = table.getValueAt(row, 0);
+      final Object s = table.getValueAt(row, 0);
       tableModel.removeElement(s);
+    }
+  }
+
+  private class MyActionListener implements ActionListener {
+    private JButton clear;
+    private JCheckBox enableHighlights;
+
+    public MyActionListener(JButton clear, JCheckBox enableHighlights) {
+      this.clear = clear;
+      this.enableHighlights = enableHighlights;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      if (clear.equals(e.getSource())) {
+        tableModel.removeAll();
+      } else if (enableHighlights.equals(e.getSource())) {
+        tableModel.setHighlightEnable(enableHighlights.isSelected());
+      }
     }
   }
 }
