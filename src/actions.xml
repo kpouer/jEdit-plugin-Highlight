@@ -1,0 +1,16 @@
+<!DOCTYPE ACTIONS SYSTEM "actions.dtd">
+
+<ACTIONS>
+	<ACTION NAME="gatchan-highlight">
+		<CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.highlightThis(textArea);
+		</CODE>
+	</ACTION>
+    <ACTION NAME="gatchan-cancelHighlight">
+		<CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.cancelHighlight(textArea);
+		</CODE>
+	</ACTION>
+</ACTIONS>
