@@ -22,6 +22,7 @@ plugin.gatchan.highlight.HighlightPlugin.menu=\
 
 gatchan-highlight.label=Highlight
 gatchan-highlight-dialog.label=Highlight dialog
+gatchan-highlightcurrentSearch.label=Highlight current search
 gatchan-removeAllHighlights.label=Remove all
 gatchan-enableHighlights.label=Enable highlights
 gatchan-disableHighlights.label=Disable highlights
