@@ -1,9 +1,14 @@
 package gatchan.highlight;
 
+import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.jedit.GUIUtilities;
+import org.gjt.sp.util.Log;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.*;
 
 /**
  * The tableModel that will contains the highlights. It got two columns, the first is a checkbox to enable/disable the
@@ -17,6 +22,9 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   private final List highlightChangeListeners = new ArrayList(2);
   private boolean highlightEnable = true;
+  private final String PROJECT_DIRECTORY = jEdit.getSettingsDirectory() + File.separator + "HighlightPlugin" + File.separator;
+  private final File projectDirectory = new File(PROJECT_DIRECTORY);
+  private final File highlights = new File(projectDirectory, "highlights.ser");
 
   /**
    * Returns the instance of the HighlightManagerTableModel.
@@ -40,6 +48,39 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   }
 
   private HighlightManagerTableModel() {
+    if (highlights.exists()) {
+      BufferedReader reader = null;
+      try {
+        reader = new BufferedReader(new FileReader(highlights));
+        String line = reader.readLine();
+        while (line != null) {
+          try {
+            addElement(Highlight.unserialize(line));
+          } catch (InvalidHighlightException e) {
+            Log.log(Log.WARNING, this, "Unable to read this highlight, please report it : " + line);
+          }
+          line = reader.readLine();
+        }
+      } catch (FileNotFoundException e) {
+        Log.log(Log.ERROR, this, e);
+      } catch (IOException e) {
+        Log.log(Log.ERROR, this, e);
+      } finally {
+        if (reader != null) {
+          try {
+            reader.close();
+          } catch (IOException e) {
+          }
+        }
+      }
+    }
+  }
+
+  private boolean checkProjectDirectory(File projectDirectory) {
+    if (!projectDirectory.isDirectory()) {
+      return projectDirectory.mkdirs();
+    }
+    return true;
   }
 
   /**
@@ -140,6 +181,35 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   public void dispose() {
     highlightManagerTableModel = null;
+    save();
+  }
+
+  private void save() {
+    if (checkProjectDirectory(projectDirectory)) {
+      BufferedWriter writer = null;
+      try {
+        writer = new BufferedWriter(new FileWriter(highlights));
+        for (int i = 0; i < datas.size(); i++) {
+          Highlight highlight = (Highlight) datas.get(i);
+          writer.write(highlight.serialize());
+          writer.write('\n');
+        }
+      } catch (IOException e) {
+        Log.log(Log.ERROR,this,e);
+      } finally {
+        if (writer != null) {
+          try {
+            writer.close();
+          } catch (IOException e) {
+          }
+        }
+      }
+    } else {
+      Log.log(Log.ERROR,this,"Unable to create directory "+projectDirectory.getAbsolutePath());
+      GUIUtilities.error(jEdit.getActiveView(),
+                         "gatchan-highlight.errordialog.unableToAccessProjectDirectory",
+                         new String[] {projectDirectory.getAbsolutePath()});
+    }
   }
 
   public void fireTableChanged(TableModelEvent e) {

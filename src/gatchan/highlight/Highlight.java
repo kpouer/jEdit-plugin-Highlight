@@ -5,6 +5,8 @@ import org.gjt.sp.jedit.search.RESearchMatcher;
 import gnu.regexp.REException;
 
 import java.awt.*;
+import java.io.Serializable;
+import java.io.IOException;
 
 /**
  * A Highlight defines the string to highlight.
@@ -12,7 +14,6 @@ import java.awt.*;
  * @author Matthieu Casanova
  */
 public final class Highlight {
-
   private String stringToHighlight;
 
   private boolean regexp;
@@ -21,17 +22,19 @@ public final class Highlight {
 
   private SearchMatcher searchMatcher;
 
+  private static final int HIGHLIGHT_VERSION = 1;
+
   private static final Color[] COLORS = {new Color(153, 255, 204),
-                                         new Color(0x66, 0x66, 0xff),
-                                         new Color(0xff, 0x66, 0x66),
-                                         new Color(0xff, 0xcc, 0x66),
-                                         new Color(0xcc, 0xff, 0x66),
-                                         new Color(0xff, 0x33, 0x99),
-                                         new Color(0xff, 0x33, 0x00),
-                                         new Color(0x66, 0xff, 0x00),
-                                         new Color(0x99, 0x00, 0x99),
-                                         new Color(0x99, 0x99, 0x00),
-                                         new Color(0x00, 0x99, 0x66)};
+          new Color(0x66, 0x66, 0xff),
+          new Color(0xff, 0x66, 0x66),
+          new Color(0xff, 0xcc, 0x66),
+          new Color(0xcc, 0xff, 0x66),
+          new Color(0xff, 0x33, 0x99),
+          new Color(0xff, 0x33, 0x00),
+          new Color(0x66, 0xff, 0x00),
+          new Color(0x99, 0x00, 0x99),
+          new Color(0x99, 0x99, 0x00),
+          new Color(0x00, 0x99, 0x66)};
 
   private static int colorIndex;
 
@@ -44,7 +47,7 @@ public final class Highlight {
   }
 
   public Highlight(String s) throws REException {
-    this(s,false,true);
+    this(s, false, true);
   }
 
   public Highlight() {
@@ -95,7 +98,9 @@ public final class Highlight {
   public boolean equals(Object obj) {
     if (obj instanceof Highlight) {
       final Highlight highlight = (Highlight) obj;
-      return highlight.getStringToHighlight().equals(stringToHighlight) && highlight.isRegexp() == regexp && highlight.isIgnoreCase() == ignoreCase;
+      return highlight.getStringToHighlight().equals(stringToHighlight) &&
+             highlight.isRegexp() == regexp &&
+             highlight.isIgnoreCase() == ignoreCase;
     }
     return false;
   }
@@ -112,4 +117,55 @@ public final class Highlight {
     colorIndex = ++colorIndex % COLORS.length;
     return COLORS[colorIndex];
   }
+
+  /**
+   * Serialize the highlight like that :
+   * {@link HIGHLIGHT_VERSION};regexp ignorecase color;stringToHighlight (no space between regexp, ignorecase and color
+   * @return
+   */
+  public String serialize() {
+    StringBuffer buff = new StringBuffer();
+    buff.append(HIGHLIGHT_VERSION).append(';');
+    serializeBoolean(buff,regexp);
+    serializeBoolean(buff,ignoreCase);
+    buff.append(color.getRGB());
+    buff.append(';');
+    buff.append(stringToHighlight);
+    return buff.toString();
+  }
+
+  private static void serializeBoolean(StringBuffer buff, boolean bool) {
+    if (bool) {
+      buff.append(1);
+    } else {
+      buff.append(0);
+    }
+  }
+
+  public static Highlight unserialize(String s) throws InvalidHighlightException {
+    int index = s.indexOf(';');
+    boolean regexp;
+    if(s.charAt(index+1) == '1') {
+      regexp = true;
+    } else {
+      regexp = false;
+    }
+    boolean ignoreCase;
+    if(s.charAt(index+2) == '1') {
+      ignoreCase = true;
+    } else {
+      ignoreCase = false;
+    }
+    int i = s.indexOf(';', index + 3);
+    Color color = Color.decode(s.substring(index+3,i));
+    String searchString = s.substring(i+1);
+    final Highlight highlight = new Highlight();
+    try {
+      highlight.init(searchString, regexp, ignoreCase, color);
+    } catch (REException e) {
+      throw new InvalidHighlightException("Invalid regexp " + e.getMessage());
+    }
+    return highlight;
+  }
+
 }
