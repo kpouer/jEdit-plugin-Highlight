@@ -39,6 +39,7 @@ public final class HighlightPlugin extends EBPlugin {
 
   /** uninitialize the plugin. we will remove the Highlighter on each text area */
   public void stop() {
+    Log.log(Log.DEBUG,HighlightPlugin.class,"HighlightPlugin will be unloaded");
     View view = jEdit.getFirstView();
     while (view != null) {
       final EditPane[] panes = view.getEditPanes();
@@ -60,7 +61,7 @@ public final class HighlightPlugin extends EBPlugin {
    */
   private static void uninitTextArea(JEditTextArea textArea) {
     final TextAreaPainter painter = textArea.getPainter();
-    final Highlighter highlighter = (Highlighter) painter.getClientProperty(Highlighter.class);
+    final Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
     if (highlighter != null) {
       painter.removeExtension(highlighter);
       textArea.putClientProperty(Highlighter.class, null);
