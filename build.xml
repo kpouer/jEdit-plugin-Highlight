@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project name="Highlighter" default="dist" basedir=".">
 
-    <property name="jar.name" value="Highlighter.jar"/>
+    <property name="jar.name" value="highlight.jar"/>
 
     <property name="src.dir" value="src"/>
     <property name="build.dir" value="build"/>
