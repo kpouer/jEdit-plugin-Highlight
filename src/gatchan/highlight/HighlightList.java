@@ -77,7 +77,7 @@ public class HighlightList extends JPanel {
     final JCheckBox enableHighlights = new JCheckBox("enable");
     enableHighlights.setSelected(true);
 
-    MyActionListener actionListener = new MyActionListener(clear, enableHighlights);
+    final MyActionListener actionListener = new MyActionListener(clear, enableHighlights);
     clear.addActionListener(actionListener);
     enableHighlights.addActionListener(actionListener);
     toolBar.add(clear);
