@@ -35,3 +35,6 @@ highlighter-panel.label=Highlighter panel
 
 gatchan-highlight.errordialog.invalidHighlight.message = Invalid highlight
 gatchan-highlight.errordialog.invalidHighlight.title = Highlight error
+
+gatchan-highlight.errordialog.unableToAccessProjectDirectory.message = Unable to access project directory {0}
+gatchan-highlight.errordialog.unableToAccessProjectDirectory.title = Highlight error
