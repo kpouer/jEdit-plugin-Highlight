@@ -65,7 +65,7 @@ public final class HighlightTablePanel extends JPanel {
       expressionField.getDocument().addDocumentListener(highlightCellEditor);
       regexp.addActionListener(highlightCellEditor);
       ignoreCase.addActionListener(highlightCellEditor);
-      colorBox.addActionListener(highlightCellEditor);
+    //  colorBox.addActionListener(highlightCellEditor);
     }
   }
 
@@ -96,7 +96,7 @@ public final class HighlightTablePanel extends JPanel {
       expressionField.getDocument().removeDocumentListener(highlightCellEditor);
       regexp.removeActionListener(highlightCellEditor);
       ignoreCase.removeActionListener(highlightCellEditor);
-      colorBox.removeActionListener(highlightCellEditor);
+     // colorBox.removeActionListener(highlightCellEditor);
     }
   }
 
