@@ -7,7 +7,7 @@ plugin.gatchan.highlight.HighlightPlugin.author=Matthieu Casanova
 plugin.gatchan.highlight.HighlightPlugin.version=1.2.0
 plugin.gatchan.highlight.HighlightPlugin.docs=Highlight.html
 plugin.gatchan.highlight.HighlightPlugin.depend.0=jdk 1.4
-plugin.gatchan.highlight.HighlightPlugin.1=jedit 04.02.11.00
+plugin.gatchan.highlight.HighlightPlugin.depend.1=jedit 04.02.11.00
 plugin.gatchan.highlight.HighlightPlugin.menu=\
                                                 gatchan-highlight-dialog \
                                                 gatchan-highlight \
