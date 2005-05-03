@@ -128,7 +128,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
       lineString = lineStringParam;
       stringToHighlight = stringToHighlightParam;
     }
-    int start = lineString.indexOf(stringToHighlight);
+    int start = lineString.indexOf(stringToHighlight, textArea.getLineStartOffset(physicalLine)-lineStartOffset);
     if (start == -1) return;
     _highlight(highlightColor, stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     while (true) {
@@ -147,7 +147,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
                           Graphics2D gfx,
                           int y) {
     int end = start + stringToHighlight.length();
-
+    int lineStart = textArea.getLineStartOffset(physicalLine);
     if (start == 0 && end == 0) {
       textArea.getLineText(physicalLine, seg);
       for (int j = 0; j < seg.count; j++) {
@@ -161,21 +161,21 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
       end = seg.count;
     }
 
-    if (start + lineStartOffset >= lineEndOffset || end + lineStartOffset <= lineStartOffset) {
+    if (start + lineStart >= lineEndOffset || end + lineStart <= lineStartOffset) {
       return;
     }
 
     final int startX;
 
-    if (start + lineStartOffset >= lineStartOffset) {
+    if (start + lineStart >= lineStartOffset) {
       startX = textArea.offsetToXY(physicalLine, start, point).x;
     } else {
       startX = 0;
     }
     final int endX;
 
-    if (end + lineStartOffset >= lineEndOffset) {
-      endX = textArea.offsetToXY(physicalLine, lineEndOffset - lineStartOffset - 1, point).x;
+    if (end + lineStart >= lineEndOffset) {
+      endX = textArea.offsetToXY(physicalLine, lineEndOffset - lineStart - 1, point).x;
     } else {
       endX = textArea.offsetToXY(physicalLine, end, point).x;
     }
