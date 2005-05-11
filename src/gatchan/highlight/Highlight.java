@@ -1,12 +1,10 @@
 package gatchan.highlight;
 
-import org.gjt.sp.jedit.search.SearchMatcher;
-import org.gjt.sp.jedit.search.RESearchMatcher;
 import gnu.regexp.REException;
+import org.gjt.sp.jedit.search.RESearchMatcher;
+import org.gjt.sp.jedit.search.SearchMatcher;
 
 import java.awt.*;
-import java.io.Serializable;
-import java.io.IOException;
 
 /**
  * A Highlight defines the string to highlight.
@@ -97,7 +95,7 @@ public final class Highlight {
 
   public boolean equals(Object obj) {
     if (obj instanceof Highlight) {
-      final Highlight highlight = (Highlight) obj;
+      Highlight highlight = (Highlight) obj;
       return highlight.getStringToHighlight().equals(stringToHighlight) &&
              highlight.isRegexp() == regexp &&
              highlight.isIgnoreCase() == ignoreCase;
@@ -124,7 +122,7 @@ public final class Highlight {
    * @return
    */
   public String serialize() {
-    StringBuffer buff = new StringBuffer();
+    StringBuffer buff = new StringBuffer(stringToHighlight.length()+20);
     buff.append(HIGHLIGHT_VERSION).append(';');
     serializeBoolean(buff,regexp);
     serializeBoolean(buff,ignoreCase);
@@ -144,22 +142,14 @@ public final class Highlight {
 
   public static Highlight unserialize(String s) throws InvalidHighlightException {
     int index = s.indexOf(';');
-    boolean regexp;
-    if(s.charAt(index+1) == '1') {
-      regexp = true;
-    } else {
-      regexp = false;
-    }
-    boolean ignoreCase;
-    if(s.charAt(index+2) == '1') {
-      ignoreCase = true;
-    } else {
-      ignoreCase = false;
-    }
+    boolean regexp = s.charAt(index + 1) == '1';
+    boolean ignoreCase = s.charAt(index + 2) == '1';
     int i = s.indexOf(';', index + 3);
     Color color = Color.decode(s.substring(index+3,i));
-    String searchString = s.substring(i+1);
-    final Highlight highlight = new Highlight();
+    // When using String.substring() the new String uses the same char[] so the new String is as big as the first one.
+    // This is minor optimization
+    String searchString = new String(s.substring(i+1));
+    Highlight highlight = new Highlight();
     try {
       highlight.init(searchString, regexp, ignoreCase, color);
     } catch (REException e) {
