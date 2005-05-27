@@ -8,13 +8,15 @@ import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.Log;
 
+import javax.swing.*;
+
 /**
  * The HighlightPlugin. This is my first plugin for jEdit, some parts of my code were inspired by the ErrorList plugin
  *
  * @author Matthieu Casanova
+ * @version $Id$
  */
 public final class HighlightPlugin extends EBPlugin {
-
   private static HighlightManager highlightManager;
 
   public static final String NAME = "highlight";
@@ -27,9 +29,9 @@ public final class HighlightPlugin extends EBPlugin {
     highlightManager = HighlightManagerTableModel.getManager();
     View view = jEdit.getFirstView();
     while (view != null) {
-      final EditPane[] panes = view.getEditPanes();
+      EditPane[] panes = view.getEditPanes();
       for (int i = 0; i < panes.length; i++) {
-        final JEditTextArea textArea = panes[i].getTextArea();
+        JEditTextArea textArea = panes[i].getTextArea();
         initTextArea(textArea);
       }
       view = view.getNext();
@@ -39,13 +41,19 @@ public final class HighlightPlugin extends EBPlugin {
 
   /** uninitialize the plugin. we will remove the Highlighter on each text area */
   public void stop() {
+    if (highlightManager.countHighlights() == 0) {
+      jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "defer");
+    } else {
+      jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "startup");
+    }
+
     highlightManager.dispose();
     highlightManager = null;
     View view = jEdit.getFirstView();
     while (view != null) {
-      final EditPane[] panes = view.getEditPanes();
+      EditPane[] panes = view.getEditPanes();
       for (int i = 0; i < panes.length; i++) {
-        final JEditTextArea textArea = panes[i].getTextArea();
+        JEditTextArea textArea = panes[i].getTextArea();
         uninitTextArea(textArea);
       }
       view = view.getNext();
@@ -56,13 +64,12 @@ public final class HighlightPlugin extends EBPlugin {
    * Remove the highlighter from a text area.
    *
    * @param textArea the textarea from wich we will remove the highlighter
-   *
    * @see #stop()
-   * @see #handleEditPaneMessage(org.gjt.sp.jedit.msg.EditPaneUpdate)
+   * @see #handleEditPaneMessage(EditPaneUpdate)
    */
   private static void uninitTextArea(JEditTextArea textArea) {
-    final TextAreaPainter painter = textArea.getPainter();
-    final Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
+    TextAreaPainter painter = textArea.getPainter();
+    Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
     if (highlighter != null) {
       painter.removeExtension(highlighter);
       textArea.putClientProperty(Highlighter.class, null);
@@ -73,12 +80,11 @@ public final class HighlightPlugin extends EBPlugin {
    * Initialize the textarea with a highlight painter.
    *
    * @param textArea the textarea to initialize
-   *
    * @return the new highlighter for the textArea
    */
   private static Highlighter initTextArea(JEditTextArea textArea) {
-    final Highlighter highlighter = new Highlighter(textArea);
-    final TextAreaPainter painter = textArea.getPainter();
+    Highlighter highlighter = new Highlighter(textArea);
+    TextAreaPainter painter = textArea.getPainter();
     painter.addExtension(TextAreaPainter.HIGHEST_LAYER, highlighter);
     textArea.putClientProperty(Highlighter.class, highlighter);
     return highlighter;
@@ -93,8 +99,8 @@ public final class HighlightPlugin extends EBPlugin {
 
 
   private static void handleEditPaneMessage(EditPaneUpdate message) {
-    final JEditTextArea textArea = message.getEditPane().getTextArea();
-    final Object what = message.getWhat();
+    JEditTextArea textArea = message.getEditPane().getTextArea();
+    Object what = message.getWhat();
 
     if (what == EditPaneUpdate.CREATED) {
       initTextArea(textArea);
@@ -110,7 +116,7 @@ public final class HighlightPlugin extends EBPlugin {
    * @param textArea the textarea
    */
   public static void highlightThis(JEditTextArea textArea) {
-    final String text = getCurrentWord(textArea);
+    String text = getCurrentWord(textArea);
     try {
       highlightManager.addElement(new Highlight(text));
     } catch (REException e) {
@@ -122,7 +128,6 @@ public final class HighlightPlugin extends EBPlugin {
    * Get the current word. If nothing is selected, it will select it.
    *
    * @param textArea the textArea
-   *
    * @return the current word
    */
   private static String getCurrentWord(JEditTextArea textArea) {
@@ -141,10 +146,10 @@ public final class HighlightPlugin extends EBPlugin {
    * @param textArea the textarea
    */
   public static void highlightEntireWord(JEditTextArea textArea) {
-    final String text = getCurrentWord(textArea);
+    String text = getCurrentWord(textArea);
 
     try {
-      final Highlight highlight = new Highlight("\\<" + text + "\\>", true, false);
+      Highlight highlight = new Highlight("\\<" + text + "\\>", true, false);
       highlightManager.addElement(highlight);
     } catch (REException e) {
       Log.log(Log.MESSAGE, HighlightPlugin.class, "This should never happens here " + e.getMessage());
@@ -168,7 +173,7 @@ public final class HighlightPlugin extends EBPlugin {
    * @param view the current view
    */
   public static void highlightDialog(View view) {
-    final HighlightDialog d = new HighlightDialog(view);
+    HighlightDialog d = new HighlightDialog(view);
     d.setVisible(true);
   }
 
