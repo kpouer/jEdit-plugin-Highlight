@@ -3,6 +3,7 @@ package gatchan.highlight;
 import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.jedit.Buffer;
 import org.gjt.sp.jedit.gui.EnhancedDialog;
 
 import javax.swing.*;
@@ -60,7 +61,12 @@ public final class HighlightDialog extends EnhancedDialog {
     try {
       panel.save(highlight);
       Integer selectedItem = (Integer) scopeCombo.getSelectedItem();
-      highlight.setScope(selectedItem.intValue());
+      int scope = selectedItem.intValue();
+      highlight.setScope(scope);
+      if (scope == Highlight.BUFFER_SCOPE) {
+        Buffer buffer = jEdit.getActiveView().getBuffer();
+        highlight.setBuffer(buffer);
+      }
       HighlightManagerTableModel.getManager().addElement(highlight);
       dispose();
     } catch (InvalidHighlightException e) {

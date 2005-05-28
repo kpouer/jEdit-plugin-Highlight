@@ -3,6 +3,7 @@ package gatchan.highlight;
 import gnu.regexp.REException;
 import org.gjt.sp.jedit.search.RESearchMatcher;
 import org.gjt.sp.jedit.search.SearchMatcher;
+import org.gjt.sp.jedit.Buffer;
 
 import java.awt.*;
 
@@ -49,6 +50,8 @@ public final class Highlight {
   private boolean enabled = true;
 
   private int scope = PERMANENT_SCOPE;
+
+  private Buffer buffer;
 
   public Highlight(String stringToHighlight, boolean regexp, boolean ignoreCase, int scope) throws REException {
     this.scope = scope;
@@ -179,5 +182,13 @@ public final class Highlight {
 
   public void setScope(int scope) {
     this.scope = scope;
+  }
+
+  public Buffer getBuffer() {
+    return buffer;
+  }
+
+  public void setBuffer(Buffer buffer) {
+    this.buffer = buffer;
   }
 }

@@ -4,6 +4,7 @@ import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
+import org.gjt.sp.jedit.Buffer;
 import org.gjt.sp.util.CharIndexedSegment;
 
 import javax.swing.text.Segment;
@@ -28,18 +29,18 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
     highlightManager = HighlightManagerTableModel.getManager();
     highlightManager.addHighlightChangeListener(this);
     this.textArea = textArea;
-    final TextAreaPainter painter = textArea.getPainter();
+    TextAreaPainter painter = textArea.getPainter();
     fm = painter.getFontMetrics();
     seg = new Segment();
     point = new Point();
   }
 
   /**
-     * The Highlighter must be removed from the highlight listeners because they can be destroyed when a JEditTextAera is
-     * destroyed.
-     *
-     * @throws Throwable
-     */
+   * The Highlighter must be removed from the highlight listeners because they can be destroyed when a JEditTextAera is
+   * destroyed.
+   *
+   * @throws Throwable
+   */
   protected void finalize() throws Throwable {
     highlightManager.removeHighlightChangeListener(this);
   }
@@ -57,10 +58,12 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
 
 
   private void highlightList(Graphics2D gfx, int physicalLine, int lineStartOffset, int lineEndOffset, int y) {
-    final String lineContent = textArea.getLineText(physicalLine);
+    String lineContent = textArea.getLineText(physicalLine);
+    Buffer buffer = textArea.getBuffer();
     for (int i = 0; i < highlightManager.countHighlights(); i++) {
-      final Highlight highlight = highlightManager.getHighlight(i);
-      if (highlight.isEnabled()) {
+      Highlight highlight = highlightManager.getHighlight(i);
+      if (highlight.isEnabled() && (highlight.getScope() != Highlight.BUFFER_SCOPE ||
+                                    highlight.getBuffer() == buffer)) {
         highlight(highlight, lineContent, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
       }
     }
@@ -74,7 +77,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
                          Graphics2D gfx,
                          int y) {
     if (highlight.isRegexp()) {
-      final SearchMatcher searchMatcher = highlight.getSearchMatcher();
+      SearchMatcher searchMatcher = highlight.getSearchMatcher();
       Segment segment = new Segment(lineContent.toCharArray(), 0, lineContent.length());
       SearchMatcher.Match match = null;
       int i = 0;
@@ -87,7 +90,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
         if (match == null) {
           break;
         }
-        final String s = lineContent.substring(match.start, match.end);
+        String s = lineContent.substring(match.start, match.end);
         _highlight(highlight.getColor(), s, match.start + i, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
 
         if (match.end == lineContent.length()) {
@@ -128,7 +131,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
       lineString = lineStringParam;
       stringToHighlight = stringToHighlightParam;
     }
-    int start = lineString.indexOf(stringToHighlight, textArea.getLineStartOffset(physicalLine)-lineStartOffset);
+    int start = lineString.indexOf(stringToHighlight, textArea.getLineStartOffset(physicalLine) - lineStartOffset);
     if (start == -1) return;
     _highlight(highlightColor, stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     while (true) {
@@ -165,14 +168,14 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
       return;
     }
 
-    final int startX;
+    int startX;
 
     if (start + lineStart >= lineStartOffset) {
       startX = textArea.offsetToXY(physicalLine, start, point).x;
     } else {
       startX = 0;
     }
-    final int endX;
+    int endX;
 
     if (end + lineStart >= lineEndOffset) {
       endX = textArea.offsetToXY(physicalLine, lineEndOffset - lineStart - 1, point).x;
