@@ -17,26 +17,37 @@ public final class HighlightDialog extends EnhancedDialog {
 
   private final Highlight highlight;
   private final HighlightTablePanel panel = new HighlightTablePanel();
+  private final JComboBox scopeCombo = new JComboBox(new Integer[]{Integer.valueOf(Highlight.PERMANENT_SCOPE),
+    Integer.valueOf(Highlight.SESSION_SCOPE), Integer.valueOf(Highlight.BUFFER_SCOPE)});
 
   public HighlightDialog(View owner, Highlight highlight) {
     super(owner, "Highlight", false);
     this.highlight = highlight;
     panel.setDialog(this);
-    getContentPane().add(panel);
+    Container contentPane = getContentPane();
+    contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
 
-    final MyActionListener myActionListener = new MyActionListener();
+    JPanel scopePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    scopePanel.add(new JLabel("scope : "));
+    scopeCombo.setRenderer(new MyListCellRenderer());
+    scopePanel.add(scopeCombo);
+
+    MyActionListener myActionListener = new MyActionListener();
     ok.addActionListener(myActionListener);
     cancel.addActionListener(myActionListener);
-    final JPanel buttonsPanel = new JPanel();
+    JPanel buttonsPanel = new JPanel();
 
-    final BoxLayout layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
+    BoxLayout layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
     buttonsPanel.setLayout(layout);
     buttonsPanel.add(Box.createGlue());
     buttonsPanel.add(ok);
     buttonsPanel.add(Box.createHorizontalStrut(6));
     buttonsPanel.add(cancel);
     buttonsPanel.add(Box.createGlue());
-    getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
+
+    contentPane.add(panel);
+    contentPane.add(scopePanel);
+    contentPane.add(buttonsPanel);
     pack();
     GUIUtilities.centerOnScreen(this);
   }
@@ -48,6 +59,8 @@ public final class HighlightDialog extends EnhancedDialog {
   public void ok() {
     try {
       panel.save(highlight);
+      Integer selectedItem = (Integer) scopeCombo.getSelectedItem();
+      highlight.setScope(selectedItem.intValue());
       HighlightManagerTableModel.getManager().addElement(highlight);
       dispose();
     } catch (InvalidHighlightException e) {
@@ -67,6 +80,35 @@ public final class HighlightDialog extends EnhancedDialog {
       } else if (e.getSource() == cancel) {
         cancel();
       }
+    }
+  }
+
+  private static class MyListCellRenderer extends DefaultListCellRenderer {
+    public Component getListCellRendererComponent(JList list,
+                                                  Object value,
+                                                  int index,
+                                                  boolean isSelected,
+                                                  boolean cellHasFocus) {
+      if (isSelected) {
+        setBackground(list.getSelectionBackground());
+        setForeground(list.getSelectionForeground());
+      } else {
+        setBackground(list.getBackground());
+        setForeground(list.getForeground());
+      }
+      int scope = ((Integer) value).intValue();
+      switch (scope) {
+        case Highlight.PERMANENT_SCOPE :
+          setText("permanent");
+          break;
+        case Highlight.SESSION_SCOPE :
+          setText("session");
+          break;
+        case Highlight.BUFFER_SCOPE:
+          setText("buffer");
+          break;
+      }
+      return this;
     }
   }
 }

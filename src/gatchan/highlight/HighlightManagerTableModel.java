@@ -191,11 +191,13 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         writer = new BufferedWriter(new FileWriter(highlights));
         for (int i = 0; i < datas.size(); i++) {
           Highlight highlight = (Highlight) datas.get(i);
-          writer.write(highlight.serialize());
-          writer.write('\n');
+          if (highlight.getScope() == Highlight.PERMANENT_SCOPE) {
+            writer.write(highlight.serialize());
+            writer.write('\n');
+          }
         }
       } catch (IOException e) {
-        Log.log(Log.ERROR,this,e);
+        Log.log(Log.ERROR, this, e);
       } finally {
         if (writer != null) {
           try {
@@ -205,10 +207,10 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         }
       }
     } else {
-      Log.log(Log.ERROR,this,"Unable to create directory "+projectDirectory.getAbsolutePath());
+      Log.log(Log.ERROR, this, "Unable to create directory " + projectDirectory.getAbsolutePath());
       GUIUtilities.error(jEdit.getActiveView(),
                          "gatchan-highlight.errordialog.unableToAccessProjectDirectory",
-                         new String[] {projectDirectory.getAbsolutePath()});
+                         new String[]{projectDirectory.getAbsolutePath()});
     }
   }
 

@@ -12,6 +12,14 @@ import java.awt.*;
  * @author Matthieu Casanova
  */
 public final class Highlight {
+
+  /** This scope will be saved when you exit jEdit. */
+  public static final int PERMANENT_SCOPE = 0;
+  /** This scope is global but will not be saved. */
+  public static final int SESSION_SCOPE = 1;
+  /** This scope will not be saved and is for one buffer only. */
+  public static final int BUFFER_SCOPE = 2;
+
   private String stringToHighlight;
 
   private boolean regexp;
@@ -40,12 +48,19 @@ public final class Highlight {
 
   private boolean enabled = true;
 
-  public Highlight(String stringToHighlight, boolean regexp, boolean ignoreCase) throws REException {
+  private int scope = PERMANENT_SCOPE;
+
+  public Highlight(String stringToHighlight, boolean regexp, boolean ignoreCase, int scope) throws REException {
+    this.scope = scope;
     init(stringToHighlight, regexp, ignoreCase, getNextColor());
   }
 
+  public Highlight(String stringToHighlight, boolean regexp, boolean ignoreCase) throws REException {
+    this(stringToHighlight,regexp, ignoreCase,PERMANENT_SCOPE);
+  }
+
   public Highlight(String s) throws REException {
-    this(s, false, true);
+    this(s, false, true, PERMANENT_SCOPE);
   }
 
   public Highlight() {
@@ -158,4 +173,11 @@ public final class Highlight {
     return highlight;
   }
 
+  public int getScope() {
+    return scope;
+  }
+
+  public void setScope(int scope) {
+    this.scope = scope;
+  }
 }
