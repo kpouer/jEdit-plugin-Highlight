@@ -54,6 +54,9 @@ public final class Highlight {
 
   private Buffer buffer;
 
+  private long duration = Long.MAX_VALUE;
+  private long lastSeen = System.currentTimeMillis();
+
   public Highlight(String stringToHighlight, boolean regexp, boolean ignoreCase, int scope) throws REException {
     this.scope = scope;
     init(stringToHighlight, regexp, ignoreCase, getNextColor());
@@ -236,5 +239,17 @@ public final class Highlight {
       }
       highlights.add(this);
     }
+  }
+
+  public void setDuration(long duration) {
+    this.duration = duration;
+  }
+
+  public void updateLastSeen() {
+    this.lastSeen = System.currentTimeMillis();
+  }
+
+  public boolean isExpired() {
+    return System.currentTimeMillis() - lastSeen > duration;
   }
 }

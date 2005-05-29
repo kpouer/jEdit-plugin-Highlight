@@ -51,3 +51,5 @@ gatchan-highlight.errordialog.invalidHighlight.title = Highlight error
 
 gatchan-highlight.errordialog.unableToAccessProjectDirectory.message = Unable to access project directory {0}
 gatchan-highlight.errordialog.unableToAccessProjectDirectory.title = Highlight error
+
+gatchan.highlight.expire.tooltip=The time in seconds before the highlight will disappear if not used. 0 means unlimited

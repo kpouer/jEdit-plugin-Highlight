@@ -92,7 +92,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
         }
         String s = lineContent.substring(match.start, match.end);
         _highlight(highlight.getColor(), s, match.start + i, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
-
+        highlight.updateLastSeen();
         if (match.end == lineContent.length()) {
           break;
         }
@@ -101,27 +101,30 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
         segment = new Segment(lineContent.toCharArray(), 0, lineContent.length());
       }
     } else {
-      highlightStringInLine(highlight.getColor(),
-                            lineContent,
-                            highlight.getStringToHighlight(),
-                            highlight.isIgnoreCase(),
-                            physicalLine,
-                            lineStartOffset,
-                            lineEndOffset,
-                            gfx,
-                            y);
+      boolean found = highlightStringInLine(highlight.getColor(),
+                                            lineContent,
+                                            highlight.getStringToHighlight(),
+                                            highlight.isIgnoreCase(),
+                                            physicalLine,
+                                            lineStartOffset,
+                                            lineEndOffset,
+                                            gfx,
+                                            y);
+      if (found) {
+        highlight.updateLastSeen();
+      }
     }
   }
 
-  private void highlightStringInLine(Color highlightColor,
-                                     String lineStringParam,
-                                     String stringToHighlightParam,
-                                     boolean ignoreCase,
-                                     int physicalLine,
-                                     int lineStartOffset,
-                                     int lineEndOffset,
-                                     Graphics2D gfx,
-                                     int y) {
+  private boolean highlightStringInLine(Color highlightColor,
+                                        String lineStringParam,
+                                        String stringToHighlightParam,
+                                        boolean ignoreCase,
+                                        int physicalLine,
+                                        int lineStartOffset,
+                                        int lineEndOffset,
+                                        Graphics2D gfx,
+                                        int y) {
     String stringToHighlight;
     String lineString;
     if (ignoreCase) {
@@ -132,11 +135,11 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
       stringToHighlight = stringToHighlightParam;
     }
     int start = lineString.indexOf(stringToHighlight, textArea.getLineStartOffset(physicalLine) - lineStartOffset);
-    if (start == -1) return;
+    if (start == -1) return false;
     _highlight(highlightColor, stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     while (true) {
       start = lineString.indexOf(stringToHighlight, start + 1);
-      if (start == -1) return;
+      if (start == -1) return true;
       _highlight(highlightColor, stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     }
   }

@@ -7,10 +7,13 @@ import org.gjt.sp.util.Log;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.io.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * The tableModel that will contains the highlights. It got two columns, the first is a checkbox to enable/disable the
@@ -28,6 +31,8 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   private final String PROJECT_DIRECTORY = jEdit.getSettingsDirectory() + File.separator + "HighlightPlugin" + File.separator;
   private final File projectDirectory = new File(PROJECT_DIRECTORY);
   private final File highlights = new File(projectDirectory, "highlights.ser");
+
+  private RWLock rwLock = new RWLock();
 
   /**
    * Returns the instance of the HighlightManagerTableModel.
@@ -77,6 +82,8 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         }
       }
     }
+    Timer  timer = new Timer(1000, new RemoveExpired());
+    timer.start();
   }
 
   private static boolean checkProjectDirectory(File projectDirectory) {
@@ -92,7 +99,10 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @return the number of highlights
    */
   public int getRowCount() {
-    return datas.size();
+    rwLock.getReadLock();
+    int i = datas.size();
+    rwLock.releaseLock();
+    return i;
   }
 
   /**
@@ -123,17 +133,27 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   public Object getValueAt(int rowIndex, int columnIndex) {
     if (columnIndex == 0) {
-      return Boolean.valueOf(((Highlight) datas.get(rowIndex)).isEnabled());
+      rwLock.getReadLock();
+      Object o = datas.get(rowIndex);
+      rwLock.releaseLock();
+      return Boolean.valueOf(((Highlight) o).isEnabled());
     }
-    return datas.get(rowIndex);
+    rwLock.getReadLock();
+    Object o = datas.get(rowIndex);
+    rwLock.releaseLock();
+    return o;
   }
 
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     if (columnIndex == 0) {
+      rwLock.getReadLock();
       Highlight highlight = (Highlight) datas.get(rowIndex);
+      rwLock.releaseLock();
       highlight.setEnabled(((Boolean) aValue).booleanValue());
     } else {
+      rwLock.getWriteLock();
       datas.set(rowIndex, aValue);
+      rwLock.releaseLock();
     }
     fireTableCellUpdated(rowIndex, columnIndex);
   }
@@ -146,7 +166,10 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @return a highlight
    */
   public Highlight getHighlight(int i) {
-    return (Highlight) datas.get(i);
+    rwLock.getReadLock();
+    Highlight highlight = (Highlight) datas.get(i);
+    rwLock.releaseLock();
+    return highlight;
   }
 
   /**
@@ -155,9 +178,13 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @param highlight the highlight to be added
    */
   public void addElement(Highlight highlight) {
-    if (!datas.contains(highlight)) {
+    rwLock.getWriteLock();
+    if (datas.contains(highlight)) {
+      rwLock.releaseLock();
+    } else {
       datas.add(highlight);
       int firstRow = datas.size() - 1;
+      rwLock.releaseLock();
       fireTableRowsInserted(firstRow, firstRow);
     }
     setHighlightEnable(true);
@@ -169,7 +196,9 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @param index the index
    */
   public void removeRow(int index) {
+    rwLock.getWriteLock();
     datas.remove(index);
+    rwLock.releaseLock();
     fireTableRowsDeleted(index, index);
   }
 
@@ -179,7 +208,10 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @param item the item to be removed
    */
   private void removeRow(Object item) {
-    removeRow(datas.indexOf(item));
+    rwLock.getReadLock();
+    int index = datas.indexOf(item);
+    rwLock.releaseLock();
+    removeRow(index);
   }
 
   /**
@@ -198,8 +230,10 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   /** remove all Highlights. */
   public void removeAll() {
+    rwLock.getWriteLock();
     int rowMax = datas.size();
     datas.clear();
+    rwLock.releaseLock();
     if (rowMax != 0) {
       fireTableRowsDeleted(0, rowMax - 1);
     }
@@ -215,6 +249,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       BufferedWriter writer = null;
       try {
         writer = new BufferedWriter(new FileWriter(highlights));
+        rwLock.getWriteLock();
         ListIterator listIterator = datas.listIterator();
         while (listIterator.hasNext()) {
           Highlight highlight = (Highlight) listIterator.next();
@@ -225,6 +260,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
             listIterator.remove();
           }
         }
+        rwLock.releaseLock();
       } catch (IOException e) {
         Log.log(Log.ERROR, this, e);
       } finally {
@@ -292,5 +328,28 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   public void setHighlightEnable(boolean highlightEnable) {
     this.highlightEnable = highlightEnable;
     fireHighlightChangeListener(highlightEnable);
+  }
+
+  private class RemoveExpired implements ActionListener {
+    public void actionPerformed(ActionEvent e) {
+      List expired = null;
+      rwLock.getReadLock();
+      for (int i = 0; i < datas.size(); i++) {
+        Highlight highlight = (Highlight) datas.get(i);
+        if (highlight.isExpired()) {
+          if (expired == null) {
+            expired = new ArrayList();
+          }
+          expired.add(highlight);
+        }
+      }
+      rwLock.releaseLock();
+      if (expired != null) {
+        for (int i = 0; i < expired.size(); i++) {
+          Highlight highlight = (Highlight) expired.get(i);
+          removeRow(highlight);
+        }
+      }
+    }
   }
 }
