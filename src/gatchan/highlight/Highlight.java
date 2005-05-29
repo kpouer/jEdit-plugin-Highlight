@@ -6,14 +6,15 @@ import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.Buffer;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * A Highlight defines the string to highlight.
  *
  * @author Matthieu Casanova
+ * @version $Id$
  */
 public final class Highlight {
-
   /** This scope will be saved when you exit jEdit. */
   public static final int PERMANENT_SCOPE = 0;
   /** This scope is global but will not be saved. */
@@ -32,16 +33,16 @@ public final class Highlight {
   private static final int HIGHLIGHT_VERSION = 1;
 
   private static final Color[] COLORS = {new Color(153, 255, 204),
-          new Color(0x66, 0x66, 0xff),
-          new Color(0xff, 0x66, 0x66),
-          new Color(0xff, 0xcc, 0x66),
-          new Color(0xcc, 0xff, 0x66),
-          new Color(0xff, 0x33, 0x99),
-          new Color(0xff, 0x33, 0x00),
-          new Color(0x66, 0xff, 0x00),
-          new Color(0x99, 0x00, 0x99),
-          new Color(0x99, 0x99, 0x00),
-          new Color(0x00, 0x99, 0x66)};
+    new Color(0x66, 0x66, 0xff),
+    new Color(0xff, 0x66, 0x66),
+    new Color(0xff, 0xcc, 0x66),
+    new Color(0xcc, 0xff, 0x66),
+    new Color(0xff, 0x33, 0x99),
+    new Color(0xff, 0x33, 0x00),
+    new Color(0x66, 0xff, 0x00),
+    new Color(0x99, 0x00, 0x99),
+    new Color(0x99, 0x99, 0x00),
+    new Color(0x00, 0x99, 0x66)};
 
   private static int colorIndex;
 
@@ -59,7 +60,7 @@ public final class Highlight {
   }
 
   public Highlight(String stringToHighlight, boolean regexp, boolean ignoreCase) throws REException {
-    this(stringToHighlight,regexp, ignoreCase,PERMANENT_SCOPE);
+    this(stringToHighlight, regexp, ignoreCase, PERMANENT_SCOPE);
   }
 
   public Highlight(String s) throws REException {
@@ -135,15 +136,16 @@ public final class Highlight {
   }
 
   /**
-   * Serialize the highlight like that :
-   * {@link HIGHLIGHT_VERSION};regexp ignorecase color;stringToHighlight (no space between regexp, ignorecase and color
+   * Serialize the highlight like that : {@link HIGHLIGHT_VERSION};regexp ignorecase color;stringToHighlight (no space
+   * between regexp, ignorecase and color
+   *
    * @return
    */
   public String serialize() {
-    StringBuffer buff = new StringBuffer(stringToHighlight.length()+20);
+    StringBuffer buff = new StringBuffer(stringToHighlight.length() + 20);
     buff.append(HIGHLIGHT_VERSION).append(';');
-    serializeBoolean(buff,regexp);
-    serializeBoolean(buff,ignoreCase);
+    serializeBoolean(buff, regexp);
+    serializeBoolean(buff, ignoreCase);
     buff.append(color.getRGB());
     buff.append(';');
     buff.append(stringToHighlight);
@@ -158,15 +160,24 @@ public final class Highlight {
     }
   }
 
+  /**
+   * Unserialize the highlight.
+   *
+   * @param s the string to parse.
+   *
+   * @return the highlight unserialized
+   *
+   * @throws InvalidHighlightException exception if the highlight is invalid
+   */
   public static Highlight unserialize(String s) throws InvalidHighlightException {
     int index = s.indexOf(';');
     boolean regexp = s.charAt(index + 1) == '1';
     boolean ignoreCase = s.charAt(index + 2) == '1';
     int i = s.indexOf(';', index + 3);
-    Color color = Color.decode(s.substring(index+3,i));
+    Color color = Color.decode(s.substring(index + 3, i));
     // When using String.substring() the new String uses the same char[] so the new String is as big as the first one.
     // This is minor optimization
-    String searchString = new String(s.substring(i+1));
+    String searchString = new String(s.substring(i + 1));
     Highlight highlight = new Highlight();
     try {
       highlight.init(searchString, regexp, ignoreCase, color);
@@ -176,19 +187,54 @@ public final class Highlight {
     return highlight;
   }
 
+  /**
+   * Get the scope of the highlight.
+   *
+   * @return the scope of the highlight
+   */
   public int getScope() {
     return scope;
   }
 
+  /**
+   * Set the scope of the highlight.
+   *
+   * @param scope the new scope
+   */
   public void setScope(int scope) {
     this.scope = scope;
   }
 
+  /**
+   * Returns the buffer associated to this highlight. It will be null if the scope is not {@link #BUFFER_SCOPE}
+   *
+   * @return the buffer associated
+   */
   public Buffer getBuffer() {
     return buffer;
   }
 
+  /**
+   * Associate the highlight to a buffer. It must only be used for {@link #BUFFER_SCOPE}
+   *
+   * @param buffer the buffer
+   */
   public void setBuffer(Buffer buffer) {
+    if (this.buffer != null) {
+      java.util.List highlights = (java.util.List) this.buffer.getProperty("highlights");
+      highlights.remove(this);
+      if (highlights.isEmpty()) {
+        this.buffer.unsetProperty("highlights");
+      }
+    }
     this.buffer = buffer;
+    if (buffer != null) {
+      java.util.List highlights = (java.util.List) buffer.getProperty("highlights");
+      if (highlights == null) {
+        highlights = new ArrayList();
+        buffer.setProperty("highlights", highlights);
+      }
+      highlights.add(this);
+    }
   }
 }

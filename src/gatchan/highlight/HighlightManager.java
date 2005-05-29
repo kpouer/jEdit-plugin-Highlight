@@ -1,9 +1,12 @@
 package gatchan.highlight;
 
+import org.gjt.sp.jedit.Buffer;
+
 /**
  * The highlight manager.
  *
  * @author Matthieu Casanova
+ * @version $Id$
  */
 public interface HighlightManager {
 
@@ -67,5 +70,17 @@ public interface HighlightManager {
   /** remove all Highlights. */
   void removeAll();
 
+  /**
+   * Remove an element at the specified index.
+   *
+   * @param index the index
+   */
   void removeRow(int index);
+
+  /**
+   * A buffer is closed. We must remove all highlights associated.
+   *
+   * @param buffer the removed buffer
+   */
+  void bufferClosed(Buffer buffer);
 }

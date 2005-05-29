@@ -2,12 +2,14 @@ package gatchan.highlight;
 
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.GUIUtilities;
+import org.gjt.sp.jedit.Buffer;
 import org.gjt.sp.util.Log;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.io.*;
 
 /**
@@ -15,6 +17,7 @@ import java.io.*;
  * highlight, the second is the highlight view
  *
  * @author Matthieu Casanova
+ * @version $Id$
  */
 public final class HighlightManagerTableModel extends AbstractTableModel implements HighlightManager {
   private final List datas = new ArrayList();
@@ -76,7 +79,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     }
   }
 
-  private boolean checkProjectDirectory(File projectDirectory) {
+  private static boolean checkProjectDirectory(File projectDirectory) {
     if (!projectDirectory.isDirectory()) {
       return projectDirectory.mkdirs();
     }
@@ -127,7 +130,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     if (columnIndex == 0) {
-      final Highlight highlight = (Highlight) datas.get(rowIndex);
+      Highlight highlight = (Highlight) datas.get(rowIndex);
       highlight.setEnabled(((Boolean) aValue).booleanValue());
     } else {
       datas.set(rowIndex, aValue);
@@ -154,7 +157,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   public void addElement(Highlight highlight) {
     if (!datas.contains(highlight)) {
       datas.add(highlight);
-      final int firstRow = datas.size() - 1;
+      int firstRow = datas.size() - 1;
       fireTableRowsInserted(firstRow, firstRow);
     }
     setHighlightEnable(true);
@@ -170,9 +173,32 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     fireTableRowsDeleted(index, index);
   }
 
+  /**
+   * Remove an item.
+   *
+   * @param item the item to be removed
+   */
+  private void removeRow(Object item) {
+    removeRow(datas.indexOf(item));
+  }
+
+  /**
+   * A buffer is closed, we will remove all highlights from this buffer.
+   *
+   * @param buffer the closed buffer
+   */
+  public void bufferClosed(Buffer buffer) {
+    List highlights = (List) buffer.getProperty("highlights");
+    if (highlights != null) {
+      for (int i = 0; i < highlights.size(); i++) {
+        removeRow(highlights.get(i));
+      }
+    }
+  }
+
   /** remove all Highlights. */
   public void removeAll() {
-    final int rowMax = datas.size();
+    int rowMax = datas.size();
     datas.clear();
     if (rowMax != 0) {
       fireTableRowsDeleted(0, rowMax - 1);
@@ -189,11 +215,14 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       BufferedWriter writer = null;
       try {
         writer = new BufferedWriter(new FileWriter(highlights));
-        for (int i = 0; i < datas.size(); i++) {
-          Highlight highlight = (Highlight) datas.get(i);
+        ListIterator listIterator = datas.listIterator();
+        while (listIterator.hasNext()) {
+          Highlight highlight = (Highlight) listIterator.next();
           if (highlight.getScope() == Highlight.PERMANENT_SCOPE) {
             writer.write(highlight.serialize());
             writer.write('\n');
+          } else {
+            listIterator.remove();
           }
         }
       } catch (IOException e) {
@@ -232,7 +261,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   public void fireHighlightChangeListener(boolean highlightEnabled) {
     for (int i = 0; i < highlightChangeListeners.size(); i++) {
-      final HighlightChangeListener listener = (HighlightChangeListener) highlightChangeListeners.get(i);
+      HighlightChangeListener listener = (HighlightChangeListener) highlightChangeListeners.get(i);
       listener.highlightUpdated(highlightEnabled);
     }
   }

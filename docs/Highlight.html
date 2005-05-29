@@ -11,7 +11,7 @@
     <tr>
       <td valign="top" style="font-weight:bold;font-size:x-large">Highlight</td>
       <td align="right" valign="top" style="font-size:small">
-      <span style="font-weight:bold">Version 1.2.0 (mar 23, 2005)</span><br>
+      <span style="font-weight:bold">Version 1.3.0 (May 29, 2005)</span><br>
       Matthieu Casanova &lt;chocolat.mou@gmail.com&gt;&nbsp;</td>
     </tr>
 </table>
@@ -35,8 +35,17 @@ You can also highlight the last searched word</p>
 <p>You can have multiple highlights at the same time, choose colors and use regexp.</p>
 <p>You can toggle all highlights on or off, or toggle only the highlights you want.</p>
 <p>And there is also a panel to manage your highlights (it is the only way to remove only of them).</p>
+<p>Scope :<br/>
+  Now the highlights have a scope. The default scope is PERMANENT. The new scopes are SESSION (this scope works
+  like permanent scope but will not be saved when closing jEdit. The last is the BUFFER scope. It will be activated only
+  in the buffer where it was created.
+</p>
 <h2>History</h2>
 <ul>
+  <li>1.3.0 (May 29, 2005)</li>
+  <ul>
+    <li>New feature : highlight scope.</li>
+  </ul>
   <li>1.2.1 (May 11, 2005)</li>
   <ul>
     <li>1193535 bug fixed (wrong highlights with soft wrap)</li>
@@ -67,10 +76,6 @@ You can also highlight the last searched word</p>
   <ul>
     <li>Initial Release</li>
   </ul>
-</ul>
-<h2>To Do</h2>
-<ul>
-  <li>Allow to choose if your highlight will be limited to a buffer or be global.</li>
 </ul>
 <h2>Feedback</h2>
 <p>You can send mails to Matthieu Casanova &lt;chocolat.mou@gmail.com&gt; to report bugs, ideas ...

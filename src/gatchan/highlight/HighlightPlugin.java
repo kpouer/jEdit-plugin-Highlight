@@ -4,6 +4,7 @@ import gnu.regexp.REException;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.search.SearchAndReplace;
 import org.gjt.sp.jedit.msg.EditPaneUpdate;
+import org.gjt.sp.jedit.msg.BufferUpdate;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.Log;
@@ -39,13 +40,16 @@ public final class HighlightPlugin extends EBPlugin {
 
   /** uninitialize the plugin. we will remove the Highlighter on each text area */
   public void stop() {
+    highlightManager.dispose();
     if (highlightManager.countHighlights() == 0) {
       jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "defer");
     } else {
       jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "startup");
     }
-
-    highlightManager.dispose();
+    Buffer[] buffers = jEdit.getBuffers();
+    for (int i = 0; i < buffers.length; i++) {
+      buffers[i].unsetProperty("highlights");
+    }
     highlightManager = null;
     View view = jEdit.getFirstView();
     while (view != null) {
@@ -62,6 +66,7 @@ public final class HighlightPlugin extends EBPlugin {
    * Remove the highlighter from a text area.
    *
    * @param textArea the textarea from wich we will remove the highlighter
+   *
    * @see #stop()
    * @see #handleEditPaneMessage(EditPaneUpdate)
    */
@@ -78,6 +83,7 @@ public final class HighlightPlugin extends EBPlugin {
    * Initialize the textarea with a highlight painter.
    *
    * @param textArea the textarea to initialize
+   *
    * @return the new highlighter for the textArea
    */
   private static Highlighter initTextArea(JEditTextArea textArea) {
@@ -92,6 +98,11 @@ public final class HighlightPlugin extends EBPlugin {
   public void handleMessage(EBMessage message) {
     if (message instanceof EditPaneUpdate) {
       handleEditPaneMessage((EditPaneUpdate) message);
+    } else if (message instanceof BufferUpdate) {
+      BufferUpdate bufferUpdate = (BufferUpdate) message;
+      if (bufferUpdate.getWhat() == BufferUpdate.CLOSED) {
+        highlightManager.bufferClosed(bufferUpdate.getBuffer());
+      }
     }
   }
 
@@ -108,15 +119,33 @@ public final class HighlightPlugin extends EBPlugin {
   }
 
   /**
-   * Highlight a word in a textarea. If a text is selected this text will be highlighted, if no text is selected we will
-   * ask the textarea to select a word
+   * Highlight a word in a textarea with PERMANENT_SCOPE. If a text is selected this text will be highlighted, if no
+   * text is selected we will ask the textarea to select a word
    *
    * @param textArea the textarea
    */
   public static void highlightThis(JEditTextArea textArea) {
+    highlightThis(textArea, Highlight.PERMANENT_SCOPE);
+  }
+
+  /**
+   * Highlight a word in a textarea. If a text is selected this text will be highlighted, if no text is selected we will
+   * ask the textarea to select a word
+   *
+   * @param textArea the textarea
+   * @param scope    the scope {@link Highlight#BUFFER_SCOPE},{@link Highlight#PERMANENT_SCOPE},{@link
+   *                 Highlight#SESSION_SCOPE}
+   */
+  public static void highlightThis(JEditTextArea textArea, int scope) {
     String text = getCurrentWord(textArea);
+    if (text == null) return;
     try {
-      highlightManager.addElement(new Highlight(text));
+      Highlight highlight = new Highlight(text);
+      highlight.setScope(scope);
+      if (scope == Highlight.BUFFER_SCOPE) {
+        highlight.setBuffer(textArea.getBuffer());
+      }
+      highlightManager.addElement(highlight);
     } catch (REException e) {
       Log.log(Log.MESSAGE, HighlightPlugin.class, "This should never happens here " + e.getMessage());
     }
@@ -126,6 +155,7 @@ public final class HighlightPlugin extends EBPlugin {
    * Get the current word. If nothing is selected, it will select it.
    *
    * @param textArea the textArea
+   *
    * @return the current word
    */
   private static String getCurrentWord(JEditTextArea textArea) {
@@ -138,25 +168,56 @@ public final class HighlightPlugin extends EBPlugin {
   }
 
   /**
-   * Highlight a word in a textarea. If a text is selected this text will be highlighted, if no text is selected we will
-   * ask the textarea to select a word. only the entire word will be highlighted
+   * Highlight a word in a textarea with PERMANENT_SCOPE. If a text is selected this text will be highlighted, if no
+   * text is selected we will ask the textarea to select a word. only the entire word will be highlighted
    *
    * @param textArea the textarea
    */
   public static void highlightEntireWord(JEditTextArea textArea) {
-    String text = getCurrentWord(textArea);
+    highlightEntireWord(textArea, Highlight.PERMANENT_SCOPE);
+  }
 
+  /**
+   * Highlight a word in a textarea. If a text is selected this text will be highlighted, if no text is selected we will
+   * ask the textarea to select a word. only the entire word will be highlighted
+   *
+   * @param textArea the textarea
+   * @param scope    the scope {@link Highlight#BUFFER_SCOPE},{@link Highlight#PERMANENT_SCOPE},{@link
+   *                 Highlight#SESSION_SCOPE}
+   */
+  public static void highlightEntireWord(JEditTextArea textArea, int scope) {
+    String text = getCurrentWord(textArea);
+    if (text == null) return;
     try {
       Highlight highlight = new Highlight("\\<" + text + "\\>", true, false);
+      highlight.setScope(scope);
+      if (scope == Highlight.BUFFER_SCOPE) {
+        highlight.setBuffer(textArea.getBuffer());
+      }
       highlightManager.addElement(highlight);
     } catch (REException e) {
       Log.log(Log.MESSAGE, HighlightPlugin.class, "This should never happens here " + e.getMessage());
     }
   }
 
+  /** Highlight the current search. */
   public static void highlightCurrentSearch() {
+    highlightCurrentSearch(Highlight.PERMANENT_SCOPE);
+  }
+
+  /**
+   * Highlight the current serach with scope.
+   *
+   * @param scope the scope {@link Highlight#BUFFER_SCOPE},{@link Highlight#PERMANENT_SCOPE},{@link
+   *              Highlight#SESSION_SCOPE}
+   */
+  public static void highlightCurrentSearch(int scope) {
     try {
       Highlight h = new Highlight();
+      h.setScope(scope);
+      if (scope == Highlight.BUFFER_SCOPE) {
+        h.setBuffer(jEdit.getActiveView().getBuffer());
+      }
       h.init(SearchAndReplace.getSearchString(), SearchAndReplace.getRegexp(), false, Highlight.getNextColor());
       addHighlight(h);
     } catch (REException e) {

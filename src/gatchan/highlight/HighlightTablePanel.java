@@ -14,9 +14,9 @@ import java.awt.event.ActionListener;
  * This panel will be used to display and edit an Highlight in the JTable and in a dialog to add highlight.
  *
  * @author Matthieu Casanova
+ * @version $Id$
  */
 public final class HighlightTablePanel extends JPanel {
-
   /** The field where the searched expression will be. */
   private final HistoryTextField expressionField = new HistoryTextField("gatchan-highlight.expression");
   //private final JTextField expressionField = new JTextField(40);
@@ -33,21 +33,26 @@ public final class HighlightTablePanel extends JPanel {
 
   private boolean initialized;
 
+  private Color permanentScopeColor;
+  private static final Color SESSION_SCOPE_COLOR = new Color(0xcc, 0xcc, 0xff);
+  private static final Color BUFFER_SCOPE_COLOR = new Color(0xff, 0xfc, 0xc0);
+
   /** Instantiate the panel. */
   public HighlightTablePanel() {
     super(new GridBagLayout());
+    permanentScopeColor = getBackground();
     ignoreCase.setSelected(true);
-    final GridBagConstraints cons = new GridBagConstraints();
+    GridBagConstraints cons = new GridBagConstraints();
     cons.gridy = 0;
 
     cons.anchor = GridBagConstraints.WEST;
-    final JLabel exprLabel = new JLabel("expr");
+    JLabel exprLabel = new JLabel("expr");
     add(exprLabel, cons);
     cons.fill = GridBagConstraints.HORIZONTAL;
-    cons.weightx = 1;
+    cons.weightx = 1.0;
     cons.gridwidth = GridBagConstraints.REMAINDER;
     add(expressionField, cons);
-    cons.weightx = 0;
+    cons.weightx = 0.0;
     cons.fill = GridBagConstraints.NONE;
     cons.gridy = 1;
     cons.gridwidth = 2;
@@ -75,17 +80,33 @@ public final class HighlightTablePanel extends JPanel {
     if (highlightCellEditor != null) {
       expressionField.getDocument().addDocumentListener(highlightCellEditor);
       if (!initialized) {
-      regexp.addActionListener(highlightCellEditor);
-      ignoreCase.addActionListener(highlightCellEditor);
-      ActionListener[] actionListeners = colorBox.getActionListeners();
-      if (actionListeners.length == 1) {
-        final ActionListener actionListener = actionListeners[0];
-        colorBox.removeActionListener(actionListener);
-        colorBox.addActionListener(new SpecialColorWellButtonActionListener(actionListener,highlightCellEditor));
-      }
+        regexp.addActionListener(highlightCellEditor);
+        ignoreCase.addActionListener(highlightCellEditor);
+        ActionListener[] actionListeners = colorBox.getActionListeners();
+        if (actionListeners.length == 1) {
+          ActionListener actionListener = actionListeners[0];
+          colorBox.removeActionListener(actionListener);
+          colorBox.addActionListener(new SpecialColorWellButtonActionListener(actionListener, highlightCellEditor));
+        }
         initialized = true;
       }
     }
+    switch (highlight.getScope()) {
+      case Highlight.SESSION_SCOPE :
+        changeBackgroundColor(SESSION_SCOPE_COLOR);
+        break;
+      case Highlight.BUFFER_SCOPE :
+        changeBackgroundColor(BUFFER_SCOPE_COLOR);
+        break;
+      default:
+        changeBackgroundColor(permanentScopeColor);
+    }
+  }
+
+  public void changeBackgroundColor(Color bg) {
+    setBackground(bg);
+    regexp.setBackground(bg);
+    ignoreCase.setBackground(bg);
   }
 
   /** The panel will request focus for expressionfield. */
@@ -100,7 +121,7 @@ public final class HighlightTablePanel extends JPanel {
    */
   public void save(Highlight highlight) throws InvalidHighlightException {
     try {
-      final String stringToHighlight = expressionField.getText();
+      String stringToHighlight = expressionField.getText();
       if (stringToHighlight.length() == 0) {
         throw new InvalidHighlightException("String cannot be empty");
       }
@@ -125,8 +146,8 @@ public final class HighlightTablePanel extends JPanel {
     private final ActionListener actionListener;
     private final HighlightCellEditor highlightCellEditor;
 
-    public SpecialColorWellButtonActionListener(ActionListener actionListener,
-                                                HighlightCellEditor highlightCellEditor) {
+    SpecialColorWellButtonActionListener(ActionListener actionListener,
+                                         HighlightCellEditor highlightCellEditor) {
       this.actionListener = actionListener;
       this.highlightCellEditor = highlightCellEditor;
     }
@@ -140,7 +161,7 @@ public final class HighlightTablePanel extends JPanel {
   private static class MyActionListener implements ActionListener {
     private final EnhancedDialog dialog;
 
-    public MyActionListener(EnhancedDialog dialog) {
+    MyActionListener(EnhancedDialog dialog) {
       this.dialog = dialog;
     }
 

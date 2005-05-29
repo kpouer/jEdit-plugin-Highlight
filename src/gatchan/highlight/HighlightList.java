@@ -15,9 +15,9 @@ import java.awt.event.MouseEvent;
  * The dockable panel that will contains a list of all your highlights.
  *
  * @author Matthieu Casanova
+ * @version $Id$
  */
 public final class HighlightList extends JPanel implements HighlightChangeListener {
-
   private JPopupMenu popupMenu;
   private JMenuItem remove;
 
@@ -25,6 +25,10 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
   private final HighlightManagerTableModel tableModel;
   private HighlightList.RemoveAction removeAction;
   private final JCheckBox enableHighlights = new JCheckBox("enable");
+  private JCheckBoxMenuItem permanentScope;
+  private JCheckBoxMenuItem sessionScope;
+  private JCheckBoxMenuItem bufferScope;
+  private MyActionListener actionListener;
 
   public HighlightList() {
     super(new BorderLayout());
@@ -79,7 +83,7 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
     clear.setToolTipText("Remove all highlights");
     enableHighlights.setSelected(true);
     enableHighlights.setToolTipText("Enable / disable highlights");
-    final MyActionListener actionListener = new MyActionListener(tableModel, newButton, clear, enableHighlights);
+    actionListener = new MyActionListener(tableModel, newButton, clear, enableHighlights);
     newButton.addActionListener(actionListener);
     clear.addActionListener(actionListener);
     enableHighlights.addActionListener(actionListener);
@@ -103,7 +107,23 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
       popupMenu = new JPopupMenu();
       removeAction = new RemoveAction(tableModel);
       remove = popupMenu.add(removeAction);
+      permanentScope = new JCheckBoxMenuItem("permanent");
+      sessionScope = new JCheckBoxMenuItem("session");
+      bufferScope = new JCheckBoxMenuItem("buffer");
+      popupMenu.add(permanentScope);
+      popupMenu.add(sessionScope);
+      popupMenu.add(bufferScope);
+      permanentScope.addActionListener(actionListener);
+      sessionScope.addActionListener(actionListener);
+      bufferScope.addActionListener(actionListener);
     }
+    Highlight highlight = tableModel.getHighlight(row);
+    actionListener.setHighlight(highlight, row);
+    int scope = highlight.getScope();
+    permanentScope.setSelected(scope == Highlight.PERMANENT_SCOPE);
+    sessionScope.setSelected(scope == Highlight.SESSION_SCOPE);
+    bufferScope.setSelected(scope == Highlight.BUFFER_SCOPE);
+
     remove.setEnabled(tableModel.getRowCount() > 0);
     removeAction.setRow(row);
     GUIUtilities.showPopupMenu(popupMenu, e.getComponent(), e.getX(), e.getY());
@@ -130,7 +150,6 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
    * @author Matthieu Casanova
    */
   public static final class RemoveAction extends AbstractAction {
-
     private int row;
 
     private final HighlightManagerTableModel tableModel;
@@ -154,13 +173,15 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
    *
    * @author Matthieu Casanova
    */
-  private static final class MyActionListener implements ActionListener {
+  private final class MyActionListener implements ActionListener {
     private final JButton newButton;
     private final JButton clear;
     private final JCheckBox enableHighlights;
 
     private final HighlightManagerTableModel tableModel;
 
+    private Highlight highlight;
+    private int row;
     private MyActionListener(HighlightManagerTableModel tableModel,
                              JButton newButton,
                              JButton clear,
@@ -171,15 +192,34 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
       this.enableHighlights = enableHighlights;
     }
 
+
+    private void setHighlight(Highlight highlight, int row) {
+      this.highlight = highlight;
+      this.row = row;
+    }
+
     public final void actionPerformed(ActionEvent e) {
-      final Object source = e.getSource();
-      if (clear.equals(source)) {
+      Object source = e.getSource();
+      if (clear ==source) {
         tableModel.removeAll();
-      } else if (newButton.equals(source)) {
+      } else if (newButton == source) {
         HighlightPlugin.highlightDialog(jEdit.getActiveView());
-      } else if (enableHighlights.equals(source)) {
+      } else if (enableHighlights == source) {
         tableModel.setHighlightEnable(enableHighlights.isSelected());
+      } else if (source == permanentScope) {
+        highlight.setScope(Highlight.PERMANENT_SCOPE);
+        highlight.setBuffer(null);
+        tableModel.fireTableRowsUpdated(row, row);
+      } else if (source == sessionScope) {
+        highlight.setScope(Highlight.SESSION_SCOPE);
+        highlight.setBuffer(null);
+        tableModel.fireTableRowsUpdated(row, row);
+      } else if (source == bufferScope) {
+        highlight.setScope(Highlight.BUFFER_SCOPE);
+        highlight.setBuffer(jEdit.getActiveView().getBuffer());
+        tableModel.fireTableRowsUpdated(row, row);
       }
+
     }
   }
 }
