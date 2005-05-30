@@ -18,8 +18,8 @@ public final class HighlightDialog extends EnhancedDialog {
 
   private final Highlight highlight;
   private final HighlightTablePanel panel = new HighlightTablePanel();
-  private final JComboBox scopeCombo = new JComboBox(new Integer[]{Integer.valueOf(Highlight.PERMANENT_SCOPE),
-    Integer.valueOf(Highlight.SESSION_SCOPE), Integer.valueOf(Highlight.BUFFER_SCOPE)});
+  private final JComboBox scopeCombo = new JComboBox(new Integer[]{new Integer(Highlight.PERMANENT_SCOPE),
+    new Integer(Highlight.SESSION_SCOPE), new Integer(Highlight.BUFFER_SCOPE)});
   private JSpinner spinner;
 
   public HighlightDialog(View owner, Highlight highlight) {
@@ -34,7 +34,7 @@ public final class HighlightDialog extends EnhancedDialog {
     scopeCombo.setRenderer(new MyListCellRenderer());
     scopePanel.add(scopeCombo);
 
-    spinner = new JSpinner(new SpinnerNumberModel(Integer.valueOf(15),Integer.valueOf(0),Integer.valueOf(Integer.MAX_VALUE),Integer.valueOf(5)));
+    spinner = new JSpinner(new SpinnerNumberModel(0,0,Integer.MAX_VALUE,5));
     spinner.setToolTipText(jEdit.getProperty("gatchan.highlight.expire.tooltip"));
 
     MyActionListener myActionListener = new MyActionListener();
