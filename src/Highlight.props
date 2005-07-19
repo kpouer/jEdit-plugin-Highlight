@@ -4,10 +4,10 @@
 plugin.gatchan.highlight.HighlightPlugin.activate=startup
 plugin.gatchan.highlight.HighlightPlugin.name=Highlight
 plugin.gatchan.highlight.HighlightPlugin.author=Matthieu Casanova
-plugin.gatchan.highlight.HighlightPlugin.version=1.3.0
+plugin.gatchan.highlight.HighlightPlugin.version=1.3.1 beta
 plugin.gatchan.highlight.HighlightPlugin.docs=Highlight.html
 plugin.gatchan.highlight.HighlightPlugin.depend.0=jdk 1.4
-plugin.gatchan.highlight.HighlightPlugin.depend.1=jedit 04.02.11.00
+plugin.gatchan.highlight.HighlightPlugin.depend.1=jedit 04.03.03.00
 plugin.gatchan.highlight.HighlightPlugin.menu=\
                                                 gatchan-highlight-dialog \
                                                 - \
