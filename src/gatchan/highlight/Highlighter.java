@@ -4,7 +4,7 @@ import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
-import org.gjt.sp.jedit.Buffer;
+import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.util.CharIndexedSegment;
 
 import javax.swing.text.Segment;
@@ -59,7 +59,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
 
   private void highlightList(Graphics2D gfx, int physicalLine, int lineStartOffset, int lineEndOffset, int y) {
     String lineContent = textArea.getLineText(physicalLine);
-    Buffer buffer = textArea.getBuffer();
+    JEditBuffer buffer = textArea.getBuffer();
     for (int i = 0; i < highlightManager.countHighlights(); i++) {
       Highlight highlight = highlightManager.getHighlight(i);
       if (highlight.isEnabled() && (highlight.getScope() != Highlight.BUFFER_SCOPE ||

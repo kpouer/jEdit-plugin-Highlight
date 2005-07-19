@@ -3,7 +3,7 @@ package gatchan.highlight;
 import gnu.regexp.REException;
 import org.gjt.sp.jedit.search.RESearchMatcher;
 import org.gjt.sp.jedit.search.SearchMatcher;
-import org.gjt.sp.jedit.Buffer;
+import org.gjt.sp.jedit.buffer.JEditBuffer;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -52,9 +52,12 @@ public final class Highlight {
 
   private int scope = PERMANENT_SCOPE;
 
-  private Buffer buffer;
+  private JEditBuffer buffer;
 
+  /** The time to live in ms. */
   private long duration = Long.MAX_VALUE;
+
+  /** The date where the highlight was last seen. */
   private long lastSeen = System.currentTimeMillis();
 
   public Highlight(String stringToHighlight, boolean regexp, boolean ignoreCase, int scope) throws REException {
@@ -213,7 +216,7 @@ public final class Highlight {
    *
    * @return the buffer associated
    */
-  public Buffer getBuffer() {
+  public JEditBuffer getBuffer() {
     return buffer;
   }
 
@@ -222,7 +225,7 @@ public final class Highlight {
    *
    * @param buffer the buffer
    */
-  public void setBuffer(Buffer buffer) {
+  public void setBuffer(JEditBuffer buffer) {
     if (this.buffer != null) {
       java.util.List highlights = (java.util.List) this.buffer.getProperty("highlights");
       highlights.remove(this);
@@ -241,14 +244,27 @@ public final class Highlight {
     }
   }
 
+  /**
+   * Set the time to live of the highlight.
+   * This time to live is the time until the highlight expires if it wasn't be seen
+   *
+   * @param duration the duration in ms.
+   */
   public void setDuration(long duration) {
     this.duration = duration;
   }
 
+  /** This method is called each time the highlight is seen. */
   public void updateLastSeen() {
-    this.lastSeen = System.currentTimeMillis();
+    lastSeen = System.currentTimeMillis();
   }
 
+  /**
+   * Check if the highlight is expired.
+   * The highlight is expired if it hasn't been seen for more that {@link #duration} field
+   *
+   * @return true if the highlight is expired
+   */
   public boolean isExpired() {
     return System.currentTimeMillis() - lastSeen > duration;
   }
