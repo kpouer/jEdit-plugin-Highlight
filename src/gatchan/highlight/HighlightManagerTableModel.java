@@ -1,19 +1,23 @@
 package gatchan.highlight;
 
-import org.gjt.sp.jedit.jEdit;
-import org.gjt.sp.jedit.GUIUtilities;
 import org.gjt.sp.jedit.Buffer;
+import org.gjt.sp.jedit.GUIUtilities;
+import org.gjt.sp.jedit.TextUtilities;
+import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.util.Log;
 
+import javax.swing.*;
+import javax.swing.event.CaretEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import java.io.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 /**
  * The tableModel that will contains the highlights. It got two columns, the first is a checkbox to enable/disable the
@@ -34,6 +38,8 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   private RWLock rwLock = new RWLock();
 
+  public static final Highlight currentWordHighlight = new Highlight();
+  private boolean shouldHighlightCaret = false;
   /**
    * Returns the instance of the HighlightManagerTableModel.
    *
@@ -82,6 +88,8 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         }
       }
     }
+    shouldHighlightCaret = jEdit.getBooleanProperty("gatchan.highlight.caretHighlight");
+    currentWordHighlight.setEnabled(false);
     Timer  timer = new Timer(1000, new RemoveExpired());
     timer.start();
   }
@@ -99,10 +107,12 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @return the number of highlights
    */
   public int getRowCount() {
-    rwLock.getReadLock();
-    int i = datas.size();
-    rwLock.releaseLock();
-    return i;
+    try {
+      rwLock.getReadLock();
+      return datas.size();
+    } finally {
+      rwLock.releaseLock();
+    }
   }
 
   /**
@@ -133,9 +143,13 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   public Object getValueAt(int rowIndex, int columnIndex) {
     if (columnIndex == 0) {
-      rwLock.getReadLock();
-      Object o = datas.get(rowIndex);
-      rwLock.releaseLock();
+      Object o;
+      try {
+        rwLock.getReadLock();
+        o = datas.get(rowIndex);
+      } finally {
+        rwLock.releaseLock();
+      }
       return Boolean.valueOf(((Highlight) o).isEnabled());
     }
     rwLock.getReadLock();
@@ -351,5 +365,46 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         }
       }
     }
+  }
+
+  public void setShouldHighlightCaret(boolean shouldHighlightCaret) {
+    this.shouldHighlightCaret = shouldHighlightCaret;
+    if (!shouldHighlightCaret)
+      currentWordHighlight.setEnabled(false);
+  }
+
+  public void caretUpdate(CaretEvent e) {
+    JEditTextArea textArea = (JEditTextArea) e.getSource();
+    if (shouldHighlightCaret) {
+      int line = textArea.getCaretLine();
+      int lineStart = textArea.getLineStartOffset(line);
+      int offset = textArea.getCaretPosition() - lineStart;
+
+      if (textArea.getLineLength(line) == 0)
+        return;
+
+      JEditBuffer buffer = textArea.getBuffer();
+      String lineText = textArea.getLineText(line);
+      String noWordSep = buffer.getStringProperty("noWordSep");
+
+      if (offset == textArea.getLineLength(line))
+        offset--;
+
+      int wordStart = TextUtilities.findWordStart(lineText, offset, noWordSep);
+      int wordEnd = TextUtilities.findWordEnd(lineText, offset + 1, noWordSep);
+
+      if (wordEnd - wordStart < 2) {
+        currentWordHighlight.setEnabled(false);
+      } else {
+        currentWordHighlight.setEnabled(true);
+        String stringToHighlight = lineText.substring(wordStart, wordEnd);
+        currentWordHighlight.setStringToHighlight(stringToHighlight);
+      }
+      fireHighlightChangeListener(true);
+    }
+  }
+
+  public boolean isShouldHighlightCaret() {
+    return shouldHighlightCaret;
   }
 }

@@ -268,4 +268,8 @@ public final class Highlight {
   public boolean isExpired() {
     return System.currentTimeMillis() - lastSeen > duration;
   }
+
+  public void setStringToHighlight(String stringToHighlight) {
+    this.stringToHighlight = stringToHighlight;
+  }
 }

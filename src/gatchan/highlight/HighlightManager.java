@@ -2,13 +2,15 @@ package gatchan.highlight;
 
 import org.gjt.sp.jedit.Buffer;
 
+import javax.swing.event.CaretListener;
+
 /**
  * The highlight manager.
  *
  * @author Matthieu Casanova
  * @version $Id$
  */
-public interface HighlightManager {
+public interface HighlightManager extends CaretListener {
 
   /**
    * Add a Highlight listener.
@@ -83,4 +85,6 @@ public interface HighlightManager {
    * @param buffer the removed buffer
    */
   void bufferClosed(Buffer buffer);
+
+  boolean isShouldHighlightCaret();
 }

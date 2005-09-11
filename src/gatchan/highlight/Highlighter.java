@@ -1,10 +1,10 @@
 package gatchan.highlight;
 
+import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
-import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.util.CharIndexedSegment;
 
 import javax.swing.text.Segment;
@@ -15,7 +15,8 @@ import java.awt.*;
  * rectangle in it's background.
  *
  * @author Matthieu Casanova
- */
+ * @version $Id$
+*/
 final class Highlighter extends TextAreaExtension implements HighlightChangeListener {
   private final JEditTextArea textArea;
   private final Segment seg;
@@ -51,7 +52,9 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
                              int start,
                              int end,
                              int y) {
-    if (highlightManager.isHighlightEnable() && highlightManager.countHighlights() != 0) {
+    if (highlightManager.isHighlightEnable() &&
+        highlightManager.countHighlights() != 0 ||
+        HighlightManagerTableModel.currentWordHighlight.isEnabled()) {
       highlightList(gfx, physicalLine, start, end, y);
     }
   }
@@ -62,10 +65,22 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
     JEditBuffer buffer = textArea.getBuffer();
     for (int i = 0; i < highlightManager.countHighlights(); i++) {
       Highlight highlight = highlightManager.getHighlight(i);
-      if (highlight.isEnabled() && (highlight.getScope() != Highlight.BUFFER_SCOPE ||
-                                    highlight.getBuffer() == buffer)) {
-        highlight(highlight, lineContent, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
-      }
+      highlight(highlight, buffer, lineContent, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
+    }
+    highlight(HighlightManagerTableModel.currentWordHighlight, buffer, lineContent, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
+  }
+
+  private void highlight(Highlight highlight,
+                         JEditBuffer buffer,
+                         String lineContent,
+                         int physicalLine,
+                         int lineStartOffset,
+                         int lineEndOffset,
+                         Graphics2D gfx,
+                         int y) {
+    if (highlight.isEnabled() && (highlight.getScope() != Highlight.BUFFER_SCOPE ||
+                                  highlight.getBuffer() == buffer)) {
+      highlight(highlight, lineContent, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     }
   }
 
@@ -196,7 +211,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
   }
 
   public void highlightUpdated(boolean highlightEnable) {
-    int firstLine = textArea.getFirstLine();
+    int firstLine = textArea.getFirstPhysicalLine();
     textArea.invalidateLineRange(firstLine, firstLine + textArea.getVisibleLines());
   }
 }

@@ -41,7 +41,7 @@ public final class HighlightPlugin extends EBPlugin {
   /** uninitialize the plugin. we will remove the Highlighter on each text area */
   public void stop() {
     highlightManager.dispose();
-    if (highlightManager.countHighlights() == 0) {
+    if (highlightManager.countHighlights() == 0 && !highlightManager.isShouldHighlightCaret()) {
       jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "defer");
     } else {
       jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "startup");
@@ -77,6 +77,7 @@ public final class HighlightPlugin extends EBPlugin {
       painter.removeExtension(highlighter);
       textArea.putClientProperty(Highlighter.class, null);
     }
+    textArea.removeCaretListener(highlightManager);
   }
 
   /**
@@ -91,6 +92,7 @@ public final class HighlightPlugin extends EBPlugin {
     TextAreaPainter painter = textArea.getPainter();
     painter.addExtension(TextAreaPainter.HIGHEST_LAYER, highlighter);
     textArea.putClientProperty(Highlighter.class, highlighter);
+    textArea.addCaretListener(highlightManager);
     return highlighter;
   }
 

@@ -29,10 +29,10 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
   private JCheckBoxMenuItem sessionScope;
   private JCheckBoxMenuItem bufferScope;
   private MyActionListener actionListener;
+  private JCheckBox caretHighlight;
 
   public HighlightList() {
     super(new BorderLayout());
-
 
     tableModel = HighlightManagerTableModel.getInstance();
     table = new JTable(tableModel);
@@ -83,14 +83,16 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
     clear.setToolTipText("Remove all highlights");
     enableHighlights.setSelected(true);
     enableHighlights.setToolTipText("Enable / disable highlights");
-    actionListener = new MyActionListener(tableModel, newButton, clear, enableHighlights);
+    actionListener = new MyActionListener(newButton, clear);
     newButton.addActionListener(actionListener);
     clear.addActionListener(actionListener);
     enableHighlights.addActionListener(actionListener);
     toolBar.add(newButton);
     toolBar.add(clear);
     toolBar.add(enableHighlights);
-
+    toolBar.add(caretHighlight = new JCheckBox("caret highlight"));
+    caretHighlight.setSelected(jEdit.getBooleanProperty("gatchan.highlight.caretHighlight"));
+    caretHighlight.addActionListener(actionListener);
     add(toolBar, BorderLayout.NORTH);
     final JScrollPane scroll = new JScrollPane(table);
     add(scroll);
@@ -149,17 +151,17 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
    *
    * @author Matthieu Casanova
    */
-  public static final class RemoveAction extends AbstractAction {
+  private static final class RemoveAction extends AbstractAction {
     private int row;
 
     private final HighlightManagerTableModel tableModel;
 
-    private RemoveAction(HighlightManagerTableModel tableModel) {
+    RemoveAction(HighlightManagerTableModel tableModel) {
       super("remove");
       this.tableModel = tableModel;
     }
 
-    private final void setRow(int row) {
+    private void setRow(int row) {
       this.row = row;
     }
 
@@ -176,20 +178,14 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
   private final class MyActionListener implements ActionListener {
     private final JButton newButton;
     private final JButton clear;
-    private final JCheckBox enableHighlights;
-
-    private final HighlightManagerTableModel tableModel;
 
     private Highlight highlight;
     private int row;
-    private MyActionListener(HighlightManagerTableModel tableModel,
-                             JButton newButton,
-                             JButton clear,
-                             JCheckBox enableHighlights) {
-      this.tableModel = tableModel;
+
+    MyActionListener(JButton newButton,
+                     JButton clear) {
       this.newButton = newButton;
       this.clear = clear;
-      this.enableHighlights = enableHighlights;
     }
 
 
@@ -200,12 +196,15 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 
     public final void actionPerformed(ActionEvent e) {
       Object source = e.getSource();
-      if (clear ==source) {
+      if (clear == source) {
         tableModel.removeAll();
       } else if (newButton == source) {
         HighlightPlugin.highlightDialog(jEdit.getActiveView());
       } else if (enableHighlights == source) {
         tableModel.setHighlightEnable(enableHighlights.isSelected());
+      } else if (caretHighlight == source) {
+        tableModel.setShouldHighlightCaret(caretHighlight.isSelected());
+        jEdit.setBooleanProperty("gatchan.highlight.caretHighlight", caretHighlight.isSelected());
       } else if (source == permanentScope) {
         highlight.setScope(Highlight.PERMANENT_SCOPE);
         highlight.setBuffer(null);
