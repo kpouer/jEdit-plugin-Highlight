@@ -40,6 +40,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   public static final Highlight currentWordHighlight = new Highlight();
   private boolean shouldHighlightCaret = false;
+
   /**
    * Returns the instance of the HighlightManagerTableModel.
    *
@@ -90,7 +91,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     }
     shouldHighlightCaret = jEdit.getBooleanProperty("gatchan.highlight.caretHighlight");
     currentWordHighlight.setEnabled(false);
-    Timer  timer = new Timer(1000, new RemoveExpired());
+    Timer timer = new Timer(1000, new RemoveExpired());
     timer.start();
   }
 
@@ -142,32 +143,36 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   }
 
   public Object getValueAt(int rowIndex, int columnIndex) {
+    Object o;
+    try {
+      rwLock.getReadLock();
+      o = datas.get(rowIndex);
+    } finally {
+      rwLock.releaseLock();
+    }
     if (columnIndex == 0) {
-      Object o;
-      try {
-        rwLock.getReadLock();
-        o = datas.get(rowIndex);
-      } finally {
-        rwLock.releaseLock();
-      }
       return Boolean.valueOf(((Highlight) o).isEnabled());
     }
-    rwLock.getReadLock();
-    Object o = datas.get(rowIndex);
-    rwLock.releaseLock();
     return o;
   }
 
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     if (columnIndex == 0) {
-      rwLock.getReadLock();
-      Highlight highlight = (Highlight) datas.get(rowIndex);
-      rwLock.releaseLock();
+      Highlight highlight;
+      try {
+        rwLock.getReadLock();
+        highlight = (Highlight) datas.get(rowIndex);
+      } finally {
+        rwLock.releaseLock();
+      }
       highlight.setEnabled(((Boolean) aValue).booleanValue());
     } else {
-      rwLock.getWriteLock();
-      datas.set(rowIndex, aValue);
-      rwLock.releaseLock();
+      try {
+        rwLock.getWriteLock();
+        datas.set(rowIndex, aValue);
+      } finally {
+        rwLock.releaseLock();
+      }
     }
     fireTableCellUpdated(rowIndex, columnIndex);
   }
@@ -180,9 +185,13 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @return a highlight
    */
   public Highlight getHighlight(int i) {
-    rwLock.getReadLock();
-    Highlight highlight = (Highlight) datas.get(i);
-    rwLock.releaseLock();
+    Highlight highlight;
+    try {
+      rwLock.getReadLock();
+      highlight = (Highlight) datas.get(i);
+    } finally {
+      rwLock.releaseLock();
+    }
     return highlight;
   }
 
@@ -210,9 +219,12 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @param index the index
    */
   public void removeRow(int index) {
-    rwLock.getWriteLock();
-    datas.remove(index);
-    rwLock.releaseLock();
+    try {
+      rwLock.getWriteLock();
+      datas.remove(index);
+    } finally {
+      rwLock.releaseLock();
+    }
     fireTableRowsDeleted(index, index);
   }
 
@@ -222,9 +234,13 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * @param item the item to be removed
    */
   private void removeRow(Object item) {
-    rwLock.getReadLock();
-    int index = datas.indexOf(item);
-    rwLock.releaseLock();
+    int index;
+    try {
+      rwLock.getReadLock();
+      index = datas.indexOf(item);
+    } finally {
+      rwLock.releaseLock();
+    }
     removeRow(index);
   }
 
@@ -244,10 +260,14 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
 
   /** remove all Highlights. */
   public void removeAll() {
-    rwLock.getWriteLock();
-    int rowMax = datas.size();
-    datas.clear();
-    rwLock.releaseLock();
+    int rowMax;
+    try {
+      rwLock.getWriteLock();
+      rowMax = datas.size();
+      datas.clear();
+    } finally {
+      rwLock.releaseLock();
+    }
     if (rowMax != 0) {
       fireTableRowsDeleted(0, rowMax - 1);
     }
@@ -263,18 +283,21 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       BufferedWriter writer = null;
       try {
         writer = new BufferedWriter(new FileWriter(highlights));
-        rwLock.getWriteLock();
-        ListIterator listIterator = datas.listIterator();
-        while (listIterator.hasNext()) {
-          Highlight highlight = (Highlight) listIterator.next();
-          if (highlight.getScope() == Highlight.PERMANENT_SCOPE) {
-            writer.write(highlight.serialize());
-            writer.write('\n');
-          } else {
-            listIterator.remove();
+        try {
+          rwLock.getWriteLock();
+          ListIterator listIterator = datas.listIterator();
+          while (listIterator.hasNext()) {
+            Highlight highlight = (Highlight) listIterator.next();
+            if (highlight.getScope() == Highlight.PERMANENT_SCOPE) {
+              writer.write(highlight.serialize());
+              writer.write('\n');
+            } else {
+              listIterator.remove();
+            }
           }
+        } finally {
+          rwLock.releaseLock();
         }
-        rwLock.releaseLock();
       } catch (IOException e) {
         Log.log(Log.ERROR, this, e);
       } finally {
@@ -347,17 +370,20 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   private class RemoveExpired implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       List expired = null;
-      rwLock.getReadLock();
-      for (int i = 0; i < datas.size(); i++) {
-        Highlight highlight = (Highlight) datas.get(i);
-        if (highlight.isExpired()) {
-          if (expired == null) {
-            expired = new ArrayList();
+      try {
+        rwLock.getReadLock();
+        for (int i = 0; i < datas.size(); i++) {
+          Highlight highlight = (Highlight) datas.get(i);
+          if (highlight.isExpired()) {
+            if (expired == null) {
+              expired = new ArrayList();
+            }
+            expired.add(highlight);
           }
-          expired.add(highlight);
         }
+      } finally {
+        rwLock.releaseLock();
       }
-      rwLock.releaseLock();
       if (expired != null) {
         for (int i = 0; i < expired.size(); i++) {
           Highlight highlight = (Highlight) expired.get(i);
@@ -384,7 +410,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         return;
 
       JEditBuffer buffer = textArea.getBuffer();
-      String lineText = textArea.getLineText(line);
+      String lineText = buffer.getLineText(line);
       String noWordSep = buffer.getStringProperty("noWordSep");
 
       if (offset == textArea.getLineLength(line))
