@@ -5,6 +5,7 @@ import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.search.SearchAndReplace;
 import org.gjt.sp.jedit.msg.EditPaneUpdate;
 import org.gjt.sp.jedit.msg.BufferUpdate;
+import org.gjt.sp.jedit.msg.PropertiesChanged;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.Log;
@@ -41,7 +42,7 @@ public final class HighlightPlugin extends EBPlugin {
   /** uninitialize the plugin. we will remove the Highlighter on each text area */
   public void stop() {
     highlightManager.dispose();
-    if (highlightManager.countHighlights() == 0 && !highlightManager.isShouldHighlightCaret()) {
+    if (highlightManager.countHighlights() == 0 && !highlightManager.isHighlightWordAtCaret()) {
       jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "defer");
     } else {
       jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "startup");
@@ -105,6 +106,8 @@ public final class HighlightPlugin extends EBPlugin {
       if (bufferUpdate.getWhat() == BufferUpdate.CLOSED) {
         highlightManager.bufferClosed(bufferUpdate.getBuffer());
       }
+    } else if (message instanceof PropertiesChanged) {
+      highlightManager.propertiesChanged();
     }
   }
 

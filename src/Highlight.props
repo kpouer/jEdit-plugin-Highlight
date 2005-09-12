@@ -53,3 +53,13 @@ gatchan-highlight.errordialog.unableToAccessProjectDirectory.message = Unable to
 gatchan-highlight.errordialog.unableToAccessProjectDirectory.title = Highlight error
 
 gatchan.highlight.expire.tooltip=The time in seconds before the highlight will disappear if not used. 0 means unlimited
+
+plugin.gatchan.highlight.HighlightPlugin.option-pane=gatchan.highlight.option-pane
+options.gatchan.highlight.option-pane.label=Highlight
+options.gatchan.highlight.option-pane.code=new gatchan.highlight.HighlightOptionPane();
+
+
+options.name.gatchan.highlight.label=Highlight
+
+gatchan.highlight.caretHighlight.text=Highlight word at caret
+gatchan.highlight.caretHighlightIgnoreCase.text=ignore case

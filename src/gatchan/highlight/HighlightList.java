@@ -29,7 +29,6 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
   private JCheckBoxMenuItem sessionScope;
   private JCheckBoxMenuItem bufferScope;
   private MyActionListener actionListener;
-  private JCheckBox caretHighlight;
 
   public HighlightList() {
     super(new BorderLayout());
@@ -90,9 +89,6 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
     toolBar.add(newButton);
     toolBar.add(clear);
     toolBar.add(enableHighlights);
-    toolBar.add(caretHighlight = new JCheckBox("caret highlight"));
-    caretHighlight.setSelected(jEdit.getBooleanProperty("gatchan.highlight.caretHighlight"));
-    caretHighlight.addActionListener(actionListener);
     add(toolBar, BorderLayout.NORTH);
     final JScrollPane scroll = new JScrollPane(table);
     add(scroll);
@@ -202,9 +198,6 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
         HighlightPlugin.highlightDialog(jEdit.getActiveView());
       } else if (enableHighlights == source) {
         tableModel.setHighlightEnable(enableHighlights.isSelected());
-      } else if (caretHighlight == source) {
-        tableModel.setShouldHighlightCaret(caretHighlight.isSelected());
-        jEdit.setBooleanProperty("gatchan.highlight.caretHighlight", caretHighlight.isSelected());
       } else if (source == permanentScope) {
         highlight.setScope(Highlight.PERMANENT_SCOPE);
         highlight.setBuffer(null);

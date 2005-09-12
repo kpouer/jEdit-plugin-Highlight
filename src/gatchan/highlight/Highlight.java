@@ -105,6 +105,10 @@ public final class Highlight {
     return ignoreCase;
   }
 
+  public void setIgnoreCase(boolean ignoreCase) {
+    this.ignoreCase = ignoreCase;
+  }
+
   public SearchMatcher getSearchMatcher() {
     return searchMatcher;
   }
