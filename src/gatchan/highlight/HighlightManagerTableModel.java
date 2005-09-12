@@ -397,23 +397,28 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     this.shouldHighlightCaret = shouldHighlightCaret;
     if (!shouldHighlightCaret)
       currentWordHighlight.setEnabled(false);
+    fireHighlightChangeListener(highlightEnable);
   }
 
   public void caretUpdate(CaretEvent e) {
     JEditTextArea textArea = (JEditTextArea) e.getSource();
     if (shouldHighlightCaret) {
       int line = textArea.getCaretLine();
+
+      if (textArea.getLineLength(line) == 0 || textArea.getSelectionCount() != 0) {
+        currentWordHighlight.setEnabled(false);
+        fireHighlightChangeListener(highlightEnable);
+        return;
+      }
+
       int lineStart = textArea.getLineStartOffset(line);
       int offset = textArea.getCaretPosition() - lineStart;
-
-      if (textArea.getLineLength(line) == 0)
-        return;
 
       JEditBuffer buffer = textArea.getBuffer();
       String lineText = buffer.getLineText(line);
       String noWordSep = buffer.getStringProperty("noWordSep");
 
-      if (offset == textArea.getLineLength(line))
+      if (offset != 0)
         offset--;
 
       int wordStart = TextUtilities.findWordStart(lineText, offset, noWordSep);
@@ -426,7 +431,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         String stringToHighlight = lineText.substring(wordStart, wordEnd);
         currentWordHighlight.setStringToHighlight(stringToHighlight);
       }
-      fireHighlightChangeListener(true);
+      fireHighlightChangeListener(highlightEnable);
     }
   }
 
