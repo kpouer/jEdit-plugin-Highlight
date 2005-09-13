@@ -122,6 +122,15 @@ public final class Highlight {
     return color;
   }
 
+  /**
+   * Set the color of the highlight.
+   *
+   * @param color the new color
+   */
+  public void setColor(Color color) {
+    this.color = color;
+  }
+
   public boolean equals(Object obj) {
     if (obj instanceof Highlight) {
       Highlight highlight = (Highlight) obj;

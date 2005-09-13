@@ -14,10 +14,13 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+
+import gnu.regexp.REException;
 
 /**
  * The tableModel that will contains the highlights. It got two columns, the first is a checkbox to enable/disable the
@@ -39,7 +42,8 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   private RWLock rwLock = new RWLock();
 
   public static final Highlight currentWordHighlight = new Highlight();
-  private boolean highlightWordAtCaret = false;
+  private boolean highlightWordAtCaret;
+  private boolean highlightWordAtCaretEntireWord;
 
   /**
    * Returns the instance of the HighlightManagerTableModel.
@@ -90,7 +94,15 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       }
     }
     highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
-    currentWordHighlight.setIgnoreCase(jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE));
+    highlightWordAtCaretEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD);
+    try {
+      currentWordHighlight.init(" ",
+                                highlightWordAtCaretEntireWord,
+                                jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE),
+                                jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_COLOR));
+    } catch (REException e) {
+      Log.log(Log.ERROR, this, e);
+    }
     currentWordHighlight.setEnabled(false);
     Timer timer = new Timer(1000, new RemoveExpired());
     timer.start();
@@ -136,7 +148,6 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    *
    * @param rowIndex
    * @param columnIndex
-   *
    * @return true
    */
   public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -182,7 +193,6 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * Return the Highlight at index i.
    *
    * @param i the index of the highlight
-   *
    * @return a highlight
    */
   public Highlight getHighlight(int i) {
@@ -423,7 +433,16 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       } else {
         currentWordHighlight.setEnabled(true);
         String stringToHighlight = lineText.substring(wordStart, wordEnd);
-        currentWordHighlight.setStringToHighlight(stringToHighlight);
+        if (highlightWordAtCaretEntireWord) {
+          stringToHighlight = "\\<" + stringToHighlight + "\\>";
+          try {
+            currentWordHighlight.init(stringToHighlight, true, currentWordHighlight.isIgnoreCase(), currentWordHighlight.getColor());
+          } catch (REException e1) {
+            Log.log(Log.ERROR, this, e);
+          }
+        } else {
+          currentWordHighlight.setStringToHighlight(stringToHighlight);
+        }
       }
       fireHighlightChangeListener(highlightEnable);
     }
@@ -434,21 +453,43 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   }
 
   public void propertiesChanged() {
-    boolean highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
-
     boolean changed = false;
+
+    boolean highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
     if (this.highlightWordAtCaret != highlightWordAtCaret) {
       changed = true;
       this.highlightWordAtCaret = highlightWordAtCaret;
       if (!highlightWordAtCaret)
         currentWordHighlight.setEnabled(false);
     }
+
+    boolean entireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD);
+    if (this.highlightWordAtCaretEntireWord != entireWord) {
+      changed = true;
+      this.highlightWordAtCaretEntireWord = entireWord;
+      if (entireWord) {
+        String s = currentWordHighlight.getStringToHighlight();
+        currentWordHighlight.setStringToHighlight("\\<" + s + "\\>");
+      }
+    }
+
     boolean ignoreCase = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE);
     if (currentWordHighlight.isIgnoreCase() != ignoreCase) {
       changed = true;
-      currentWordHighlight.setIgnoreCase(ignoreCase);
     }
-    if (changed)
+    Color newColor = jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_COLOR);
+    if (!currentWordHighlight.getColor().equals(newColor)) {
+      changed = true;
+    }
+
+
+    if (changed) {
+      try {
+        currentWordHighlight.init(currentWordHighlight.getStringToHighlight(), entireWord, ignoreCase, newColor);
+      } catch (REException e) {
+        Log.log(Log.ERROR, this, e);
+      }
       fireHighlightChangeListener(highlightEnable);
+    }
   }
 }

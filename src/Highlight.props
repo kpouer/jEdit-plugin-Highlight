@@ -63,3 +63,5 @@ options.name.gatchan.highlight.label=Highlight
 
 gatchan.highlight.caretHighlight.text=Highlight word at caret
 gatchan.highlight.caretHighlightIgnoreCase.text=ignore case
+gatchan.highlight.caretHighlightEntireWord.text=Entire word (this option could be slow)
+gatchan.highlight.caretHighlightColor=#FFFF66
