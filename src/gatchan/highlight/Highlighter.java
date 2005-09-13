@@ -28,22 +28,11 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
 
   Highlighter(JEditTextArea textArea) {
     highlightManager = HighlightManagerTableModel.getManager();
-    highlightManager.addHighlightChangeListener(this);
     this.textArea = textArea;
     TextAreaPainter painter = textArea.getPainter();
     fm = painter.getFontMetrics();
     seg = new Segment();
     point = new Point();
-  }
-
-  /**
-   * The Highlighter must be removed from the highlight listeners because they can be destroyed when a JEditTextAera is
-   * destroyed.
-   *
-   * @throws Throwable
-   */
-  protected void finalize() throws Throwable {
-    highlightManager.removeHighlightChangeListener(this);
   }
 
   public void paintValidLine(Graphics2D gfx,

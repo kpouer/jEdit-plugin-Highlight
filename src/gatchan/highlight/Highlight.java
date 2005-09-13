@@ -4,6 +4,7 @@ import gnu.regexp.REException;
 import org.gjt.sp.jedit.search.RESearchMatcher;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.jedit.jEdit;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -31,6 +32,9 @@ public final class Highlight {
   private SearchMatcher searchMatcher;
 
   private static final int HIGHLIGHT_VERSION = 1;
+
+  /** The default color. If null we will cycle the colors. */
+  private static Color defaultColor = jEdit.getColorProperty(HighlightOptionPane.PROP_DEFAULT_COLOR);
 
   private static final Color[] COLORS = {new Color(153, 255, 204),
     new Color(0x66, 0x66, 0xff),
@@ -149,7 +153,19 @@ public final class Highlight {
     this.enabled = enabled;
   }
 
+  /**
+   * Set the default color.
+   *
+   * @param defaultColor the new default color. If null we will cycle the colors
+   */
+  public static void setDefaultColor(Color defaultColor) {
+    Highlight.defaultColor = defaultColor;
+  }
+
   public static Color getNextColor() {
+    if (defaultColor != null) {
+      return defaultColor;
+    }
     colorIndex = ++colorIndex % COLORS.length;
     return COLORS[colorIndex];
   }
@@ -158,7 +174,7 @@ public final class Highlight {
    * Serialize the highlight like that : {@link HIGHLIGHT_VERSION};regexp ignorecase color;stringToHighlight (no space
    * between regexp, ignorecase and color
    *
-   * @return
+   * @return the serialized string
    */
   public String serialize() {
     StringBuffer buff = new StringBuffer(stringToHighlight.length() + 20);

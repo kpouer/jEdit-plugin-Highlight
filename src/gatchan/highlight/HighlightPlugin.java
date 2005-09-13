@@ -77,6 +77,7 @@ public final class HighlightPlugin extends EBPlugin {
     if (highlighter != null) {
       painter.removeExtension(highlighter);
       textArea.putClientProperty(Highlighter.class, null);
+      highlightManager.removeHighlightChangeListener(highlighter);
     }
     textArea.removeCaretListener(highlightManager);
   }
@@ -90,6 +91,7 @@ public final class HighlightPlugin extends EBPlugin {
    */
   private static Highlighter initTextArea(JEditTextArea textArea) {
     Highlighter highlighter = new Highlighter(textArea);
+    highlightManager.addHighlightChangeListener(highlighter);
     TextAreaPainter painter = textArea.getPainter();
     painter.addExtension(TextAreaPainter.HIGHEST_LAYER, highlighter);
     textArea.putClientProperty(Highlighter.class, highlighter);

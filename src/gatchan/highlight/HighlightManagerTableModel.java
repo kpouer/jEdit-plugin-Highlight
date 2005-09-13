@@ -45,6 +45,9 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   private boolean highlightWordAtCaret;
   private boolean highlightWordAtCaretEntireWord;
 
+  /** If true the highlight will be appended, if false the highlight will replace the previous one. */
+  private boolean appendHighlight = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_APPEND);
+
   /**
    * Returns the instance of the HighlightManagerTableModel.
    *
@@ -148,6 +151,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    *
    * @param rowIndex
    * @param columnIndex
+   *
    * @return true
    */
   public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -193,6 +197,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
    * Return the Highlight at index i.
    *
    * @param i the index of the highlight
+   *
    * @return a highlight
    */
   public Highlight getHighlight(int i) {
@@ -216,10 +221,25 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     if (datas.contains(highlight)) {
       rwLock.releaseLock();
     } else {
-      datas.add(highlight);
-      int firstRow = datas.size() - 1;
-      rwLock.releaseLock();
-      fireTableRowsInserted(firstRow, firstRow);
+      if (appendHighlight || datas.isEmpty()) {
+        datas.add(highlight);
+        int firstRow = datas.size() - 1;
+        rwLock.releaseLock();
+        fireTableRowsInserted(firstRow, firstRow);
+      } else {
+        int firstRow = datas.size() - 1;
+        Highlight replacedHighlight = (Highlight) datas.get(firstRow);
+        rwLock.releaseLock();
+        try {
+          replacedHighlight.init(highlight.getStringToHighlight(),
+                                 highlight.isRegexp(),
+                                 highlight.isIgnoreCase(),
+                                 highlight.getColor());
+        } catch (REException e) {
+          Log.log(Log.ERROR, this, e);
+        }
+        fireTableRowsUpdated(firstRow, firstRow);
+      }
     }
     setHighlightEnable(true);
   }
@@ -436,7 +456,10 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         if (highlightWordAtCaretEntireWord) {
           stringToHighlight = "\\<" + stringToHighlight + "\\>";
           try {
-            currentWordHighlight.init(stringToHighlight, true, currentWordHighlight.isIgnoreCase(), currentWordHighlight.getColor());
+            currentWordHighlight.init(stringToHighlight,
+                                      true,
+                                      currentWordHighlight.isIgnoreCase(),
+                                      currentWordHighlight.getColor());
           } catch (REException e1) {
             Log.log(Log.ERROR, this, e);
           }
@@ -453,6 +476,12 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   }
 
   public void propertiesChanged() {
+    if (jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_CYCLE_COLOR)) {
+      Highlight.setDefaultColor(null);
+    } else {
+      Highlight.setDefaultColor(jEdit.getColorProperty(HighlightOptionPane.PROP_DEFAULT_COLOR));
+    }
+    appendHighlight = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_APPEND);
     boolean changed = false;
 
     boolean highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);

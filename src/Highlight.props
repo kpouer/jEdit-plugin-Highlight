@@ -61,7 +61,18 @@ options.gatchan.highlight.option-pane.code=new gatchan.highlight.HighlightOption
 
 options.name.gatchan.highlight.label=Highlight
 
+#{{{ properties for option pane
+
+gatchan.highlight.option-pane.commonProperties.text=Common properties
+gatchan.highlight.cycleColor=true
+gatchan.highlight.cycleColor.text=Cycle the color when creating highlights : 
+gatchan.highlight.defaultColor=#66FFFF
+gatchan.highlight.defaultColor.text=Cycle the color when creating highlights
+gatchan.highlight.appendHighlight=true
+gatchan.highlight.appendHighlight.text=Append highlights (if not checked an highlight will replace the previous one)
 gatchan.highlight.caretHighlight.text=Highlight word at caret
 gatchan.highlight.caretHighlightIgnoreCase.text=ignore case
 gatchan.highlight.caretHighlightEntireWord.text=Entire word (this option could be slow)
 gatchan.highlight.caretHighlightColor=#FFFF66
+gatchan.highlight.caretHighlightColor.text=Color of the caret highlight : 
+#}}}
