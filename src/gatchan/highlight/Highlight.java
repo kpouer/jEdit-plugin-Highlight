@@ -313,8 +313,13 @@ public final class Highlight {
    * Highlight subsequences (if checked, the same highlight can be found several times inside the same word)
    *
    * @param highlightSubsequence true to activate the feature, false otherwise
+   * @return <code>true</code> if the value was changed
    */
-  public void setHighlightSubsequence(boolean highlightSubsequence) {
-    this.highlightSubsequence = highlightSubsequence;
+  public boolean setHighlightSubsequence(boolean highlightSubsequence) {
+    if (this.highlightSubsequence != highlightSubsequence) {
+      this.highlightSubsequence = highlightSubsequence;
+      return true;
+    }
+    return false;
   }
 }

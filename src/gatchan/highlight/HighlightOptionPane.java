@@ -66,10 +66,11 @@ public class HighlightOptionPane extends AbstractOptionPane {
 
   protected void _save() {
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET, highlightWordAtCaret.isSelected());
-    jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE, caretHighlightSubsequence.isSelected());
-    jEdit.setBooleanProperty(PROP_HIGHLIGHT_SUBSEQUENCE, highlightSubsequence.isSelected());
+    jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE, caretHighlightSubsequence.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE, wordAtCaretIgnoreCase.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD, entireWord.isSelected());
+
+    jEdit.setBooleanProperty(PROP_HIGHLIGHT_SUBSEQUENCE, highlightSubsequence.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_CYCLE_COLOR, cycleColor.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_APPEND, highlightAppend.isSelected());
     jEdit.setColorProperty(PROP_HIGHLIGHT_WORD_AT_CARET_COLOR, wordAtCaretColor.getSelectedColor());

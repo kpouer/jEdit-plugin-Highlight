@@ -511,6 +511,9 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       changed = true;
     }
 
+    if (currentWordHighlight.setHighlightSubsequence(jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE))) {
+      changed = true;
+    }
 
     if (changed) {
       try {
