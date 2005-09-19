@@ -109,6 +109,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
                                             lineContent,
                                             highlight.getStringToHighlight(),
                                             highlight.isIgnoreCase(),
+                                            highlight.isHighlightSubsequence(),
                                             physicalLine,
                                             lineStartOffset,
                                             lineEndOffset,
@@ -124,6 +125,7 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
                                         String lineStringParam,
                                         String stringToHighlightParam,
                                         boolean ignoreCase,
+                                        boolean highlightSubsequence,
                                         int physicalLine,
                                         int lineStartOffset,
                                         int lineEndOffset,
@@ -142,7 +144,11 @@ final class Highlighter extends TextAreaExtension implements HighlightChangeList
     if (start == -1) return false;
     _highlight(highlightColor, stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     while (true) {
-      start = lineString.indexOf(stringToHighlight, start + 1);
+      if (highlightSubsequence) {
+        start = lineString.indexOf(stringToHighlight, start + 1);
+      }   else {
+        start = lineString.indexOf(stringToHighlight, start + stringToHighlight.length());
+      }
       if (start == -1) return true;
       _highlight(highlightColor, stringToHighlight, start, physicalLine, lineStartOffset, lineEndOffset, gfx, y);
     }

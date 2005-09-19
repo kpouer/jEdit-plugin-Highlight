@@ -64,15 +64,18 @@ options.name.gatchan.highlight.label=Highlight
 #{{{ properties for option pane
 
 gatchan.highlight.option-pane.commonProperties.text=Common properties
-gatchan.highlight.cycleColor=true
+gatchan.highlight.subsequence.text=Highlight subsequences (if checked, the same highlight can be found several times inside the same word. This will not change previous highlights)
+gatchan.highlight.subsequence=true
 gatchan.highlight.cycleColor.text=Cycle the color when creating highlights : 
 gatchan.highlight.defaultColor=#66FFFF
 gatchan.highlight.defaultColor.text=Cycle the color when creating highlights
 gatchan.highlight.appendHighlight=true
 gatchan.highlight.appendHighlight.text=Append highlights (if not checked an highlight will replace the previous one)
+
+gatchan.highlight.caretHighlight.subsequence.text=Highlight subsequences (if checked, the same highlight can be found several times inside the same word)
 gatchan.highlight.caretHighlight.text=Highlight word at caret
-gatchan.highlight.caretHighlightIgnoreCase.text=ignore case
-gatchan.highlight.caretHighlightEntireWord.text=Entire word (this option could be slow)
-gatchan.highlight.caretHighlightColor=#FFFF66
-gatchan.highlight.caretHighlightColor.text=Color of the caret highlight : 
+gatchan.highlight.caretHighlight.ignoreCase.text=ignore case
+gatchan.highlight.caretHighlight.entireWord.text=Entire word (this option could be slow)
+gatchan.highlight.caretHighlight.color=#FFFF66
+gatchan.highlight.caretHighlight.color.text=Color of the caret highlight :
 #}}}

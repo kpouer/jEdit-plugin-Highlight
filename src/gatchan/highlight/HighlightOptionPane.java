@@ -19,18 +19,22 @@ public class HighlightOptionPane extends AbstractOptionPane {
   public static final String PROP_COMMON_PROPERTIES = "gatchan.highlight.option-pane.commonProperties.text";
   public static final String PROP_DEFAULT_COLOR = "gatchan.highlight.defaultColor";
   public static final String PROP_HIGHLIGHT_WORD_AT_CARET = "gatchan.highlight.caretHighlight";
-  public static final String PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE = "gatchan.highlight.caretHighlightIgnoreCase";
-  public static final String PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD = "gatchan.highlight.caretHighlightEntireWord";
-  public static final String PROP_HIGHLIGHT_WORD_AT_CARET_COLOR = "gatchan.highlight.caretHighlightColor";
+  public static final String PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE = "gatchan.highlight.caretHighlight.ignoreCase";
+  public static final String PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD = "gatchan.highlight.caretHighlight.entireWord";
+  public static final String PROP_HIGHLIGHT_WORD_AT_CARET_COLOR = "gatchan.highlight.caretHighlight.color";
   public static final String PROP_HIGHLIGHT_CYCLE_COLOR = "gatchan.highlight.cycleColor";
   public static final String PROP_HIGHLIGHT_APPEND = "gatchan.highlight.appendHighlight";
+  public static final String PROP_HIGHLIGHT_SUBSEQUENCE = "gatchan.highlight.subsequence";
+  public static final String PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE = "gatchan.highlight.caretHighlight.subsequence";
   private JCheckBox highlightWordAtCaret;
   private JCheckBox wordAtCaretIgnoreCase;
   private JCheckBox entireWord;
   private ColorWellButton wordAtCaretColor;
   private JCheckBox cycleColor;
   private JCheckBox highlightAppend;
+  private JCheckBox highlightSubsequence;
   private ColorWellButton defaultColor;
+  private JCheckBox caretHighlightSubsequence;
 
   public HighlightOptionPane() {
     super("gatchan.highlight");
@@ -38,6 +42,7 @@ public class HighlightOptionPane extends AbstractOptionPane {
 
   protected void _init() {
     addComponent(new JLabel(jEdit.getProperty(PROP_COMMON_PROPERTIES)));
+    addComponent(highlightSubsequence = createCheckBox(PROP_HIGHLIGHT_SUBSEQUENCE));
     addComponent(highlightAppend = createCheckBox(PROP_HIGHLIGHT_APPEND));
     addComponent(cycleColor = createCheckBox(PROP_HIGHLIGHT_CYCLE_COLOR));
     addComponent(new JLabel(jEdit.getProperty(PROP_DEFAULT_COLOR + ".text")),
@@ -52,6 +57,7 @@ public class HighlightOptionPane extends AbstractOptionPane {
 
     addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_WORD_AT_CARET + ".text")));
     addComponent(highlightWordAtCaret = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET));
+    addComponent(caretHighlightSubsequence = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE));
     addComponent(wordAtCaretIgnoreCase = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE));
     addComponent(entireWord = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD));
     addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_WORD_AT_CARET_COLOR + ".text")),
@@ -60,6 +66,8 @@ public class HighlightOptionPane extends AbstractOptionPane {
 
   protected void _save() {
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET, highlightWordAtCaret.isSelected());
+    jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE, caretHighlightSubsequence.isSelected());
+    jEdit.setBooleanProperty(PROP_HIGHLIGHT_SUBSEQUENCE, highlightSubsequence.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE, wordAtCaretIgnoreCase.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD, entireWord.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_CYCLE_COLOR, cycleColor.isSelected());
