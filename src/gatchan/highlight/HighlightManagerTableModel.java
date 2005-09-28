@@ -44,6 +44,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   public static final Highlight currentWordHighlight = new Highlight();
   private boolean highlightWordAtCaret;
   private boolean highlightWordAtCaretEntireWord;
+  private boolean highlightWordAtCaretWhitespace;
 
   /** If true the highlight will be appended, if false the highlight will replace the previous one. */
   private boolean appendHighlight = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_APPEND);
@@ -98,6 +99,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     }
     highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
     highlightWordAtCaretEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD);
+    highlightWordAtCaretEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE);
     try {
       currentWordHighlight.init(" ",
                                 highlightWordAtCaretEntireWord,
@@ -446,25 +448,32 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         offset--;
 
       int wordStart = TextUtilities.findWordStart(lineText, offset, noWordSep);
-      int wordEnd = TextUtilities.findWordEnd(lineText, offset + 1, noWordSep);
-
-      if (wordEnd - wordStart < 2) {
+      if (!highlightWordAtCaretWhitespace && Character.isWhitespace(lineText.charAt(wordStart))) {
         currentWordHighlight.setEnabled(false);
       } else {
-        currentWordHighlight.setEnabled(true);
-        String stringToHighlight = lineText.substring(wordStart, wordEnd);
-        if (highlightWordAtCaretEntireWord) {
-          stringToHighlight = "\\<" + stringToHighlight + "\\>";
-          try {
-            currentWordHighlight.init(stringToHighlight,
-                                      true,
-                                      currentWordHighlight.isIgnoreCase(),
-                                      currentWordHighlight.getColor());
-          } catch (REException e1) {
-            Log.log(Log.ERROR, this, e);
-          }
+
+
+        int wordEnd = TextUtilities.findWordEnd(lineText, offset + 1, noWordSep);
+
+        if (wordEnd - wordStart < 2) {
+          currentWordHighlight.setEnabled(false);
         } else {
-          currentWordHighlight.setStringToHighlight(stringToHighlight);
+
+          currentWordHighlight.setEnabled(true);
+          String stringToHighlight = lineText.substring(wordStart, wordEnd);
+          if (highlightWordAtCaretEntireWord) {
+            stringToHighlight = "\\<" + stringToHighlight + "\\>";
+            try {
+              currentWordHighlight.init(stringToHighlight,
+                                        true,
+                                        currentWordHighlight.isIgnoreCase(),
+                                        currentWordHighlight.getColor());
+            } catch (REException e1) {
+              Log.log(Log.ERROR, this, e);
+            }
+          } else {
+            currentWordHighlight.setStringToHighlight(stringToHighlight);
+          }
         }
       }
       fireHighlightChangeListener(highlightEnable);
@@ -502,6 +511,12 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       }
     }
 
+    boolean whitespace = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE);
+    if (this.highlightWordAtCaretWhitespace != whitespace) {
+      changed = true;
+      this.highlightWordAtCaretWhitespace = whitespace;
+    }
+
     boolean ignoreCase = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE);
     if (currentWordHighlight.isIgnoreCase() != ignoreCase) {
       changed = true;
@@ -511,7 +526,8 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       changed = true;
     }
 
-    if (currentWordHighlight.setHighlightSubsequence(jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE))) {
+    if (currentWordHighlight.setHighlightSubsequence(jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE)))
+    {
       changed = true;
     }
 

@@ -26,6 +26,7 @@ public class HighlightOptionPane extends AbstractOptionPane {
   public static final String PROP_HIGHLIGHT_APPEND = "gatchan.highlight.appendHighlight";
   public static final String PROP_HIGHLIGHT_SUBSEQUENCE = "gatchan.highlight.subsequence";
   public static final String PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE = "gatchan.highlight.caretHighlight.subsequence";
+  public static final String PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE = "gatchan.highlight.caretHighlight.whitespace";
   private JCheckBox highlightWordAtCaret;
   private JCheckBox wordAtCaretIgnoreCase;
   private JCheckBox entireWord;
@@ -35,6 +36,7 @@ public class HighlightOptionPane extends AbstractOptionPane {
   private JCheckBox highlightSubsequence;
   private ColorWellButton defaultColor;
   private JCheckBox caretHighlightSubsequence;
+  private JCheckBox wordAtCaretWhitespace;
 
   public HighlightOptionPane() {
     super("gatchan.highlight");
@@ -59,6 +61,7 @@ public class HighlightOptionPane extends AbstractOptionPane {
     addComponent(highlightWordAtCaret = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET));
     addComponent(caretHighlightSubsequence = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE));
     addComponent(wordAtCaretIgnoreCase = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE));
+    addComponent(wordAtCaretWhitespace = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE));
     addComponent(entireWord = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD));
     addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_WORD_AT_CARET_COLOR + ".text")),
                  wordAtCaretColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_WORD_AT_CARET_COLOR)));
@@ -69,6 +72,7 @@ public class HighlightOptionPane extends AbstractOptionPane {
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE, caretHighlightSubsequence.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE, wordAtCaretIgnoreCase.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD, entireWord.isSelected());
+    jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE, wordAtCaretWhitespace.isSelected());
 
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_SUBSEQUENCE, highlightSubsequence.isSelected());
     jEdit.setBooleanProperty(PROP_HIGHLIGHT_CYCLE_COLOR, cycleColor.isSelected());

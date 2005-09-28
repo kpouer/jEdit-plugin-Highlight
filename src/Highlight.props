@@ -73,6 +73,7 @@ gatchan.highlight.appendHighlight=true
 gatchan.highlight.appendHighlight.text=Append highlights (if not checked an highlight will replace the previous one)
 
 gatchan.highlight.caretHighlight.subsequence.text=Highlight subsequences (if checked, the same highlight can be found several times inside the same word)
+gatchan.highlight.caretHighlight.whitespace.text=Highlight whitespace words
 gatchan.highlight.caretHighlight.text=Highlight word at caret
 gatchan.highlight.caretHighlight.ignoreCase.text=ignore case
 gatchan.highlight.caretHighlight.entireWord.text=Entire word (this option could be slow)
