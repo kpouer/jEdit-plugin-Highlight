@@ -45,6 +45,7 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   private boolean highlightWordAtCaret;
   private boolean highlightWordAtCaretEntireWord;
   private boolean highlightWordAtCaretWhitespace;
+  private boolean highlightWordAtCaretOnlyWords;
 
   /** If true the highlight will be appended, if false the highlight will replace the previous one. */
   private boolean appendHighlight = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_APPEND);
@@ -99,7 +100,8 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     }
     highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
     highlightWordAtCaretEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD);
-    highlightWordAtCaretEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE);
+    highlightWordAtCaretWhitespace = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE);
+    highlightWordAtCaretOnlyWords = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS);
     try {
       currentWordHighlight.init(" ",
                                 highlightWordAtCaretEntireWord,
@@ -448,7 +450,11 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
         offset--;
 
       int wordStart = TextUtilities.findWordStart(lineText, offset, noWordSep);
-      if (!highlightWordAtCaretWhitespace && Character.isWhitespace(lineText.charAt(wordStart))) {
+      char ch = lineText.charAt(wordStart);
+      if ((!highlightWordAtCaretWhitespace && Character.isWhitespace(ch)) ||
+          (highlightWordAtCaretOnlyWords &&
+           !Character.isLetterOrDigit(ch) &&
+           noWordSep.indexOf(ch) == -1)) {
         currentWordHighlight.setEnabled(false);
       } else {
 
@@ -515,6 +521,12 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
     if (this.highlightWordAtCaretWhitespace != whitespace) {
       changed = true;
       this.highlightWordAtCaretWhitespace = whitespace;
+    }
+
+    boolean onlyWords = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS);
+    if (this.highlightWordAtCaretOnlyWords != onlyWords) {
+      changed = true;
+      this.highlightWordAtCaretOnlyWords = onlyWords;
     }
 
     boolean ignoreCase = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE);
