@@ -183,6 +183,7 @@ public final class Highlight {
     buff.append(HIGHLIGHT_VERSION).append(';');
     serializeBoolean(buff, regexp);
     serializeBoolean(buff, ignoreCase);
+    serializeBoolean(buff, enabled);
     buff.append(color.getRGB());
     buff.append(';');
     buff.append(stringToHighlight);
@@ -206,16 +207,19 @@ public final class Highlight {
    *
    * @throws InvalidHighlightException exception if the highlight is invalid
    */
-  public static Highlight unserialize(String s) throws InvalidHighlightException {
+  public static Highlight unserialize(String s, boolean getStatus) throws InvalidHighlightException {
     int index = s.indexOf(';');
     boolean regexp = s.charAt(index + 1) == '1';
     boolean ignoreCase = s.charAt(index + 2) == '1';
-    int i = s.indexOf(';', index + 3);
-    Color color = Color.decode(s.substring(index + 3, i));
+    boolean enabled = !getStatus || s.charAt((index + 3)) == '1';
+    int i = s.indexOf(';', index + 4);
+    Color color = Color.decode(s.substring(index + 4, i));
+
     // When using String.substring() the new String uses the same char[] so the new String is as big as the first one.
     // This is minor optimization
     String searchString = new String(s.substring(i + 1));
     Highlight highlight = new Highlight();
+    highlight.setEnabled(enabled);
     try {
       highlight.init(searchString, regexp, ignoreCase, color);
     } catch (REException e) {

@@ -50,6 +50,8 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
   /** If true the highlight will be appended, if false the highlight will replace the previous one. */
   private boolean appendHighlight = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_APPEND);
 
+  public static final String FILE_VERSION = "Highlight file v2";
+
   /**
    * Returns the instance of the HighlightManagerTableModel.
    *
@@ -77,9 +79,15 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       try {
         reader = new BufferedReader(new FileReader(highlights));
         String line = reader.readLine();
+        boolean getStatus = false;
+        if (FILE_VERSION.equals(line))
+        {
+          getStatus = true;
+          line = reader.readLine();
+        }
         while (line != null) {
           try {
-            addElement(Highlight.unserialize(line));
+            addElement(Highlight.unserialize(line,getStatus));
           } catch (InvalidHighlightException e) {
             Log.log(Log.WARNING, this, "Unable to read this highlight, please report it : " + line);
           }
@@ -318,6 +326,8 @@ public final class HighlightManagerTableModel extends AbstractTableModel impleme
       BufferedWriter writer = null;
       try {
         writer = new BufferedWriter(new FileWriter(highlights));
+        writer.write(FILE_VERSION);
+        writer.write('\n');
         try {
           rwLock.getWriteLock();
           ListIterator listIterator = datas.listIterator();
