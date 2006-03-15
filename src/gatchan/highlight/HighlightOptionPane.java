@@ -45,7 +45,7 @@ public class HighlightOptionPane extends AbstractOptionPane {
   }
 
   protected void _init() {
-    addComponent(new JLabel(jEdit.getProperty(PROP_COMMON_PROPERTIES)));
+    addSeparator(PROP_COMMON_PROPERTIES);
     addComponent(highlightSubsequence = createCheckBox(PROP_HIGHLIGHT_SUBSEQUENCE));
     addComponent(highlightAppend = createCheckBox(PROP_HIGHLIGHT_APPEND));
     addComponent(cycleColor = createCheckBox(PROP_HIGHLIGHT_CYCLE_COLOR));
@@ -59,7 +59,7 @@ public class HighlightOptionPane extends AbstractOptionPane {
     if (cycleColor.isSelected())
       defaultColor.setEnabled(false);
 
-    addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_WORD_AT_CARET + ".text")));
+    addSeparator(PROP_HIGHLIGHT_WORD_AT_CARET + ".text");
     addComponent(highlightWordAtCaret = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET));
     addComponent(caretHighlightSubsequence = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE));
     addComponent(wordAtCaretIgnoreCase = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE));
