@@ -225,7 +225,10 @@ public final class HighlightPlugin extends EBPlugin {
       if (scope == Highlight.BUFFER_SCOPE) {
         h.setBuffer(jEdit.getActiveView().getBuffer());
       }
-      h.init(SearchAndReplace.getSearchString(), SearchAndReplace.getRegexp(), false, Highlight.getNextColor());
+      h.init(SearchAndReplace.getSearchString(),
+             SearchAndReplace.getRegexp(),
+             SearchAndReplace.getIgnoreCase(),
+             Highlight.getNextColor());
       addHighlight(h);
     } catch (REException e) {
       Log.log(Log.WARNING, HighlightPlugin.class, "This should never happens");
