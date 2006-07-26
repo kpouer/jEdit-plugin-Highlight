@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
  * The dockable panel that will contains a list of all your highlights.
  *
  * @author Matthieu Casanova
- * @version $Id$
+ * @version $Id: HighlightList.java,v 1.17 2005/09/12 20:07:37 kpouer Exp $
  */
 public final class HighlightList extends JPanel implements HighlightChangeListener {
   private JPopupMenu popupMenu;

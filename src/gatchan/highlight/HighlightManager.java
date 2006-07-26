@@ -8,7 +8,7 @@ import javax.swing.event.CaretListener;
  * The highlight manager.
  *
  * @author Matthieu Casanova
- * @version $Id$
+ * @version $Id: HighlightManager.java,v 1.6 2005/09/12 20:07:37 kpouer Exp $
  */
 public interface HighlightManager extends CaretListener {
 

@@ -12,7 +12,7 @@ import java.awt.event.ActionEvent;
  * The option pane of the Highlight plugin.
  *
  * @author Matthieu Casanova
- * @version $Id$
+ * @version $Id: HighlightOptionPane.java,v 1.8 2006/03/15 09:27:21 kpouer Exp $
  */
 public class HighlightOptionPane extends AbstractOptionPane {
 

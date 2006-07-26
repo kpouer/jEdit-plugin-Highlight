@@ -4,7 +4,7 @@ import org.gjt.sp.util.Log;
 
 /**
  * @author Matthieu Casanova
- * @version $Id$
+ * @version $Id: RWLock.java,v 1.1 2005/05/29 22:48:45 kpouer Exp $
  */
 public class RWLock {
   private int givenLocks;

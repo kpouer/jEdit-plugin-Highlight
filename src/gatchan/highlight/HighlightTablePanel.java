@@ -1,6 +1,5 @@
 package gatchan.highlight;
 
-import gnu.regexp.REException;
 import org.gjt.sp.jedit.gui.ColorWellButton;
 import org.gjt.sp.jedit.gui.EnhancedDialog;
 import org.gjt.sp.jedit.gui.HistoryTextField;
@@ -14,9 +13,9 @@ import java.awt.event.ActionListener;
  * This panel will be used to display and edit an Highlight in the JTable and in a dialog to add highlight.
  *
  * @author Matthieu Casanova
- * @version $Id$
+ * @version $Id: HighlightTablePanel.java,v 1.14 2006/06/21 09:40:32 kpouer Exp $
  */
-public final class HighlightTablePanel extends JPanel {
+public class HighlightTablePanel extends JPanel {
   /** The field where the searched expression will be. */
   private final HistoryTextField expressionField = new HistoryTextField("gatchan-highlight.expression");
   //private final JTextField expressionField = new JTextField(40);
@@ -120,15 +119,11 @@ public final class HighlightTablePanel extends JPanel {
    * @param highlight the highlight where we want to save
    */
   public void save(Highlight highlight) throws InvalidHighlightException {
-    try {
-      String stringToHighlight = expressionField.getText();
-      if (stringToHighlight.length() == 0) {
-        throw new InvalidHighlightException("String cannot be empty");
-      }
-      highlight.init(stringToHighlight, regexp.isSelected(), ignoreCase.isSelected(), colorBox.getSelectedColor());
-    } catch (REException e) {
-      throw new InvalidHighlightException("Invalid regexp " + e.getMessage());
+    String stringToHighlight = expressionField.getText();
+    if (stringToHighlight.length() == 0) {
+      throw new InvalidHighlightException("String cannot be empty");
     }
+    highlight.init(stringToHighlight, regexp.isSelected(), ignoreCase.isSelected(), colorBox.getSelectedColor());
     expressionField.addCurrentToHistory();
   }
 
