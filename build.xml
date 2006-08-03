@@ -1,53 +1,18 @@
-<?xml version="1.0"?>
-<project name="Highlighter" default="dist" basedir=".">
 
-  <property name="jar.name" value="highlight.jar"/>
+<project name="Highlight" default="build" basedir=".">
 
-  <property name="src.dir" value="src"/>
-  <property name="build.dir" value="build"/>
-  <property name="install.dir" value=".."/>
-  <property name="doc.dir" value="docs"/>
-  <property name="plugins.dir" value=".."/>
+	<!-- Read optional properties from various places -->
+	<!-- Latter ones override previous properties. -->
+	<property file="../build.properties"/>
+	<property file="build.properties"/>
+	<property name="dist.target" 			value="dist.complete" />
+	<property name="compiler.source" value="1.4" />
+	<property name="compiler.target" value="1.4" />
 
-  <property name="jedit.install.dir" value="../../jEdit/"/>
+	<import file="${build.support}/plugin-build.xml" />
 
-  <path id="project.class.path">
-    <pathelement location="${jedit.install.dir}/jedit.jar"/>
-  </path>
+	<path id="project.class.path">
+		<pathelement location="${jedit.install.dir}/jedit.jar" />
+	</path>
 
-  <target name="clean">
-    <delete dir="${build.dir}"/>
-  </target>
-
-
-  <target name="init">
-    <mkdir dir="${build.dir}"/>
-  </target>
-
-
-  <target name="compile" depends="init">
-    <javac
-      srcdir="${src.dir}"
-      destdir="${build.dir}"
-      deprecation="on"
-      includeJavaRuntime="yes">
-      <classpath refid="project.class.path"/>
-    </javac>
-  </target>
-
-
-  <target name="dist" depends="compile">
-    <mkdir dir="${install.dir}"/>
-    <jar jarfile="${install.dir}/${jar.name}">
-      <fileset dir="${build.dir}"/>
-      <fileset dir="${src.dir}">
-        <include name="actions.xml"/>
-        <include name="dockables.xml"/>
-        <include name="*.props"/>
-      </fileset>
-      <fileset dir="${doc.dir}">
-        <include name="*.html"/>
-      </fileset>
-    </jar>
-  </target>
 </project>
