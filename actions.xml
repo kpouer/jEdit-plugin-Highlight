@@ -1,0 +1,83 @@
+<!DOCTYPE ACTIONS SYSTEM "actions.dtd">
+<ACTIONS>
+  <ACTION NAME="gatchan-highlight">
+    <CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.highlightThis(textArea);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlight-session">
+    <CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.highlightThis(textArea, gatchan.highlight.Highlight.SESSION_SCOPE);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlight-buffer">
+    <CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.highlightThis(textArea, gatchan.highlight.Highlight.BUFFER_SCOPE);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlight-entireword">
+    <CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.highlightEntireWord(textArea);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlight-entireword-session">
+    <CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.highlightEntireWord(textArea, gatchan.highlight.Highlight.SESSION_SCOPE);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlight-entireword-buffer">
+    <CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.highlightEntireWord(textArea, gatchan.highlight.Highlight.BUFFER_SCOPE);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlightcurrentSearch">
+    <CODE>
+      gatchan.highlight.HighlightPlugin.highlightCurrentSearch();
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlightcurrentSearch-session">
+    <CODE>
+      gatchan.highlight.HighlightPlugin.highlightCurrentSearch(gatchan.highlight.Highlight.SESSION_SCOPE);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlightcurrentSearch-buffer">
+    <CODE>
+      gatchan.highlight.HighlightPlugin.highlightCurrentSearch(gatchan.highlight.Highlight.BUFFER_SCOPE);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-highlight-dialog">
+    <CODE>
+			textArea.requestFocus();
+			gatchan.highlight.HighlightPlugin.highlightDialog(view);
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-removeAllHighlights">
+    <CODE>
+			gatchan.highlight.HighlightPlugin.removeAllHighlights();
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-enableHighlights">
+    <CODE>
+    gatchan.highlight.HighlightPlugin.enableHighlights();
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-disableHighlights">
+    <CODE>
+    gatchan.highlight.HighlightPlugin.disableHighlights();
+    </CODE>
+  </ACTION>
+  <ACTION NAME="gatchan-toggleHighlights">
+    <CODE>
+    gatchan.highlight.HighlightPlugin.toggleHighlights();
+    </CODE>
+    <IS_SELECTED>                
+      return (gatchan.highlight.HighlightPlugin.isHighlightEnable());
+    </IS_SELECTED>
+  </ACTION>
+</ACTIONS>

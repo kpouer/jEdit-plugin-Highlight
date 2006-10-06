@@ -1,8 +1,14 @@
 package gatchan.highlight;
 
+import org.gjt.sp.jedit.*;
+
+import org.gjt.sp.jedit.search.SearchAndReplace;
+import org.gjt.sp.jedit.search.CurrentBufferSet;
+
 import org.gjt.sp.jedit.gui.ColorWellButton;
 import org.gjt.sp.jedit.gui.EnhancedDialog;
 import org.gjt.sp.jedit.gui.HistoryTextField;
+import org.gjt.sp.jedit.gui.HistoryModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,6 +34,11 @@ public class HighlightTablePanel extends JPanel {
 
   /** This button allow to choose the color of the highlight. */
   private final ColorWellButton colorBox = new ColorWellButton(Highlight.getNextColor());
+
+  /** This button starts a hypersearch for the current highlight. */
+  private final JButton hyper = new JButton("hypersearch");
+  // private final JButton hyper = new JButton(GUIUtilities.loadIcon("Find.png"));
+
   private HighlightCellEditor highlightCellEditor;
 
   private boolean initialized;
@@ -57,6 +68,10 @@ public class HighlightTablePanel extends JPanel {
     cons.gridwidth = 2;
     add(regexp, cons);
     add(ignoreCase, cons);
+    hyper.setPreferredSize(new Dimension(
+	    hyper.getPreferredSize().width,
+	    colorBox.getPreferredSize().height));
+    add(hyper, cons);
     cons.gridwidth = GridBagConstraints.REMAINDER;
     add(colorBox, cons);
     setBorder(BorderFactory.createEtchedBorder());
@@ -81,6 +96,7 @@ public class HighlightTablePanel extends JPanel {
       if (!initialized) {
         regexp.addActionListener(highlightCellEditor);
         ignoreCase.addActionListener(highlightCellEditor);
+        hyper.addActionListener(new ButtonListener(highlight));
         ActionListener[] actionListeners = colorBox.getActionListeners();
         if (actionListeners.length == 1) {
           ActionListener actionListener = actionListeners[0];
@@ -164,4 +180,24 @@ public class HighlightTablePanel extends JPanel {
       dialog.ok();
     }
   }
+
+  private static class ButtonListener implements ActionListener {
+    private final Highlight highlight;
+
+    ButtonListener(Highlight highlight) {
+      this.highlight = highlight;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+	String text = highlight.getStringToHighlight();
+	SearchAndReplace.setRegexp(highlight.isRegexp());
+	// if(highlight.isRegexp())
+	//    text = SearchAndReplace.escapeRegexp(text,false);
+	HistoryModel.getModel("find").addItem(text);
+	SearchAndReplace.setSearchString(text);
+	SearchAndReplace.setSearchFileSet(new CurrentBufferSet());
+	SearchAndReplace.hyperSearch(jEdit.getActiveView());
+    }
+  }
+
 }

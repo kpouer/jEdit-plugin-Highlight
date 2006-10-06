@@ -29,8 +29,8 @@ public final class HighlightCellRenderer implements TableCellRenderer {
       enabled.setSelected(highlight.isEnabled());
       return enabled;
     } else if (column == 1) {
-    highlightTablePanel.setHighlight(highlight);
-    return highlightTablePanel;
+      highlightTablePanel.setHighlight(highlight);
+      return highlightTablePanel;
     } else {
       return remove;
     }
