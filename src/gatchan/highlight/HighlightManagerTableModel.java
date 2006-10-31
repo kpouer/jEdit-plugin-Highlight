@@ -156,11 +156,11 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
     /**
      * Returns 2 because there is only two column.
      *
-     * @return 2
+     * @return 4
      */
     public int getColumnCount()
     {
-        return 3;
+        return 4;
     }
 
     public Class getColumnClass(int columnIndex)
@@ -671,4 +671,15 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
             fireHighlightChangeListener(highlightEnable);
         }
     }
+
+	public void getReadLock()
+	{
+		rwLock.getReadLock();
+	}
+
+
+	public void releaseLock()
+	{
+		rwLock.releaseLock();
+	}
 }

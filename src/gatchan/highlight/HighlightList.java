@@ -44,6 +44,7 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
     final TableColumnModel columnModel = table.getColumnModel();
 
     columnModel.getColumn(2).setCellEditor(new ButtonCellEditor(tableModel));
+    columnModel.getColumn(3).setCellEditor(new ButtonCellEditor(tableModel));
 
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     table.setShowGrid(false);
@@ -59,6 +60,11 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
     col3.setMinWidth(26);
     col3.setMaxWidth(26);
     col3.setResizable(false);
+    final TableColumn col4 = columnModel.getColumn(3);
+    col4.setPreferredWidth(26);
+    col4.setMinWidth(26);
+    col4.setMaxWidth(26);
+    col4.setResizable(false);
 
     table.setDefaultEditor(Highlight.class, new HighlightCellEditor());
     table.setDefaultEditor(Boolean.class, table.getDefaultEditor(Boolean.class));

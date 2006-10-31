@@ -63,14 +63,16 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
         tempLineContent.array = lineContent.array;
         tempLineContent.offset = lineContent.offset;
         tempLineContent.count = lineContent.count;
-        for (int i = 0; i < highlightManager.countHighlights(); i++)
+	highlightManager.getReadLock();
+	for (int i = 0; i < highlightManager.countHighlights(); i++)
         {
             Highlight highlight = highlightManager.getHighlight(i);
             highlight(highlight, buffer, physicalLine, gfx, y);
             tempLineContent.offset = lineContent.offset;
             tempLineContent.count = lineContent.count;
         }
-        highlight(HighlightManagerTableModel.currentWordHighlight, buffer, physicalLine, gfx, y);
+	highlightManager.releaseLock();
+	highlight(HighlightManagerTableModel.currentWordHighlight, buffer, physicalLine, gfx, y);
     }
 
     private void highlight(Highlight highlight,

@@ -89,4 +89,7 @@ public interface HighlightManager extends CaretListener {
   boolean isHighlightWordAtCaret();
 
   void propertiesChanged();
+
+  void getReadLock();
+  void releaseLock();
 }

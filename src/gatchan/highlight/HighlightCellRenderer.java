@@ -11,32 +11,45 @@ import java.awt.*;
  *
  * @author Matthieu Casanova
  */
-public final class HighlightCellRenderer implements TableCellRenderer {
+public class HighlightCellRenderer implements TableCellRenderer
+{
 
-  private final HighlightTablePanel highlightTablePanel = new HighlightTablePanel();
-  private JCheckBox enabled = new JCheckBox();
-  private JButton remove = new JButton(GUIUtilities.loadIcon("Clear.png"));
+	private final HighlightTablePanel highlightTablePanel = new HighlightTablePanel();
+	private JCheckBox enabled = new JCheckBox();
+	private JButton remove = new JButton(GUIUtilities.loadIcon("Clear.png"));
+	private JButton hypersearch = new JButton(GUIUtilities.loadIcon("Find.png"));
 
 
-  public Component getTableCellRendererComponent(JTable table,
-                                                 Object value,
-                                                 boolean isSelected,
-                                                 boolean hasFocus,
-                                                 int row,
-                                                 int column) {
-    final Highlight highlight = (Highlight) value;
-    if (column == 0) {
-      enabled.setSelected(highlight.isEnabled());
-      return enabled;
-    } else if (column == 1) {
-      highlightTablePanel.setHighlight(highlight);
-      return highlightTablePanel;
-    } else {
-      return remove;
-    }
-  }
+	public Component getTableCellRendererComponent(JTable table,
+						       Object value,
+						       boolean isSelected,
+						       boolean hasFocus,
+						       int row,
+						       int column)
+	{
+		Highlight highlight = (Highlight) value;
+		if (column == 0)
+		{
+			enabled.setSelected(highlight.isEnabled());
+			return enabled;
+		}
+		else if (column == 1)
+		{
+			highlightTablePanel.setHighlight(highlight);
+			return highlightTablePanel;
+		}
+		else if (column == 2)
+		{
+			return remove;
+		}
+		else
+		{
+			return hypersearch;
+		}
+	}
 
-  public Dimension getPreferredSize() {
-    return highlightTablePanel.getPreferredSize();
-  }
+	public Dimension getPreferredSize()
+	{
+		return highlightTablePanel.getPreferredSize();
+	}
 }
