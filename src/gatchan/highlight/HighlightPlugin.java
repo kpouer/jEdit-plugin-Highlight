@@ -29,7 +29,8 @@ public class HighlightPlugin extends EBPlugin
     public void start()
     {
         highlightManager = HighlightManagerTableModel.getManager();
-        View view = jEdit.getFirstView();
+	highlightManager.propertiesChanged();
+	View view = jEdit.getFirstView();
         while (view != null)
         {
             EditPane[] panes = view.getEditPanes();
