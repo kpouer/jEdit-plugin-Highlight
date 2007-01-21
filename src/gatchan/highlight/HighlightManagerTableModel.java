@@ -27,10 +27,10 @@ import java.util.ListIterator;
  */
 public class HighlightManagerTableModel extends AbstractTableModel implements HighlightManager
 {
-	private final List datas = new ArrayList();
+	private final List<Highlight> datas = new ArrayList<Highlight>();
 	private static HighlightManagerTableModel highlightManagerTableModel;
 
-	private final List highlightChangeListeners = new ArrayList(2);
+	private final List<HighlightChangeListener> highlightChangeListeners = new ArrayList<HighlightChangeListener>(2);
 	private boolean highlightEnable = true;
 	private final File highlights;
 
@@ -209,7 +209,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			try
 			{
 				rwLock.getReadLock();
-				highlight = (Highlight) datas.get(rowIndex);
+				highlight = datas.get(rowIndex);
 			}
 			finally
 			{
@@ -222,7 +222,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			try
 			{
 				rwLock.getWriteLock();
-				datas.set(rowIndex, aValue);
+				datas.set(rowIndex, (Highlight) aValue);
 			}
 			finally
 			{
@@ -244,7 +244,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		try
 		{
 			rwLock.getReadLock();
-			highlight = (Highlight) datas.get(i);
+			highlight = datas.get(i);
 		}
 		finally
 		{
@@ -277,7 +277,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			else
 			{
 				int firstRow = datas.size() - 1;
-				Highlight replacedHighlight = (Highlight) datas.get(firstRow);
+				Highlight replacedHighlight = datas.get(firstRow);
 				rwLock.releaseLock();
 				replacedHighlight.init(highlight.getStringToHighlight(),
 						       highlight.isRegexp(),
@@ -336,7 +336,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 */
 	public void bufferClosed(Buffer buffer)
 	{
-		List highlights = (List) buffer.getProperty("highlights");
+		List<Highlight> highlights = (List<Highlight>) buffer.getProperty("highlights");
 		if (highlights != null)
 		{
 			for (int i = 0; i < highlights.size(); i++)
@@ -388,10 +388,10 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				try
 				{
 					rwLock.getWriteLock();
-					ListIterator listIterator = datas.listIterator();
+					ListIterator<Highlight> listIterator = datas.listIterator();
 					while (listIterator.hasNext())
 					{
-						Highlight highlight = (Highlight) listIterator.next();
+						Highlight highlight = listIterator.next();
 						if (highlight.getScope() == Highlight.PERMANENT_SCOPE)
 						{
 							writer.write(highlight.serialize());
@@ -445,7 +445,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		for (int i = 0; i < highlightChangeListeners.size(); i++)
 		{
-			HighlightChangeListener listener = (HighlightChangeListener) highlightChangeListeners.get(i);
+			HighlightChangeListener listener = highlightChangeListeners.get(i);
 			listener.highlightUpdated(highlightEnable);
 		}
 	}
@@ -491,7 +491,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				rwLock.getReadLock();
 				for (int i = 0; i < datas.size(); i++)
 				{
-					Highlight highlight = (Highlight) datas.get(i);
+					Highlight highlight = datas.get(i);
 					if (highlight.isExpired())
 					{
 						if (expired == null)

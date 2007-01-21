@@ -11,15 +11,19 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/** @author Matthieu Casanova */
+/**
+ * @author Matthieu Casanova
+ * @version $Id: PluginJAR.java 8660 2007-01-17 21:25:11Z kpouer $
+ */
 public final class HighlightDialog extends EnhancedDialog {
   private final JButton ok = new JButton("ok");
   private final JButton cancel = new JButton("Cancel");
 
   private final Highlight highlight;
   private final HighlightTablePanel panel = new HighlightTablePanel();
-  private final JComboBox scopeCombo = new JComboBox(new Integer[]{new Integer(Highlight.PERMANENT_SCOPE),
-    new Integer(Highlight.SESSION_SCOPE), new Integer(Highlight.BUFFER_SCOPE)});
+  private final JComboBox scopeCombo = new JComboBox(new Integer[]{Integer.valueOf(Highlight.PERMANENT_SCOPE),
+								   Integer.valueOf(Highlight.SESSION_SCOPE),
+								   Integer.valueOf(Highlight.BUFFER_SCOPE)});
   private JSpinner spinner;
 
   public HighlightDialog(View owner, Highlight highlight) {
