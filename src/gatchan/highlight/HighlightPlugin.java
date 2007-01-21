@@ -7,6 +7,10 @@ import org.gjt.sp.jedit.msg.BufferUpdate;
 import org.gjt.sp.jedit.msg.PropertiesChanged;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
+import org.gjt.sp.util.Log;
+import org.gjt.sp.util.IOUtilities;
+
+import java.io.File;
 
 /**
  * The HighlightPlugin. This is my first plugin for jEdit, some parts of my code were inspired by the ErrorList plugin
@@ -16,286 +20,329 @@ import org.gjt.sp.jedit.textarea.TextAreaPainter;
  */
 public class HighlightPlugin extends EBPlugin
 {
-    private static HighlightManager highlightManager;
+	private static HighlightManager highlightManager;
 
-    public static final String NAME = "highlight";
-    public static final String PROPERTY_PREFIX = "plugin.Highlight.";
-    public static final String MENU = "highlight.menu";
-    public static final String OPTION_PREFIX = "options.highlight.";
-
-    /**
-     * Initialize the plugin. When starting this plugin will add an Highlighter on each text area
-     */
-    public void start()
-    {
-        highlightManager = HighlightManagerTableModel.getManager();
-	highlightManager.propertiesChanged();
-	View view = jEdit.getFirstView();
-        while (view != null)
-        {
-            EditPane[] panes = view.getEditPanes();
-            for (int i = 0; i < panes.length; i++)
-            {
-                JEditTextArea textArea = panes[i].getTextArea();
-                initTextArea(textArea);
-            }
-            view = view.getNext();
-        }
-    }
+	public static final String NAME = "highlight";
+	public static final String PROPERTY_PREFIX = "plugin.Highlight.";
+	public static final String MENU = "highlight.menu";
+	public static final String OPTION_PREFIX = "options.highlight.";
 
 
-    /**
-     * uninitialize the plugin. we will remove the Highlighter on each text area
-     */
-    public void stop()
-    {
-        highlightManager.dispose();
-        if (highlightManager.countHighlights() == 0 && !highlightManager.isHighlightWordAtCaret())
-            jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "defer");
-        else
-            jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "startup");
-
-        Buffer[] buffers = jEdit.getBuffers();
-        for (int i = 0; i < buffers.length; i++)
-        {
-            buffers[i].unsetProperty("highlights");
-        }
-        
-        View view = jEdit.getFirstView();
-        while (view != null)
-        {
-            EditPane[] panes = view.getEditPanes();
-            for (int i = 0; i < panes.length; i++)
-            {
-                JEditTextArea textArea = panes[i].getTextArea();
-                uninitTextArea(textArea);
-            }
-            view = view.getNext();
-        }
-        highlightManager = null;
-    }
-
-    /**
-     * Remove the highlighter from a text area.
-     *
-     * @param textArea the textarea from wich we will remove the highlighter
-     * @see #stop()
-     * @see #handleEditPaneMessage(EditPaneUpdate)
-     */
-    private static void uninitTextArea(JEditTextArea textArea)
-    {
-        TextAreaPainter painter = textArea.getPainter();
-        Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
-        if (highlighter != null)
-        {
-            painter.removeExtension(highlighter);
-            textArea.putClientProperty(Highlighter.class, null);
-            highlightManager.removeHighlightChangeListener(highlighter);
-        }
-        textArea.removeCaretListener(highlightManager);
-    }
-
-    /**
-     * Initialize the textarea with a highlight painter.
-     *
-     * @param textArea the textarea to initialize
-     * @return the new highlighter for the textArea
-     */
-    private static Highlighter initTextArea(JEditTextArea textArea)
-    {
-        Highlighter highlighter = new Highlighter(textArea);
-        highlightManager.addHighlightChangeListener(highlighter);
-        TextAreaPainter painter = textArea.getPainter();
-        painter.addExtension(TextAreaPainter.HIGHEST_LAYER, highlighter);
-        textArea.putClientProperty(Highlighter.class, highlighter);
-        textArea.addCaretListener(highlightManager);
-        return highlighter;
-    }
+	/**
+	 * Initialize the plugin. When starting this plugin will add an Highlighter on each text area
+	 */
+	public void start()
+	{
+		File highlightFile = dataMigration();
+		highlightManager = HighlightManagerTableModel.createInstance(highlightFile);
+		highlightManager.propertiesChanged();
+		View view = jEdit.getFirstView();
+		while (view != null)
+		{
+			EditPane[] panes = view.getEditPanes();
+			for (int i = 0; i < panes.length; i++)
+			{
+				JEditTextArea textArea = panes[i].getTextArea();
+				initTextArea(textArea);
+			}
+			view = view.getNext();
+		}
+	}
 
 
-    public void handleMessage(EBMessage message)
-    {
-        if (message instanceof EditPaneUpdate)
-        {
-            handleEditPaneMessage((EditPaneUpdate) message);
-        }
-        else if (message instanceof BufferUpdate)
-        {
-            BufferUpdate bufferUpdate = (BufferUpdate) message;
-            if (bufferUpdate.getWhat() == BufferUpdate.CLOSED)
-            {
-                highlightManager.bufferClosed(bufferUpdate.getBuffer());
-            }
-        }
-        else if (message instanceof PropertiesChanged)
-        {
-            highlightManager.propertiesChanged();
-        }
-    }
+	/**
+	 * uninitialize the plugin. we will remove the Highlighter on each text area
+	 */
+	public void stop()
+	{
+		highlightManager.dispose();
+		if (highlightManager.countHighlights() == 0 && !highlightManager.isHighlightWordAtCaret())
+			jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "defer");
+		else
+			jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "startup");
+
+		Buffer[] buffers = jEdit.getBuffers();
+		for (int i = 0; i < buffers.length; i++)
+		{
+			buffers[i].unsetProperty("highlights");
+		}
+
+		View view = jEdit.getFirstView();
+		while (view != null)
+		{
+			EditPane[] panes = view.getEditPanes();
+			for (int i = 0; i < panes.length; i++)
+			{
+				JEditTextArea textArea = panes[i].getTextArea();
+				uninitTextArea(textArea);
+			}
+			view = view.getNext();
+		}
+		highlightManager = null;
+	}
+
+	/**
+	 * Remove the highlighter from a text area.
+	 *
+	 * @param textArea the textarea from wich we will remove the highlighter
+	 * @see #stop()
+	 * @see #handleEditPaneMessage(EditPaneUpdate)
+	 */
+	private static void uninitTextArea(JEditTextArea textArea)
+	{
+		TextAreaPainter painter = textArea.getPainter();
+		Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
+		if (highlighter != null)
+		{
+			painter.removeExtension(highlighter);
+			textArea.putClientProperty(Highlighter.class, null);
+			highlightManager.removeHighlightChangeListener(highlighter);
+		}
+		textArea.removeCaretListener(highlightManager);
+	}
+
+	/**
+	 * Initialize the textarea with a highlight painter.
+	 *
+	 * @param textArea the textarea to initialize
+	 * @return the new highlighter for the textArea
+	 */
+	private static Highlighter initTextArea(JEditTextArea textArea)
+	{
+		Highlighter highlighter = new Highlighter(textArea);
+		highlightManager.addHighlightChangeListener(highlighter);
+		TextAreaPainter painter = textArea.getPainter();
+		painter.addExtension(TextAreaPainter.HIGHEST_LAYER, highlighter);
+		textArea.putClientProperty(Highlighter.class, highlighter);
+		textArea.addCaretListener(highlightManager);
+		return highlighter;
+	}
 
 
-    private static void handleEditPaneMessage(EditPaneUpdate message)
-    {
-        JEditTextArea textArea = message.getEditPane().getTextArea();
-        Object what = message.getWhat();
+	public void handleMessage(EBMessage message)
+	{
+		if (message instanceof EditPaneUpdate)
+		{
+			handleEditPaneMessage((EditPaneUpdate) message);
+		}
+		else if (message instanceof BufferUpdate)
+		{
+			BufferUpdate bufferUpdate = (BufferUpdate) message;
+			if (bufferUpdate.getWhat() == BufferUpdate.CLOSED)
+			{
+				highlightManager.bufferClosed(bufferUpdate.getBuffer());
+			}
+		}
+		else if (message instanceof PropertiesChanged)
+		{
+			highlightManager.propertiesChanged();
+		}
+	}
 
-        if (what == EditPaneUpdate.CREATED)
-        {
-            initTextArea(textArea);
-        }
-        else if (what == EditPaneUpdate.DESTROYED)
-        {
-            uninitTextArea(textArea);
-        }
-    }
 
-    /**
-     * Highlight a word in a textarea with PERMANENT_SCOPE. If a text is selected this text will be highlighted, if no
-     * text is selected we will ask the textarea to select a word
-     *
-     * @param textArea the textarea
-     */
-    public static void highlightThis(JEditTextArea textArea)
-    {
-        highlightThis(textArea, Highlight.PERMANENT_SCOPE);
-    }
+	private static void handleEditPaneMessage(EditPaneUpdate message)
+	{
+		JEditTextArea textArea = message.getEditPane().getTextArea();
+		Object what = message.getWhat();
 
-    /**
-     * Highlight a word in a textarea. If a text is selected this text will be highlighted, if no text is selected we will
-     * ask the textarea to select a word
-     *
-     * @param textArea the textarea
-     * @param scope    the scope {@link Highlight#BUFFER_SCOPE},{@link Highlight#PERMANENT_SCOPE},{@link
-     *                 Highlight#SESSION_SCOPE}
-     */
-    public static void highlightThis(JEditTextArea textArea, int scope)
-    {
-        String text = getCurrentWord(textArea);
-        if (text == null) return;
-        Highlight highlight = new Highlight(text);
-        highlight.setScope(scope);
-        if (scope == Highlight.BUFFER_SCOPE)
-        {
-            highlight.setBuffer(textArea.getBuffer());
-        }
-        highlightManager.addElement(highlight);
-    }
+		if (what == EditPaneUpdate.CREATED)
+		{
+			initTextArea(textArea);
+		}
+		else if (what == EditPaneUpdate.DESTROYED)
+		{
+			uninitTextArea(textArea);
+		}
+	}
 
-    /**
-     * Get the current word. If nothing is selected, it will select it.
-     *
-     * @param textArea the textArea
-     * @return the current word
-     */
-    private static String getCurrentWord(JEditTextArea textArea)
-    {
-        String text = textArea.getSelectedText();
-        if (text == null)
-        {
-            textArea.selectWord();
-            text = textArea.getSelectedText();
-        }
-        return text;
-    }
+	/**
+	 * Highlight a word in a textarea with PERMANENT_SCOPE. If a text is selected this text will be highlighted, if no
+	 * text is selected we will ask the textarea to select a word
+	 *
+	 * @param textArea the textarea
+	 */
+	public static void highlightThis(JEditTextArea textArea)
+	{
+		highlightThis(textArea, Highlight.PERMANENT_SCOPE);
+	}
 
-    /**
-     * Highlight a word in a textarea with PERMANENT_SCOPE. If a text is selected this text will be highlighted, if no
-     * text is selected we will ask the textarea to select a word. only the entire word will be highlighted
-     *
-     * @param textArea the textarea
-     */
-    public static void highlightEntireWord(JEditTextArea textArea)
-    {
-        highlightEntireWord(textArea, Highlight.PERMANENT_SCOPE);
-    }
+	/**
+	 * Highlight a word in a textarea. If a text is selected this text will be highlighted, if no text is selected we will
+	 * ask the textarea to select a word
+	 *
+	 * @param textArea the textarea
+	 * @param scope    the scope {@link Highlight#BUFFER_SCOPE},{@link Highlight#PERMANENT_SCOPE},{@link
+	 *                 Highlight#SESSION_SCOPE}
+	 */
+	public static void highlightThis(JEditTextArea textArea, int scope)
+	{
+		String text = getCurrentWord(textArea);
+		if (text == null) return;
+		Highlight highlight = new Highlight(text);
+		highlight.setScope(scope);
+		if (scope == Highlight.BUFFER_SCOPE)
+		{
+			highlight.setBuffer(textArea.getBuffer());
+		}
+		highlightManager.addElement(highlight);
+	}
 
-    /**
-     * Highlight a word in a textarea. If a text is selected this text will be highlighted, if no text is selected we will
-     * ask the textarea to select a word. only the entire word will be highlighted
-     *
-     * @param textArea the textarea
-     * @param scope    the scope {@link Highlight#BUFFER_SCOPE},{@link Highlight#PERMANENT_SCOPE},{@link
-     *                 Highlight#SESSION_SCOPE}
-     */
-    public static void highlightEntireWord(JEditTextArea textArea, int scope)
-    {
-        String text = getCurrentWord(textArea);
-        if (text == null) return;
-        Highlight highlight = new Highlight("\\b" + text + "\\b", true, false);
-        highlight.setScope(scope);
-        if (scope == Highlight.BUFFER_SCOPE)
-            highlight.setBuffer(textArea.getBuffer());
+	/**
+	 * Get the current word. If nothing is selected, it will select it.
+	 *
+	 * @param textArea the textArea
+	 * @return the current word
+	 */
+	private static String getCurrentWord(JEditTextArea textArea)
+	{
+		String text = textArea.getSelectedText();
+		if (text == null)
+		{
+			textArea.selectWord();
+			text = textArea.getSelectedText();
+		}
+		return text;
+	}
 
-        highlightManager.addElement(highlight);
-    }
+	/**
+	 * Highlight a word in a textarea with PERMANENT_SCOPE. If a text is selected this text will be highlighted, if no
+	 * text is selected we will ask the textarea to select a word. only the entire word will be highlighted
+	 *
+	 * @param textArea the textarea
+	 */
+	public static void highlightEntireWord(JEditTextArea textArea)
+	{
+		highlightEntireWord(textArea, Highlight.PERMANENT_SCOPE);
+	}
 
-    /**
-     * Highlight the current search.
-     */
-    public static void highlightCurrentSearch()
-    {
-        highlightCurrentSearch(Highlight.PERMANENT_SCOPE);
-    }
+	/**
+	 * Highlight a word in a textarea. If a text is selected this text will be highlighted, if no text is selected we will
+	 * ask the textarea to select a word. only the entire word will be highlighted
+	 *
+	 * @param textArea the textarea
+	 * @param scope    the scope {@link Highlight#BUFFER_SCOPE},{@link Highlight#PERMANENT_SCOPE},{@link
+	 *                 Highlight#SESSION_SCOPE}
+	 */
+	public static void highlightEntireWord(JEditTextArea textArea, int scope)
+	{
+		String text = getCurrentWord(textArea);
+		if (text == null) return;
+		Highlight highlight = new Highlight("\\b" + text + "\\b", true, false);
+		highlight.setScope(scope);
+		if (scope == Highlight.BUFFER_SCOPE)
+			highlight.setBuffer(textArea.getBuffer());
 
-    /**
-     * Highlight the current serach with scope.
-     *
-     * @param scope the scope {@link Highlight#BUFFER_SCOPE},{@link Highlight#PERMANENT_SCOPE},{@link
-     *              Highlight#SESSION_SCOPE}
-     */
-    public static void highlightCurrentSearch(int scope)
-    {
-        Highlight h = new Highlight();
-        h.setScope(scope);
-        if (scope == Highlight.BUFFER_SCOPE)
-        {
-            h.setBuffer(jEdit.getActiveView().getBuffer());
-        }
-        h.init(SearchAndReplace.getSearchString(),
-               SearchAndReplace.getRegexp(),
-               SearchAndReplace.getIgnoreCase(),
-               Highlight.getNextColor());
-        addHighlight(h);
-    }
+		highlightManager.addElement(highlight);
+	}
 
-    /**
-     * Show an highlight dialog.
-     *
-     * @param view the current view
-     */
-    public static void highlightDialog(View view)
-    {
-        HighlightDialog d = new HighlightDialog(view);
-        d.setVisible(true);
-    }
+	/**
+	 * Highlight the current search.
+	 */
+	public static void highlightCurrentSearch()
+	{
+		highlightCurrentSearch(Highlight.PERMANENT_SCOPE);
+	}
 
-    public static void addHighlight(Highlight highlight)
-    {
-        highlightManager.addElement(highlight);
-    }
+	/**
+	 * Highlight the current serach with scope.
+	 *
+	 * @param scope the scope {@link Highlight#BUFFER_SCOPE},{@link Highlight#PERMANENT_SCOPE},{@link
+	 *              Highlight#SESSION_SCOPE}
+	 */
+	public static void highlightCurrentSearch(int scope)
+	{
+		Highlight h = new Highlight();
+		h.setScope(scope);
+		if (scope == Highlight.BUFFER_SCOPE)
+		{
+			h.setBuffer(jEdit.getActiveView().getBuffer());
+		}
+		h.init(SearchAndReplace.getSearchString(),
+		       SearchAndReplace.getRegexp(),
+		       SearchAndReplace.getIgnoreCase(),
+		       Highlight.getNextColor());
+		addHighlight(h);
+	}
 
-    public static void removeAllHighlights()
-    {
-        highlightManager.removeAll();
-    }
+	/**
+	 * Show an highlight dialog.
+	 *
+	 * @param view the current view
+	 */
+	public static void highlightDialog(View view)
+	{
+		HighlightDialog d = new HighlightDialog(view);
+		d.setVisible(true);
+	}
 
-    public static void enableHighlights()
-    {
-        highlightManager.setHighlightEnable(true);
-    }
+	public static void addHighlight(Highlight highlight)
+	{
+		highlightManager.addElement(highlight);
+	}
 
-    public static void disableHighlights()
-    {
-        highlightManager.setHighlightEnable(false);
-    }
+	public static void removeAllHighlights()
+	{
+		highlightManager.removeAll();
+	}
 
-    public static void toggleHighlights()
-    {
-        highlightManager.setHighlightEnable(!highlightManager.isHighlightEnable());
-    }
+	public static void enableHighlights()
+	{
+		highlightManager.setHighlightEnable(true);
+	}
 
-    public static boolean isHighlightEnable()
-    {
-        return highlightManager.isHighlightEnable();
-    }
+	public static void disableHighlights()
+	{
+		highlightManager.setHighlightEnable(false);
+	}
+
+	public static void toggleHighlights()
+	{
+		highlightManager.setHighlightEnable(!highlightManager.isHighlightEnable());
+	}
+
+	public static boolean isHighlightEnable()
+	{
+		return highlightManager.isHighlightEnable();
+	}
+
+	/**
+	 * Move the files and returns the new saved datas file.
+	 * @return the saved datas file. It can be null
+	 */
+	public File dataMigration()
+	{
+		String home = getPluginHome();
+		if (home == null)
+			return null;
+
+		String PROJECT_DIRECTORY = jEdit.getSettingsDirectory() + File.separator + "HighlightPlugin" + File.separator;
+		File projectDirectory = new File(PROJECT_DIRECTORY);
+		File highlights = new File(projectDirectory, "highlights.ser");
+		File homeFolder = new File(home);
+		if (!homeFolder.exists())
+		{
+			Log.log(Log.DEBUG, this, "Home doesn't exist, trying to create it " + home);
+			if (!homeFolder.mkdirs())
+			{
+				Log.log(Log.ERROR, this, "Unable to create home directory, running Highlight plugin with no Home");
+				return null;
+			}
+		}
+		if (!homeFolder.isDirectory() || !homeFolder.canWrite())
+		{
+			Log.log(Log.ERROR, this, "Unable to write in home folder");
+			return null;
+		}
+
+		File newFile = new File(homeFolder, "highlights.ser");
+		if (highlights.isFile())
+		{
+			Log.log(Log.DEBUG, this, "Moving data to new home");
+			IOUtilities.moveFile(highlights, newFile);
+			highlights.delete();
+			projectDirectory.delete();
+			return newFile;
+		}
+		return newFile;
+	}
 }

@@ -4,10 +4,10 @@
 plugin.gatchan.highlight.HighlightPlugin.activate=startup
 plugin.gatchan.highlight.HighlightPlugin.name=Highlight
 plugin.gatchan.highlight.HighlightPlugin.author=Matthieu Casanova
-plugin.gatchan.highlight.HighlightPlugin.version=1.4.1
+plugin.gatchan.highlight.HighlightPlugin.version=1.4.2
 plugin.gatchan.highlight.HighlightPlugin.docs=Highlight.html
-plugin.gatchan.highlight.HighlightPlugin.depend.0=jdk 1.4
-plugin.gatchan.highlight.HighlightPlugin.depend.1=jedit 04.03.05.00
+plugin.gatchan.highlight.HighlightPlugin.depend.0=jdk 1.5
+plugin.gatchan.highlight.HighlightPlugin.depend.1=jedit 04.03.09.00
 plugin.gatchan.highlight.HighlightPlugin.menu=\
                                                 gatchan-highlight-dialog \
                                                 - \
@@ -49,7 +49,6 @@ highlighter-panel.label=Highlighter panel
 gatchan-highlight.errordialog.invalidHighlight.message = Invalid highlight
 gatchan-highlight.errordialog.invalidHighlight.title = Highlight error
 
-gatchan-highlight.errordialog.unableToAccessProjectDirectory.message = Unable to access project directory {0}
 gatchan-highlight.errordialog.unableToAccessProjectDirectory.title = Highlight error
 
 gatchan.highlight.expire.tooltip=The time in seconds before the highlight will disappear if not used. 0 means unlimited
