@@ -311,7 +311,12 @@ public class HighlightPlugin extends EBPlugin
 	 */
 	public File dataMigration()
 	{
-		String home = getPluginHome();
+		String settingsDirectory = jEdit.getSettingsDirectory();
+		if (settingsDirectory == null)
+			return null;
+		// workaround until 4.3pre10
+		File file = new File(settingsDirectory, "plugins");
+		String home = new File(file, getClass().getName()).getPath();
 		if (home == null)
 			return null;
 
