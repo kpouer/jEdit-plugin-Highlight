@@ -48,6 +48,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	private boolean appendHighlight = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_APPEND);
 
 	public static final String FILE_VERSION = "Highlight file v2";
+	private Timer timer;
 
 	/**
 	 * This method is only called by the HighlightPlugin during startup.
@@ -133,7 +134,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 					  jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE),
 					  jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_COLOR));
 		currentWordHighlight.setEnabled(false);
-		Timer timer = new Timer(1000, new RemoveExpired());
+		timer = new Timer(1000, new RemoveExpired());
 		timer.start();
 	}
 
@@ -370,6 +371,8 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 
 	public void dispose()
 	{
+		timer.stop();
+		timer = null;
 		highlightManagerTableModel = null;
 		currentWordHighlight = null;
 		save();

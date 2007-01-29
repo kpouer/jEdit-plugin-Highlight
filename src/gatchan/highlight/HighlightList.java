@@ -139,9 +139,14 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
     HighlightManagerTableModel.getManager().addHighlightChangeListener(this);
   }
 
-  public void removeNotify() {
-    super.removeNotify();
-    HighlightManagerTableModel.getManager().removeHighlightChangeListener(this);
+  public void removeNotify()
+  {
+	  super.removeNotify();
+	  HighlightManager highlightManager = HighlightManagerTableModel.getManager();
+
+	  // if unloading plugin
+	  if (highlightManager != null)
+		  highlightManager.removeHighlightChangeListener(this);
   }
 
   public void highlightUpdated(boolean highlightEnable) {
