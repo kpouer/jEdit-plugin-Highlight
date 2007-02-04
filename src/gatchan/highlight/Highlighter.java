@@ -4,7 +4,6 @@ import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
-import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.SegmentCharSequence;
 
 import javax.swing.text.Segment;
@@ -24,7 +23,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	private final Segment tempLineContent = new Segment();
 	private final Segment lineContent = new Segment();
 	private final Point point = new Point();
-	private final FontMetrics fm;
+	private FontMetrics fm;
 
 	private final HighlightManager highlightManager;
 	private final AlphaComposite blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
@@ -33,12 +32,11 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	{
 		highlightManager = HighlightManagerTableModel.getManager();
 		this.textArea = textArea;
-		TextAreaPainter painter = textArea.getPainter();
-		fm = painter.getFontMetrics();
 	}
 
 	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, int[] start, int[] end, int y, int lineHeight)
 	{
+		fm = textArea.getPainter().getFontMetrics();
 		if (highlightManager.isHighlightEnable() &&
 		    highlightManager.countHighlights() != 0 ||
 		    HighlightManagerTableModel.currentWordHighlight.isEnabled())
