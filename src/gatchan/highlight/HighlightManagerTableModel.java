@@ -235,23 +235,14 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 
 	/**
 	 * Return the Highlight at index i.
+	 * It must be called under the rwLock
 	 *
 	 * @param i the index of the highlight
 	 * @return a highlight
 	 */
 	public Highlight getHighlight(int i)
 	{
-		Highlight highlight;
-		try
-		{
-			rwLock.getReadLock();
-			highlight = datas.get(i);
-		}
-		finally
-		{
-			rwLock.releaseLock();
-		}
-		return highlight;
+		return datas.get(i);
 	}
 
 	/**
