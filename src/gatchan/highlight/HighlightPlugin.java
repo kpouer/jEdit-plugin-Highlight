@@ -1,5 +1,27 @@
+/*
+ * HighlightPlugin.java - The Highlight plugin
+ * :tabSize=8:indentSize=8:noTabs=false:
+ * :folding=explicit:collapseFolds=1:
+ *
+ * Copyright (C) 2004, 2007 Matthieu Casanova
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
 package gatchan.highlight;
 
+//{{{ imports
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.search.SearchAndReplace;
 import org.gjt.sp.jedit.msg.EditPaneUpdate;
@@ -11,6 +33,7 @@ import org.gjt.sp.util.Log;
 import org.gjt.sp.util.IOUtilities;
 
 import java.io.File;
+//}}}
 
 /**
  * The HighlightPlugin. This is my first plugin for jEdit, some parts of my code were inspired by the ErrorList plugin
@@ -22,17 +45,21 @@ public class HighlightPlugin extends EBPlugin
 {
 	private static HighlightManager highlightManager;
 
+	public static final String LAYER_PROPERTY = "plugin.highlight";
 	public static final String NAME = "highlight";
 	public static final String PROPERTY_PREFIX = "plugin.Highlight.";
 	public static final String MENU = "highlight.menu";
 	public static final String OPTION_PREFIX = "options.highlight.";
 
+	private int layer;
 
+	//{{{ start() method
 	/**
 	 * Initialize the plugin. When starting this plugin will add an Highlighter on each text area
 	 */
 	public void start()
 	{
+		layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
 		File highlightFile = dataMigration();
 		highlightManager = HighlightManagerTableModel.createInstance(highlightFile);
 		highlightManager.propertiesChanged();
@@ -47,9 +74,9 @@ public class HighlightPlugin extends EBPlugin
 			}
 			view = view.getNext();
 		}
-	}
+	} //}}}
 
-
+	//{{{ stop() method
 	/**
 	 * uninitialize the plugin. we will remove the Highlighter on each text area
 	 */
@@ -79,8 +106,9 @@ public class HighlightPlugin extends EBPlugin
 			view = view.getNext();
 		}
 		highlightManager = null;
-	}
+	} //}}}
 
+	//{{{ uninitTextArea() method
 	/**
 	 * Remove the highlighter from a text area.
 	 *
@@ -99,26 +127,27 @@ public class HighlightPlugin extends EBPlugin
 			highlightManager.removeHighlightChangeListener(highlighter);
 		}
 		textArea.removeCaretListener(highlightManager);
-	}
+	} //}}}
 
+	//{{{ initTextArea() method
 	/**
 	 * Initialize the textarea with a highlight painter.
 	 *
 	 * @param textArea the textarea to initialize
 	 * @return the new highlighter for the textArea
 	 */
-	private static Highlighter initTextArea(JEditTextArea textArea)
+	private Highlighter initTextArea(JEditTextArea textArea)
 	{
 		Highlighter highlighter = new Highlighter(textArea);
 		highlightManager.addHighlightChangeListener(highlighter);
 		TextAreaPainter painter = textArea.getPainter();
-		painter.addExtension(TextAreaPainter.HIGHEST_LAYER, highlighter);
+		painter.addExtension(layer, highlighter);
 		textArea.putClientProperty(Highlighter.class, highlighter);
 		textArea.addCaretListener(highlightManager);
 		return highlighter;
-	}
+	} //}}}
 
-
+	//{{{ handleMessage() method
 	public void handleMessage(EBMessage message)
 	{
 		if (message instanceof EditPaneUpdate)
@@ -135,12 +164,34 @@ public class HighlightPlugin extends EBPlugin
 		}
 		else if (message instanceof PropertiesChanged)
 		{
+			int layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
+			if (this.layer != layer)
+			{
+				this.layer = layer;
+				View view = jEdit.getFirstView();
+				while (view != null)
+				{
+					EditPane[] panes = view.getEditPanes();
+					for (int i = 0; i < panes.length; i++)
+					{
+						JEditTextArea textArea = panes[i].getTextArea();
+						TextAreaPainter painter = textArea.getPainter();
+						Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
+						if (highlighter != null)
+						{
+							painter.removeExtension(highlighter);
+							painter.addExtension(highlighter);
+						}
+					}
+					view = view.getNext();
+				}
+			}
 			highlightManager.propertiesChanged();
 		}
-	}
+	} //}}}
 
-
-	private static void handleEditPaneMessage(EditPaneUpdate message)
+	//{{{ handleEditPaneMessage() method
+	private void handleEditPaneMessage(EditPaneUpdate message)
 	{
 		JEditTextArea textArea = message.getEditPane().getTextArea();
 		Object what = message.getWhat();
@@ -153,8 +204,9 @@ public class HighlightPlugin extends EBPlugin
 		{
 			uninitTextArea(textArea);
 		}
-	}
+	} //}}}
 
+	//{{{ highlightThis() methods
 	/**
 	 * Highlight a word in a textarea with PERMANENT_SCOPE. If a text is selected this text will be highlighted, if no
 	 * text is selected we will ask the textarea to select a word
@@ -185,8 +237,9 @@ public class HighlightPlugin extends EBPlugin
 			highlight.setBuffer(textArea.getBuffer());
 		}
 		highlightManager.addElement(highlight);
-	}
+	} //}}}
 
+	//{{{ getCurrentWord() method
 	/**
 	 * Get the current word. If nothing is selected, it will select it.
 	 *
@@ -202,8 +255,9 @@ public class HighlightPlugin extends EBPlugin
 			text = textArea.getSelectedText();
 		}
 		return text;
-	}
+	} //}}}
 
+	///{{{ highlightEntireWord() method
 	/**
 	 * Highlight a word in a textarea with PERMANENT_SCOPE. If a text is selected this text will be highlighted, if no
 	 * text is selected we will ask the textarea to select a word. only the entire word will be highlighted
@@ -213,8 +267,9 @@ public class HighlightPlugin extends EBPlugin
 	public static void highlightEntireWord(JEditTextArea textArea)
 	{
 		highlightEntireWord(textArea, Highlight.PERMANENT_SCOPE);
-	}
+	} //}}}
 
+	//{{{ highlightEntireWord() method
 	/**
 	 * Highlight a word in a textarea. If a text is selected this text will be highlighted, if no text is selected we will
 	 * ask the textarea to select a word. only the entire word will be highlighted
@@ -233,16 +288,18 @@ public class HighlightPlugin extends EBPlugin
 			highlight.setBuffer(textArea.getBuffer());
 
 		highlightManager.addElement(highlight);
-	}
+	} //}}}
 
+	//{{{ highlightCurrentSearch() method
 	/**
 	 * Highlight the current search.
 	 */
 	public static void highlightCurrentSearch()
 	{
 		highlightCurrentSearch(Highlight.PERMANENT_SCOPE);
-	}
+	} //}}}
 
+	//{{{ highlightCurrentSearch() method
 	/**
 	 * Highlight the current serach with scope.
 	 *
@@ -262,8 +319,9 @@ public class HighlightPlugin extends EBPlugin
 		       SearchAndReplace.getIgnoreCase(),
 		       Highlight.getNextColor());
 		addHighlight(h);
-	}
+	} //}}}
 
+	//{{{ highlightDialog() method
 	/**
 	 * Show an highlight dialog.
 	 *
@@ -273,38 +331,45 @@ public class HighlightPlugin extends EBPlugin
 	{
 		HighlightDialog d = new HighlightDialog(view);
 		d.setVisible(true);
-	}
+	} //}}}
 
+	//{{{ addHighlight() method
 	public static void addHighlight(Highlight highlight)
 	{
 		highlightManager.addElement(highlight);
-	}
+	} //}}}
 
+	//{{{ removeAllHighlights() method
 	public static void removeAllHighlights()
 	{
 		highlightManager.removeAll();
-	}
+	} //}}}
 
+	//{{{ enableHighlights(= method
 	public static void enableHighlights()
 	{
 		highlightManager.setHighlightEnable(true);
-	}
+	} //}}}
 
+	//{{{ disableHighlights() method
 	public static void disableHighlights()
 	{
 		highlightManager.setHighlightEnable(false);
-	}
+	} //}}}
 
+	//{{{ toggleHighlights() method 
 	public static void toggleHighlights()
 	{
 		highlightManager.setHighlightEnable(!highlightManager.isHighlightEnable());
-	}
+	} //}}}
 
+	//{{{ isHighlightEnable() method
 	public static boolean isHighlightEnable()
 	{
 		return highlightManager.isHighlightEnable();
-	}
+	} //}}}
 
+	//{{{ dataMigration() method
 	/**
 	 * Move the files and returns the new saved datas file.
 	 * @return the saved datas file. It can be null
@@ -349,5 +414,5 @@ public class HighlightPlugin extends EBPlugin
 			return newFile;
 		}
 		return newFile;
-	}
+	} //}}}
 }

@@ -1,5 +1,7 @@
 package gatchan.highlight;
 
+//{{{ imports
+import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
@@ -9,6 +11,7 @@ import org.gjt.sp.util.SegmentCharSequence;
 import javax.swing.text.Segment;
 import java.awt.*;
 import java.util.regex.PatternSyntaxException;
+//}}}
 
 /**
  * The Highlighter is the TextAreaExtension that will look for some String to highlightList in the textarea and draw a
@@ -26,10 +29,12 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	private FontMetrics fm;
 
 	private final HighlightManager highlightManager;
-	private final AlphaComposite blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
+	private AlphaComposite blend;
 
 	Highlighter(JEditTextArea textArea)
 	{
+        blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
+                                           ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f);
 		highlightManager = HighlightManagerTableModel.getManager();
 		this.textArea = textArea;
 	}
@@ -40,7 +45,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		if (highlightManager.isHighlightEnable() &&
 		    highlightManager.countHighlights() != 0 ||
 		    HighlightManagerTableModel.currentWordHighlight.isEnabled())
-			super.paintScreenLineRange(gfx, firstLine, lastLine, physicalLines, start, end, y, lineHeight);    //To change body of overridden methods use File | Settings | File Templates.
+			super.paintScreenLineRange(gfx, firstLine, lastLine, physicalLines, start, end, y, lineHeight);
 	}
 
 	/**

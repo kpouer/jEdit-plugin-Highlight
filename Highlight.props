@@ -4,7 +4,7 @@
 plugin.gatchan.highlight.HighlightPlugin.activate=startup
 plugin.gatchan.highlight.HighlightPlugin.name=Highlight
 plugin.gatchan.highlight.HighlightPlugin.author=Matthieu Casanova
-plugin.gatchan.highlight.HighlightPlugin.version=1.4.2
+plugin.gatchan.highlight.HighlightPlugin.version=1.5.0
 plugin.gatchan.highlight.HighlightPlugin.docs=Highlight.html
 plugin.gatchan.highlight.HighlightPlugin.depend.0=jdk 1.5
 plugin.gatchan.highlight.HighlightPlugin.depend.1=jedit 04.03.09.00
@@ -79,4 +79,6 @@ gatchan.highlight.caretHighlight.ignoreCase.text=ignore case
 gatchan.highlight.caretHighlight.entireWord.text=Entire word (this option could be slow)
 gatchan.highlight.caretHighlight.color=#FFFF66
 gatchan.highlight.caretHighlight.color.text=Color of the caret highlight :
+gatchan.highlight.layer.text=Choose the layer that will be used to draw the rectangle
+gatchan.highlight.alpha.text=Select transparency : 
 #}}}
