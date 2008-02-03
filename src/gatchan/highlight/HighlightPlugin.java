@@ -52,6 +52,7 @@ public class HighlightPlugin extends EBPlugin
 	public static final String OPTION_PREFIX = "options.highlight.";
 
 	private int layer;
+	private float alpha;
 
 	//{{{ start() method
 	/**
@@ -165,9 +166,12 @@ public class HighlightPlugin extends EBPlugin
 		else if (message instanceof PropertiesChanged)
 		{
 			int layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
-			if (this.layer != layer)
+			float alpha = ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f;
+			
+			if (this.layer != layer || this.alpha != alpha)
 			{
 				this.layer = layer;
+				this.alpha = alpha;
 				View view = jEdit.getFirstView();
 				while (view != null)
 				{
@@ -177,6 +181,7 @@ public class HighlightPlugin extends EBPlugin
 						JEditTextArea textArea = panes[i].getTextArea();
 						TextAreaPainter painter = textArea.getPainter();
 						Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
+						highlighter.setAlphaComposite(alpha);
 						if (highlighter != null)
 						{
 							painter.removeExtension(highlighter);

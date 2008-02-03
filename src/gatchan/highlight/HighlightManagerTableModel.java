@@ -1,5 +1,27 @@
+/*
+* HighlightManagerTableModel.java - The Highlight manager implementation
+* :tabSize=8:indentSize=8:noTabs=false:
+* :folding=explicit:collapseFolds=1:
+*
+* Copyright (C) 2004, 2007 Matthieu Casanova
+*
+* This program is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
 package gatchan.highlight;
 
+//{{{ imports
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
@@ -17,9 +39,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+//}}}
 
 /**
- * The tableModel that will contains the highlights. It got two columns, the first is a checkbox to enable/disable the
+ * The tableModel that will contains the highlights. It got two columns, 
+ * the first is a checkbox to enable/disable the
  * highlight, the second is the highlight view
  *
  * @author Matthieu Casanova
@@ -50,6 +74,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public static final String FILE_VERSION = "Highlight file v2";
 	private Timer timer;
 
+	//{{{ createInstance() method
 	/**
 	 * This method is only called by the HighlightPlugin during startup.
 	 *
@@ -60,8 +85,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		highlightManagerTableModel = new HighlightManagerTableModel(highlightFile);
 		return highlightManagerTableModel;
-	}
+	} //}}}
 
+	//{{{ getInstance() method
 	/**
 	 * Returns the instance of the HighlightManagerTableModel.
 	 *
@@ -70,8 +96,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public static HighlightManagerTableModel getInstance()
 	{
 		return highlightManagerTableModel;
-	}
+	} //}}}
 
+	//{{{ getManager() method
 	/**
 	 * Returns the HighlightManager.
 	 *
@@ -80,8 +107,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public static HighlightManager getManager()
 	{
 		return getInstance();
-	}
+	} //}}}
 
+	//{{{ HighlightManagerTableModel constructor
 	private HighlightManagerTableModel(File highlightFile)
 	{
 		highlights = highlightFile;
@@ -136,8 +164,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		currentWordHighlight.setEnabled(false);
 		timer = new Timer(1000, new RemoveExpired());
 		timer.start();
-	}
+	} //}}}
 
+	//{{{ getRowCount() method
 	/**
 	 * Returns the number of highlights in the list.
 	 *
@@ -154,23 +183,24 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		{
 			rwLock.releaseLock();
 		}
-	}
+	} //}}}
 
+	//{{{ getColumnCount() method
 	/**
-	 * Returns 2 because there is only two column.
-	 *
 	 * @return 4
 	 */
 	public int getColumnCount()
 	{
 		return 4;
-	}
+	} //}}}
 
+	//{{{ getColumnClass() method
 	public Class getColumnClass(int columnIndex)
 	{
 		return columnIndex == 0 ? Boolean.class : Highlight.class;
-	}
+	} //}}}
 
+	//{{{ isCellEditable() method
 	/**
 	 * All cells are editable.
 	 *
@@ -181,8 +211,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public boolean isCellEditable(int rowIndex, int columnIndex)
 	{
 		return true;
-	}
+	} //}}}
 
+	//{{{ getValueAt() method
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		Object o;
@@ -200,8 +231,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			return Boolean.valueOf(((Highlight) o).isEnabled());
 		}
 		return o;
-	}
+	} //}}}
 
+	//{{{ setValueAt() method
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 	{
 		if (columnIndex == 0)
@@ -231,8 +263,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			}
 		}
 		fireTableCellUpdated(rowIndex, columnIndex);
-	}
+	} //}}}
 
+	//{{{ getHighlight() method
 	/**
 	 * Return the Highlight at index i.
 	 * It must be called under the rwLock
@@ -243,8 +276,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public Highlight getHighlight(int i)
 	{
 		return datas.get(i);
-	}
+	} //}}}
 
+	//{{{ addElement() method
 	/**
 	 * Add a Highlight in the list.
 	 *
@@ -280,8 +314,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			}
 		}
 		setHighlightEnable(true);
-	}
+	} //}}}
 
+	//{{{ removeRow() methods
 	/**
 	 * Remove an element at the specified index.
 	 *
@@ -319,8 +354,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			rwLock.releaseLock();
 		}
 		removeRow(index);
-	}
+	} //}}}
 
+	//{{{ bufferClosed() method
 	/**
 	 * A buffer is closed, we will remove all highlights from this buffer.
 	 *
@@ -336,8 +372,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				removeRow(highlights.get(i));
 			}
 		}
-	}
+	} //}}}
 
+	//{{{ removeAll() method
 	/**
 	 * remove all Highlights.
 	 */
@@ -358,8 +395,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		{
 			fireTableRowsDeleted(0, rowMax - 1);
 		}
-	}
+	} //}}}
 
+	//{{{ dispose() method
 	public void dispose()
 	{
 		timer.stop();
@@ -367,8 +405,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		highlightManagerTableModel = null;
 		currentWordHighlight = null;
 		save();
-	}
+	} //}}}
 
+	//{{{ save() method
 	private void save()
 	{
 		if (highlights != null)
@@ -413,28 +452,33 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		}
 		else
 			Log.log(Log.ERROR, this, "No settings");
-	}
+	} //}}}
 
+	//{{{ fireTableChanged() method
 	public void fireTableChanged(TableModelEvent e)
 	{
 		super.fireTableChanged(e);
 		fireHighlightChangeListener(highlightEnable);
-	}
+	} //}}}
 
+
+	//{{{ HighlightChangeListener methods
+	//{{{ addHighlightChangeListener() method
 	public void addHighlightChangeListener(HighlightChangeListener listener)
 	{
 		if (!highlightChangeListeners.contains(listener))
 		{
 			highlightChangeListeners.add(listener);
 		}
-	}
+	} //}}}
 
+	//{{{ removeHighlightChangeListener() method
 	public void removeHighlightChangeListener(HighlightChangeListener listener)
 	{
 		highlightChangeListeners.remove(listener);
-	}
+	} //}}}
 
-
+	//{{{ fireHighlightChangeListener() method
 	public void fireHighlightChangeListener(boolean highlightEnable)
 	{
 		for (int i = 0; i < highlightChangeListeners.size(); i++)
@@ -442,8 +486,11 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			HighlightChangeListener listener = highlightChangeListeners.get(i);
 			listener.highlightUpdated(highlightEnable);
 		}
-	}
+	} //}}}
+	//}}}
 
+	
+	//{{{ countHighlights() method
 	/**
 	 * Returns the number of highlights.
 	 *
@@ -452,8 +499,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public int countHighlights()
 	{
 		return getRowCount();
-	}
+	} //}}}
 
+	//{{{ isHighlightEnable() method
 	/**
 	 * If the highlights must not be displayed it will returns false.
 	 *
@@ -462,8 +510,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public boolean isHighlightEnable()
 	{
 		return highlightEnable;
-	}
+	} //}}}
 
+	//{{{ setHighlightEnable() method
 	/**
 	 * Enable or disable the highlights.
 	 *
@@ -473,8 +522,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		this.highlightEnable = highlightEnable;
 		fireHighlightChangeListener(highlightEnable);
-	}
+	} //}}}
 
+	//{{{ RemoveExpired class
 	private class RemoveExpired implements ActionListener
 	{
 		public void actionPerformed(ActionEvent e)
@@ -509,8 +559,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				}
 			}
 		}
-	}
+	} //}}}
 
+	//{{{ caretUpdate() method
 	public void caretUpdate(CaretEvent e)
 	{
 		JEditTextArea textArea = (JEditTextArea) e.getSource();
@@ -576,15 +627,18 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			}
 			fireHighlightChangeListener(highlightEnable);
 		}
-	}
+	} //}}}
 
+	//{{{ isHighlightWordAtCaret() method
 	public boolean isHighlightWordAtCaret()
 	{
 		return highlightWordAtCaret;
-	}
+	} //}}}
 
+	//{{{ propertiesChanged() method
 	public void propertiesChanged()
 	{
+		//{{{ PROP_HIGHLIGHT_CYCLE_COLOR
 		if (jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_CYCLE_COLOR))
 		{
 			Highlight.setDefaultColor(null);
@@ -592,10 +646,12 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		else
 		{
 			Highlight.setDefaultColor(jEdit.getColorProperty(HighlightOptionPane.PROP_DEFAULT_COLOR));
-		}
+		} //}}}
+		
 		appendHighlight = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_APPEND);
 		boolean changed = false;
-
+		
+		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET
 		boolean highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
 		if (this.highlightWordAtCaret != highlightWordAtCaret)
 		{
@@ -603,8 +659,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			this.highlightWordAtCaret = highlightWordAtCaret;
 			if (!highlightWordAtCaret)
 				currentWordHighlight.setEnabled(false);
-		}
+		} //}}}
 
+		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD
 		boolean entireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD);
 		if (highlightWordAtCaretEntireWord != entireWord)
 		{
@@ -615,53 +672,61 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				String s = currentWordHighlight.getStringToHighlight();
 				currentWordHighlight.setStringToHighlight("\\b" + s + "\\b");
 			}
-		}
+		} //}}}
 
+		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE
 		boolean whitespace = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE);
 		if (highlightWordAtCaretWhitespace != whitespace)
 		{
 			changed = true;
 			highlightWordAtCaretWhitespace = whitespace;
-		}
+		} //}}}
 
+		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS
 		boolean onlyWords = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS);
 		if (highlightWordAtCaretOnlyWords != onlyWords)
 		{
 			changed = true;
 			highlightWordAtCaretOnlyWords = onlyWords;
-		}
+		} //}}}
 
+		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE
 		boolean ignoreCase = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE);
 		if (currentWordHighlight.isIgnoreCase() != ignoreCase)
 		{
 			changed = true;
-		}
+		} //}}}
+
+		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET_COLOR
 		Color newColor = jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_COLOR);
 		if (!currentWordHighlight.getColor().equals(newColor))
 		{
 			changed = true;
-		}
+		} //}}}
 
+		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE
 		if (currentWordHighlight.setHighlightSubsequence(jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE)))
 		{
 			changed = true;
-		}
+		} //}}}
 
 		if (changed)
 		{
 			currentWordHighlight.init(currentWordHighlight.getStringToHighlight(), entireWord, ignoreCase, newColor);
 			fireHighlightChangeListener(highlightEnable);
 		}
-	}
+	} //}}}
 
+	//{{{ getReadLock() method
 	public void getReadLock()
 	{
 		rwLock.getReadLock();
-	}
+	} //}}}
 
-
+	//{{{ releaseLock() method
 	public void releaseLock()
 	{
 		rwLock.releaseLock();
-	}
+	} //}}}
+
 }

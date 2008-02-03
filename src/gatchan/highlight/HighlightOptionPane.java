@@ -1,5 +1,5 @@
 /*
-* HighlightPlugin.java - The Highlight plugin
+* HighlightOptionPane.java - The Highlight plugin option panel
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *

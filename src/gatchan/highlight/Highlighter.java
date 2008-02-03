@@ -1,3 +1,24 @@
+/*
+* Highlighter.java - The Highlighter is the texteara painter
+* :tabSize=8:indentSize=8:noTabs=false:
+* :folding=explicit:collapseFolds=1:
+*
+* Copyright (C) 2004, 2007 Matthieu Casanova
+*
+* This program is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
 package gatchan.highlight;
 
 //{{{ imports
@@ -14,8 +35,8 @@ import java.util.regex.PatternSyntaxException;
 //}}}
 
 /**
- * The Highlighter is the TextAreaExtension that will look for some String to highlightList in the textarea and draw a
- * rectangle in it's background.
+ * The Highlighter is the TextAreaExtension that will look for some String to 
+ * highlightList in the textarea and draw a rectangle in it's background.
  *
  * @author Matthieu Casanova
  * @version $Id: Highlighter.java,v 1.19 2006/07/24 09:26:52 kpouer Exp $
@@ -30,15 +51,29 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 
 	private final HighlightManager highlightManager;
 	private AlphaComposite blend;
+	private float alpha;
 
+	//{{{ Highlighter constructor
 	Highlighter(JEditTextArea textArea)
 	{
-        blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
-                                           ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f);
+		alpha = ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f;
+		blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
 		highlightManager = HighlightManagerTableModel.getManager();
 		this.textArea = textArea;
-	}
+	} //}}}
+	
+	//{{{ setAlphaComposite() method
+	public void setAlphaComposite(float alpha)
+	{
+		if (this.alpha != alpha)
+		{
+			this.alpha = alpha;
+			blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
+		}
+	} //}}}
 
+
+	//{{{ paintScreenLineRange() method
 	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, int[] start, int[] end, int y, int lineHeight)
 	{
 		fm = textArea.getPainter().getFontMetrics();
@@ -46,8 +81,9 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		    highlightManager.countHighlights() != 0 ||
 		    HighlightManagerTableModel.currentWordHighlight.isEnabled())
 			super.paintScreenLineRange(gfx, firstLine, lastLine, physicalLines, start, end, y, lineHeight);
-	}
+	} //}}}
 
+	//{{{ paintValidLine() method
 	/**
 	 * Called by the text area when the extension is to paint a
 	 * screen line which has an associated physical line number in
@@ -107,8 +143,9 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		tempLineContent.count = lineContent.count;
 
 		highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, screenLine, physicalLine, y, screenToPhysicalOffset);
-	}
+	} //}}}
 
+	//{{{ highlight() method
 	private void highlight(Highlight highlight,
 			       JEditBuffer buffer,
 			       Graphics2D gfx,
@@ -167,8 +204,9 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			// the regexp was invalid
 			highlight.setValid(false);
 		}
-	}
+	} //}}}
 
+	//{{{ _highlight() method
 	private void _highlight(Color highlightColor,
 				Graphics2D gfx,
 				int physicalLine,
@@ -199,11 +237,12 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 
 		gfx.setColor(oldColor);
 		gfx.setComposite(oldComposite);
-	}
+	} //}}}
 
+	//{{{ highlightUpdated() method
 	public void highlightUpdated(boolean highlightEnabled)
 	{
 		int firstLine = textArea.getFirstPhysicalLine();
 		textArea.invalidateLineRange(firstLine, firstLine + textArea.getVisibleLines());
-	}
+	} //}}}
 }
