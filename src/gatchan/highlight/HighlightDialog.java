@@ -1,3 +1,24 @@
+/*
+ * HighlightDialog.java
+ * :tabSize=8:indentSize=8:noTabs=false:
+ * :folding=explicit:collapseFolds=1:
+ *
+ * Copyright (C) 2004 Matthieu Casanova
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
 package gatchan.highlight;
 
 import org.gjt.sp.jedit.GUIUtilities;
@@ -27,6 +48,7 @@ public final class HighlightDialog extends EnhancedDialog
 									 Integer.valueOf(Highlight.BUFFER_SCOPE)});
 	private JSpinner spinner;
 
+	//{{{ HighlightDialog constructors
 	public HighlightDialog(View owner, Highlight highlight)
 	{
 		super(owner, "Highlight", false);
@@ -67,8 +89,9 @@ public final class HighlightDialog extends EnhancedDialog
 	public HighlightDialog(View owner)
 	{
 		this(owner, new Highlight());
-	}
+	} //}}}
 
+	//{{{ ok() method
 	public void ok()
 	{
 		try
@@ -95,13 +118,15 @@ public final class HighlightDialog extends EnhancedDialog
 			GUIUtilities.error(jEdit.getActiveView(), "gatchan-highlight.errordialog.invalidHighlight", null);
 			panel.focus();
 		}
-	}
+	} //}}}
 
+	//{{{ cancel() method
 	public void cancel()
 	{
 		dispose();
-	}
+	} //}}}
 
+	//{{{ MyActionListener class
 	private final class MyActionListener implements ActionListener
 	{
 		public void actionPerformed(ActionEvent e)
@@ -115,8 +140,9 @@ public final class HighlightDialog extends EnhancedDialog
 				cancel();
 			}
 		}
-	}
+	} //}}}
 
+	//{{{ MyListCellRenderer class
 	private static class MyListCellRenderer extends DefaultListCellRenderer
 	{
 		public Component getListCellRendererComponent(JList list,
@@ -150,5 +176,6 @@ public final class HighlightDialog extends EnhancedDialog
 			}
 			return this;
 		}
-	}
+	} //}}}
+
 }

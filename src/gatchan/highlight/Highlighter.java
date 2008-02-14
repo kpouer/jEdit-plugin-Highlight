@@ -72,7 +72,6 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		}
 	} //}}}
 
-
 	//{{{ paintScreenLineRange() method
 	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, int[] start, int[] end, int y, int lineHeight)
 	{
