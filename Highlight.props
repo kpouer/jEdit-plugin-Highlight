@@ -67,7 +67,7 @@ gatchan.highlight.subsequence.text=Highlight subsequences (if checked, the same 
 gatchan.highlight.subsequence=true
 gatchan.highlight.cycleColor.text=Cycle the color when creating highlights : 
 gatchan.highlight.defaultColor=#66FFFF
-gatchan.highlight.defaultColor.text=Cycle the color when creating highlights
+gatchan.highlight.defaultColor.text=Choose the color of the highlights
 gatchan.highlight.appendHighlight=true
 gatchan.highlight.appendHighlight.text=Append highlights (if not checked an highlight will replace the previous one)
 
@@ -81,4 +81,9 @@ gatchan.highlight.caretHighlight.color=#FFFF66
 gatchan.highlight.caretHighlight.color.text=Color of the caret highlight :
 gatchan.highlight.layer.text=Choose the layer that will be used to draw the rectangle
 gatchan.highlight.alpha.text=Select transparency : 
+
+gatchan.highlight.square=false
+gatchan.highlight.square.text=Draw a square around the highlighted word
+gatchan.highlight.square.color=#FF0000
+gatchan.highlight.square.color.text=Choose the color of the square
 #}}}

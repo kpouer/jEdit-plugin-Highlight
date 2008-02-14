@@ -56,11 +56,15 @@ public class HighlightOptionPane extends AbstractOptionPane
 	
 	public static final String PROP_LAYER_PROPERTY = "gatchan.highlight.layer";
 	public static final String PROP_ALPHA = "gatchan.highlight.alpha";
+	public static final String PROP_SQUARE = "gatchan.highlight.square";
+	public static final String PROP_SQUARE_COLOR = "gatchan.highlight.square.color";
 	
 	private JCheckBox highlightWordAtCaret;
 	private JCheckBox wordAtCaretIgnoreCase;
 	private JCheckBox entireWord;
 	private ColorWellButton wordAtCaretColor;
+	private JCheckBox square;
+	private ColorWellButton squareColor;
 	private JCheckBox cycleColor;
 	private JCheckBox highlightAppend;
 	private JCheckBox highlightSubsequence;
@@ -93,8 +97,32 @@ public class HighlightOptionPane extends AbstractOptionPane
 							     defaultColor.setEnabled(!cycleColor.isSelected());
 						     }
 					     });
+		addComponent(cycleColor = createCheckBox(PROP_HIGHLIGHT_CYCLE_COLOR));
+		addComponent(new JLabel(jEdit.getProperty(PROP_DEFAULT_COLOR + ".text")),
+			     defaultColor = new ColorWellButton(jEdit.getColorProperty(PROP_DEFAULT_COLOR)));
+		cycleColor.addActionListener(new ActionListener() 
+					     {
+						     public void actionPerformed(ActionEvent e) 
+						     {
+							     defaultColor.setEnabled(!cycleColor.isSelected());
+						     }
+					     });
+		
 		if (cycleColor.isSelected())
 			defaultColor.setEnabled(false);
+		
+		addComponent(square = createCheckBox(PROP_SQUARE));
+		
+		addComponent(new JLabel(jEdit.getProperty(PROP_SQUARE_COLOR + ".text")),
+			     squareColor = new ColorWellButton(jEdit.getColorProperty(PROP_SQUARE_COLOR)));
+		square.addActionListener(new ActionListener() 
+					 {
+						 public void actionPerformed(ActionEvent e) 
+						 {
+							 squareColor.setEnabled(square.isSelected());
+						 }
+					 });
+		squareColor.setEnabled(square.isSelected());
 		
 		addSeparator(PROP_HIGHLIGHT_WORD_AT_CARET + ".text");
 		addComponent(highlightWordAtCaret = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET));
@@ -129,6 +157,8 @@ public class HighlightOptionPane extends AbstractOptionPane
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_APPEND, highlightAppend.isSelected());
 		jEdit.setColorProperty(PROP_HIGHLIGHT_WORD_AT_CARET_COLOR, wordAtCaretColor.getSelectedColor());
 		jEdit.setColorProperty(PROP_DEFAULT_COLOR, defaultColor.getSelectedColor());
+		jEdit.setBooleanProperty(PROP_SQUARE, square.isSelected());
+		jEdit.setColorProperty(PROP_SQUARE_COLOR, squareColor.getSelectedColor());
 		try 
 		{
 			jEdit.setIntegerProperty(PROP_LAYER_PROPERTY, layerChooser.getLayer());

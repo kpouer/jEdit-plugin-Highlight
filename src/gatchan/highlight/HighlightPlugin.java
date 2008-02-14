@@ -167,7 +167,8 @@ public class HighlightPlugin extends EBPlugin
 		{
 			int layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
 			float alpha = ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f;
-			
+			Highlighter.square = jEdit.getBooleanProperty(HighlightOptionPane.PROP_SQUARE);
+			Highlighter.squareColor = jEdit.getColorProperty(HighlightOptionPane.PROP_SQUARE_COLOR);
 			if (this.layer != layer || this.alpha != alpha)
 			{
 				this.layer = layer;

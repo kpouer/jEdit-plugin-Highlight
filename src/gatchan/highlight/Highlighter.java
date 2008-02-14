@@ -52,6 +52,9 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	private final HighlightManager highlightManager;
 	private AlphaComposite blend;
 	private float alpha;
+	public static boolean square;
+	
+	public static Color squareColor;
 
 	//{{{ Highlighter constructor
 	Highlighter(JEditTextArea textArea)
@@ -234,6 +237,12 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		gfx.setComposite(blend);
 		gfx.fillRect(startX, y, endX - startX, fm.getHeight());
 
+		if (square)
+		{
+			gfx.setColor(squareColor);
+			gfx.drawRect(startX, y, endX - startX, fm.getHeight());
+		}
+		
 		gfx.setColor(oldColor);
 		gfx.setComposite(oldComposite);
 	} //}}}
