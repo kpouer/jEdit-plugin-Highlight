@@ -23,6 +23,7 @@ package gatchan.highlight;
 
 //{{{ Imports
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.jedit.visitors.JEditVisitorAdapter;
 import org.gjt.sp.jedit.search.SearchAndReplace;
 import org.gjt.sp.jedit.msg.EditPaneUpdate;
 import org.gjt.sp.jedit.msg.BufferUpdate;
