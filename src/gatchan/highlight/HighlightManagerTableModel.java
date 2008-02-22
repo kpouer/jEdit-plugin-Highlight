@@ -710,6 +710,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			changed = true;
 		} //}}}
 
+		Highlighter.square = jEdit.getBooleanProperty(HighlightOptionPane.PROP_SQUARE);
+		Highlighter.squareColor = jEdit.getColorProperty(HighlightOptionPane.PROP_SQUARE_COLOR);
+			
 		if (changed)
 		{
 			currentWordHighlight.init(currentWordHighlight.getStringToHighlight(), entireWord, ignoreCase, newColor);

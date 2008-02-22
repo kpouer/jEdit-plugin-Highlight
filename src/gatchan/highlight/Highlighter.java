@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2007 Matthieu Casanova
+* Copyright (C) 2004, 2008 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
 */
 package gatchan.highlight;
 
-//{{{ imports
+//{{{ Imports
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.search.SearchMatcher;
@@ -235,12 +235,12 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		Composite oldComposite = gfx.getComposite();
 		gfx.setColor(highlightColor);
 		gfx.setComposite(blend);
-		gfx.fillRect(startX, y, endX - startX, fm.getHeight());
+		gfx.fillRect(startX, y, endX - startX, fm.getHeight() - 1);
 
 		if (square)
 		{
 			gfx.setColor(squareColor);
-			gfx.drawRect(startX, y, endX - startX, fm.getHeight());
+			gfx.drawRect(startX, y, endX - startX, fm.getHeight() - 1);
 		}
 		
 		gfx.setColor(oldColor);

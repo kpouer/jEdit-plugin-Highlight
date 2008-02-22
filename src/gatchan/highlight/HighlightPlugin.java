@@ -21,7 +21,7 @@
  */
 package gatchan.highlight;
 
-//{{{ imports
+//{{{ Imports
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.search.SearchAndReplace;
 import org.gjt.sp.jedit.msg.EditPaneUpdate;
@@ -64,17 +64,7 @@ public class HighlightPlugin extends EBPlugin
 		File highlightFile = dataMigration();
 		highlightManager = HighlightManagerTableModel.createInstance(highlightFile);
 		highlightManager.propertiesChanged();
-		View view = jEdit.getFirstView();
-		while (view != null)
-		{
-			EditPane[] panes = view.getEditPanes();
-			for (int i = 0; i < panes.length; i++)
-			{
-				JEditTextArea textArea = panes[i].getTextArea();
-				initTextArea(textArea);
-			}
-			view = view.getNext();
-		}
+		jEdit.visit(new TextAreaInitializer());
 	} //}}}
 
 	//{{{ stop() method
@@ -94,18 +84,8 @@ public class HighlightPlugin extends EBPlugin
 		{
 			buffers[i].unsetProperty("highlights");
 		}
-
-		View view = jEdit.getFirstView();
-		while (view != null)
-		{
-			EditPane[] panes = view.getEditPanes();
-			for (int i = 0; i < panes.length; i++)
-			{
-				JEditTextArea textArea = panes[i].getTextArea();
-				uninitTextArea(textArea);
-			}
-			view = view.getNext();
-		}
+		
+		jEdit.visit(new TextAreaUninitializer());
 		highlightManager = null;
 	} //}}}
 
@@ -167,30 +147,21 @@ public class HighlightPlugin extends EBPlugin
 		{
 			int layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
 			float alpha = ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f;
-			Highlighter.square = jEdit.getBooleanProperty(HighlightOptionPane.PROP_SQUARE);
-			Highlighter.squareColor = jEdit.getColorProperty(HighlightOptionPane.PROP_SQUARE_COLOR);
 			if (this.layer != layer || this.alpha != alpha)
 			{
 				this.layer = layer;
 				this.alpha = alpha;
-				View view = jEdit.getFirstView();
-				while (view != null)
-				{
-					EditPane[] panes = view.getEditPanes();
-					for (int i = 0; i < panes.length; i++)
-					{
-						JEditTextArea textArea = panes[i].getTextArea();
-						TextAreaPainter painter = textArea.getPainter();
-						Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
-						highlighter.setAlphaComposite(alpha);
-						if (highlighter != null)
-						{
-							painter.removeExtension(highlighter);
-							painter.addExtension(highlighter);
-						}
-					}
-					view = view.getNext();
-				}
+				jEdit.visit(new JEditVisitorAdapter()
+					    {
+						    public void visit(JEditTextArea textArea)
+						    {
+							    TextAreaPainter painter = textArea.getPainter();
+							    Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
+							    highlighter.setAlphaComposite(HighlightPlugin.this.alpha);
+							    painter.removeExtension(highlighter);
+							    painter.addExtension(HighlightPlugin.this.layer, highlighter);
+						    }
+					    });
 			}
 			highlightManager.propertiesChanged();
 		}
@@ -420,5 +391,23 @@ public class HighlightPlugin extends EBPlugin
 			return newFile;
 		}
 		return newFile;
+	} //}}}
+
+	//{{{ TextAreaInitializer class
+	private class TextAreaInitializer extends JEditVisitorAdapter
+	{
+		public void visit(JEditTextArea textArea)
+		{
+			initTextArea(textArea);
+		}
+	} //}}}
+
+	//{{{ TextAreaUninitializer class
+	private class TextAreaUninitializer extends JEditVisitorAdapter
+	{
+		public void visit(JEditTextArea textArea)
+		{
+			uninitTextArea(textArea);
+		}
 	} //}}}
 }
