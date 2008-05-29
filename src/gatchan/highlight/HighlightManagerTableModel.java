@@ -195,6 +195,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ getColumnClass() method
+	@Override
 	public Class getColumnClass(int columnIndex)
 	{
 		return columnIndex == 0 ? Boolean.class : Highlight.class;
@@ -208,6 +209,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 * @param columnIndex
 	 * @return true
 	 */
+	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex)
 	{
 		return true;
@@ -234,6 +236,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ setValueAt() method
+	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 	{
 		if (columnIndex == 0)
@@ -455,6 +458,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ fireTableChanged() method
+	@Override
 	public void fireTableChanged(TableModelEvent e)
 	{
 		super.fireTableChanged(e);
@@ -529,7 +533,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		public void actionPerformed(ActionEvent e)
 		{
-			List expired = null;
+			List<Highlight> expired = null;
 			try
 			{
 				rwLock.getReadLock();
@@ -540,7 +544,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 					{
 						if (expired == null)
 						{
-							expired = new ArrayList();
+							expired = new ArrayList<Highlight>();
 						}
 						expired.add(highlight);
 					}
@@ -554,7 +558,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			{
 				for (int i = 0; i < expired.size(); i++)
 				{
-					Highlight highlight = (Highlight) expired.get(i);
+					Highlight highlight = expired.get(i);
 					removeRow(highlight);
 				}
 			}
