@@ -344,7 +344,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 *
 	 * @param item the item to be removed
 	 */
-	private void removeRow(Object item)
+	private void removeRow(Highlight item)
 	{
 		int index;
 		try
