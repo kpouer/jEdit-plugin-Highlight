@@ -76,6 +76,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	} //}}}
 
 	//{{{ paintScreenLineRange() method
+	@Override
 	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, int[] start, int[] end, int y, int lineHeight)
 	{
 		fm = textArea.getPainter().getFontMetrics();
@@ -104,6 +105,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	 * bounding box
 	 * @since jEdit 4.0pre4
 	 */
+	@Override
 	public void paintValidLine(Graphics2D gfx,
 				   int screenLine,
 				   int physicalLine,
@@ -165,13 +167,13 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		}
 
 		SearchMatcher searchMatcher = highlight.getSearchMatcher();
-		SearchMatcher.Match match = null;
 		boolean isFirstLine = physicalLine == 0;
 		boolean isLastLine = physicalLine == textArea.getLineCount();
 		boolean subsequence = highlight.isHighlightSubsequence();
 		try
 		{
 			int i = 0;
+			SearchMatcher.Match match = null;
 			while (true)
 			{
 				match = searchMatcher.nextMatch(new SegmentCharSequence(tempLineContent),
