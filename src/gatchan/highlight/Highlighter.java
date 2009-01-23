@@ -35,7 +35,7 @@ import java.util.regex.PatternSyntaxException;
 //}}}
 
 /**
- * The Highlighter is the TextAreaExtension that will look for some String to 
+ * The Highlighter is the TextAreaExtension that will look for some String to
  * highlightList in the textarea and draw a rectangle in it's background.
  *
  * @author Matthieu Casanova
@@ -53,7 +53,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	private AlphaComposite blend;
 	private float alpha;
 	public static boolean square;
-	
+
 	public static Color squareColor;
 
 	//{{{ Highlighter constructor
@@ -64,7 +64,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		highlightManager = HighlightManagerTableModel.getManager();
 		this.textArea = textArea;
 	} //}}}
-	
+
 	//{{{ setAlphaComposite() method
 	public void setAlphaComposite(float alpha)
 	{
@@ -244,7 +244,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			gfx.setColor(squareColor);
 			gfx.drawRect(startX, y, endX - startX, fm.getHeight() - 1);
 		}
-		
+
 		gfx.setColor(oldColor);
 		gfx.setComposite(oldComposite);
 	} //}}}
@@ -253,6 +253,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	public void highlightUpdated(boolean highlightEnabled)
 	{
 		int firstLine = textArea.getFirstPhysicalLine();
-		textArea.invalidateLineRange(firstLine, firstLine + textArea.getVisibleLines());
+		int lastLine = textArea.getLastPhysicalLine();
+		textArea.invalidateLineRange(firstLine, lastLine);
 	} //}}}
 }
