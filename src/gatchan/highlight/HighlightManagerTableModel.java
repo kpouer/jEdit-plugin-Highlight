@@ -51,11 +51,12 @@ import java.util.ListIterator;
  */
 public class HighlightManagerTableModel extends AbstractTableModel implements HighlightManager
 {
+	private static final String ENABLED_PROP = HighlightPlugin.PROPERTY_PREFIX + "enabled";
+	
 	private final List<Highlight> datas = new ArrayList<Highlight>();
 	private static HighlightManagerTableModel highlightManagerTableModel;
 
 	private final List<HighlightChangeListener> highlightChangeListeners = new ArrayList<HighlightChangeListener>(2);
-	private boolean highlightEnable = true;
 	private final File highlights;
 
 	private RWLock rwLock = new RWLock();
@@ -131,7 +132,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				{
 					try
 					{
-						addElement(Highlight.unserialize(line, getStatus));
+						addElement(Highlight.unserialize(line, getStatus), false);
 					}
 					catch (InvalidHighlightException e)
 					{
@@ -283,11 +284,24 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 
 	//{{{ addElement() method
 	/**
-	 * Add a Highlight in the list.
+	 * Add a Highlight in the list. Also enables highlighting.
 	 *
 	 * @param highlight the highlight to be added
 	 */
 	public void addElement(Highlight highlight)
+	{
+		addElement(highlight, true);
+	}
+	//}}}
+	
+	//{{{ addElement() method
+	/**
+	 * Add a Highlight in the list.
+	 *
+	 * @param highlight the highlight to be added
+	 * @param enable whether to enable highlighting
+	 */
+	private void addElement(Highlight highlight, boolean enable)
 	{
 		rwLock.getWriteLock();
 		if (datas.contains(highlight))
@@ -316,7 +330,8 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				fireTableRowsUpdated(firstRow, firstRow);
 			}
 		}
-		setHighlightEnable(true);
+		if (enable)
+			setHighlightEnable(true);
 	} //}}}
 
 	//{{{ removeRow() methods
@@ -462,7 +477,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public void fireTableChanged(TableModelEvent e)
 	{
 		super.fireTableChanged(e);
-		fireHighlightChangeListener(highlightEnable);
+		fireHighlightChangeListener(isHighlightEnable());
 	} //}}}
 
 
@@ -513,7 +528,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 */
 	public boolean isHighlightEnable()
 	{
-		return highlightEnable;
+		return jEdit.getBooleanProperty(ENABLED_PROP);
 	} //}}}
 
 	//{{{ setHighlightEnable() method
@@ -524,7 +539,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 */
 	public void setHighlightEnable(boolean highlightEnable)
 	{
-		this.highlightEnable = highlightEnable;
+		jEdit.setBooleanProperty(ENABLED_PROP, highlightEnable);
 		fireHighlightChangeListener(highlightEnable);
 	} //}}}
 
@@ -576,7 +591,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			if (textArea.getLineLength(line) == 0 || textArea.getSelectionCount() != 0)
 			{
 				currentWordHighlight.setEnabled(false);
-				fireHighlightChangeListener(highlightEnable);
+				fireHighlightChangeListener(isHighlightEnable());
 				return;
 			}
 
@@ -629,7 +644,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 					}
 				}
 			}
-			fireHighlightChangeListener(highlightEnable);
+			fireHighlightChangeListener(isHighlightEnable());
 		}
 	} //}}}
 
@@ -720,7 +735,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		if (changed)
 		{
 			currentWordHighlight.init(currentWordHighlight.getStringToHighlight(), entireWord, ignoreCase, newColor);
-			fireHighlightChangeListener(highlightEnable);
+			fireHighlightChangeListener(isHighlightEnable());
 		}
 	} //}}}
 
