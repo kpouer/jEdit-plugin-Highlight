@@ -341,6 +341,12 @@ public class HighlightPlugin extends EBPlugin
 		highlightManager.setHighlightEnable(!highlightManager.isHighlightEnable());
 	} //}}}
 
+	public static void highlightHyperSearchResult(View view)
+	{
+		HighlightHypersearchResults h = new HighlightHypersearchResults(view);
+		h.highlight();
+	}
+	
 	//{{{ isHighlightEnable() method
 	public static boolean isHighlightEnable()
 	{

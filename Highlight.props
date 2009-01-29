@@ -21,6 +21,7 @@ plugin.gatchan.highlight.HighlightPlugin.menu=\
                                                 gatchan-highlightcurrentSearch \
                                                 gatchan-highlightcurrentSearch-session \
                                                 gatchan-highlightcurrentSearch-buffer \
+                                                gatchan-highlightHyperSearchResults \
                                                 - \
                                                 gatchan-removeAllHighlights \
                                                 gatchan-enableHighlights \
@@ -39,6 +40,7 @@ gatchan-highlight-dialog.label=Highlight dialog
 gatchan-highlightcurrentSearch.label=Highlight current search
 gatchan-highlightcurrentSearch-session.label=Highlight current search (session scope)
 gatchan-highlightcurrentSearch-buffer.label=Highlight current search (buffer scope)
+gatchan-highlightHyperSearchResults.label=Highlight hypersearch results
 gatchan-removeAllHighlights.label=Remove all
 gatchan-enableHighlights.label=Enable highlights
 gatchan-disableHighlights.label=Disable highlights

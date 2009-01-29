@@ -92,4 +92,9 @@
 			gatchan.highlight.HighlightPlugin.addHighlight(highlight);
 		</CODE>
 	</ACTION>
+	<ACTION NAME="gatchan-highlightHyperSearchResults">
+		<CODE>
+			gatchan.highlight.HighlightPlugin.highlightHyperSearchResult(view);
+		</CODE>
+	</ACTION>
 </ACTIONS>
