@@ -3,6 +3,7 @@ package gatchan.highlight;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Vector;
 
 import javax.swing.JComponent;
@@ -114,6 +115,7 @@ public class HighlightHypersearchResults {
 			Collections.sort(highlights);
 			StringBuffer sb = new StringBuffer("<html><body>");
 			int i = 0;
+			Vector<Highlight> stack = new Vector<Highlight>();
 			for (HighlightPosition hlPos: highlights)
 			{
 				appendString2html(sb, s.substring(i, hlPos.pos));
@@ -123,9 +125,23 @@ public class HighlightHypersearchResults {
 					sb.append("<font style bgcolor=\"#");
 					appendColorSpec(sb, c);
 					sb.append("\"/>");
+					stack.add(hlPos.highlight);
 				}
 				else
+				{
 					sb.append("</font>");
+					stack.remove(hlPos.highlight);
+					if (stack.size() > 0)
+					{
+						// Intersecting highlights - need to end both, then put back
+						// the effective one.
+						Highlight h = stack.lastElement();
+						Color c = h.getColor();
+						sb.append("</font><font style bgcolor=\"#");
+						appendColorSpec(sb, c);
+						sb.append("\"/>");
+					}
+				}
 				i = hlPos.pos;
 			}
 			appendString2html(sb, s.substring(i));
