@@ -85,7 +85,7 @@ public class HighlightPlugin extends EBPlugin
 		{
 			buffers[i].unsetProperty("highlights");
 		}
-		
+
 		jEdit.visit(new TextAreaUninitializer());
 		highlightManager = null;
 	} //}}}
@@ -335,18 +335,19 @@ public class HighlightPlugin extends EBPlugin
 		highlightManager.setHighlightEnable(false);
 	} //}}}
 
-	//{{{ toggleHighlights() method 
+	//{{{ toggleHighlights() method
 	public static void toggleHighlights()
 	{
 		highlightManager.setHighlightEnable(!highlightManager.isHighlightEnable());
 	} //}}}
 
+	//{{{ highlightHyperSearchResult() method
 	public static void highlightHyperSearchResult(View view)
 	{
 		HighlightHypersearchResults h = new HighlightHypersearchResults(view);
 		h.highlight();
-	}
-	
+	} //}}}
+
 	//{{{ isHighlightEnable() method
 	public static boolean isHighlightEnable()
 	{
