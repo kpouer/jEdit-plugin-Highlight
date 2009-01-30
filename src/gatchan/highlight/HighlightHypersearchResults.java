@@ -3,19 +3,16 @@ package gatchan.highlight;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
 
 import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.jEdit;
-import org.gjt.sp.jedit.search.HyperSearchOperationNode;
 import org.gjt.sp.jedit.search.HyperSearchResult;
 import org.gjt.sp.jedit.search.HyperSearchResults;
 import org.gjt.sp.jedit.search.SearchMatcher;
@@ -23,23 +20,39 @@ import org.gjt.sp.jedit.search.SearchMatcher.Match;
 
 public class HighlightHypersearchResults {
 
-	private static final String HYPERSEARCH = "hypersearch-results";
+	public static final String HYPERSEARCH = "hypersearch-results";
 	private View view;
 
 	public HighlightHypersearchResults(View view) {
 		this.view = view;
 	}
-	
-	public void highlight() {
+
+	private JTree getHyperSearchTree() {
 		JComponent dockable = view.getDockableWindowManager().getDockable(HYPERSEARCH);
 		if (dockable == null)
-			return;
+			return null;
 		if (! (dockable instanceof HyperSearchResults))
-			return;
+			return null;
 		HyperSearchResults hrd = (HyperSearchResults) dockable;
-		JTree tree = hrd.getTree();
+		return hrd.getTree();
+	}
+
+	public void start() {
+		JTree tree = getHyperSearchTree();
+		if (tree == null)
+			return;
 		TreeCellRenderer renderer = tree.getCellRenderer();
-		hrd.getTree().setCellRenderer(new HighlightTreeCellRenderer(renderer));
+		if (! (renderer instanceof HighlightTreeCellRenderer))
+			tree.setCellRenderer(new HighlightTreeCellRenderer(renderer));
+	}
+	
+	public void stop() {
+		JTree tree = getHyperSearchTree();
+		if (tree == null)
+			return;
+		TreeCellRenderer renderer = tree.getCellRenderer();
+		if (renderer instanceof HighlightTreeCellRenderer)
+			tree.setCellRenderer(((HighlightTreeCellRenderer)renderer).getOriginal());
 	}
 	
 	@SuppressWarnings("serial")
@@ -50,6 +63,9 @@ public class HighlightHypersearchResults {
 		public HighlightTreeCellRenderer(TreeCellRenderer renderer) {
 			this.renderer = renderer;
 		}
+		public TreeCellRenderer getOriginal() {
+			return renderer;
+		}
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree, Object value,
 				boolean sel, boolean expanded, boolean leaf, int row,
@@ -58,7 +74,9 @@ public class HighlightHypersearchResults {
 			Component defaultComponent = renderer.getTreeCellRendererComponent(tree,
 				value, sel, expanded, leaf, row, hasFocus);
 			if (! (value instanceof DefaultMutableTreeNode))
-					return defaultComponent;
+				return defaultComponent;
+			if (! jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_HYPERSEARCH_RESULTS))
+				return defaultComponent;
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 			Object obj = node.getUserObject();
 			if (! (obj instanceof HyperSearchResult))

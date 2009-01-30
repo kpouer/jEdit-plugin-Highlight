@@ -53,6 +53,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE = "gatchan.highlight.caretHighlight.subsequence";
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE = "gatchan.highlight.caretHighlight.whitespace";
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS = "gatchan.highlight.caretHighlight.onlyWords";
+	public static final String PROP_HIGHLIGHT_HYPERSEARCH_RESULTS = "gatchan.highlight.hyperSearchResults";
 	
 	public static final String PROP_LAYER_PROPERTY = "gatchan.highlight.layer";
 	public static final String PROP_ALPHA = "gatchan.highlight.alpha";
@@ -72,6 +73,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private JCheckBox caretHighlightSubsequence;
 	private JCheckBox wordAtCaretWhitespace;
 	private JCheckBox wordAtCaretOnlyWords;
+	private JCheckBox highlightHypersearch;
 	private TextAreaExtensionLayerChooser layerChooser;
 	private JSlider alphaSlider;
 	
@@ -123,6 +125,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 						 }
 					 });
 		squareColor.setEnabled(square.isSelected());
+		addComponent(highlightHypersearch = createCheckBox(PROP_HIGHLIGHT_HYPERSEARCH_RESULTS));
 		
 		addSeparator(PROP_HIGHLIGHT_WORD_AT_CARET + ".text");
 		addComponent(highlightWordAtCaret = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET));
@@ -151,6 +154,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD, entireWord.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE, wordAtCaretWhitespace.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS, wordAtCaretOnlyWords.isSelected());
+		jEdit.setBooleanProperty(PROP_HIGHLIGHT_HYPERSEARCH_RESULTS, highlightHypersearch.isSelected());
 		
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_SUBSEQUENCE, highlightSubsequence.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_CYCLE_COLOR, cycleColor.isSelected());

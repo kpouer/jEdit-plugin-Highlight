@@ -25,9 +25,12 @@ package gatchan.highlight;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.visitors.JEditVisitorAdapter;
 import org.gjt.sp.jedit.search.SearchAndReplace;
+import org.gjt.sp.jedit.gui.DockableWindowManager;
+import org.gjt.sp.jedit.msg.DockableWindowUpdate;
 import org.gjt.sp.jedit.msg.EditPaneUpdate;
 import org.gjt.sp.jedit.msg.BufferUpdate;
 import org.gjt.sp.jedit.msg.PropertiesChanged;
+import org.gjt.sp.jedit.msg.ViewUpdate;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.Log;
@@ -66,6 +69,7 @@ public class HighlightPlugin extends EBPlugin
 		highlightManager = HighlightManagerTableModel.createInstance(highlightFile);
 		highlightManager.propertiesChanged();
 		jEdit.visit(new TextAreaInitializer());
+		jEdit.visit(new ViewInitializer());
 	} //}}}
 
 	//{{{ stop() method
@@ -87,6 +91,7 @@ public class HighlightPlugin extends EBPlugin
 		}
 
 		jEdit.visit(new TextAreaUninitializer());
+		jEdit.visit(new ViewUninitializer());
 		highlightManager = null;
 	} //}}}
 
@@ -129,10 +134,48 @@ public class HighlightPlugin extends EBPlugin
 		return highlighter;
 	} //}}}
 
+	//{{{ initView() method
+	/**
+	 * Initialize the view with a hypersearch results highlighter.
+	 *
+	 * @param view the view whose hypersearch results to initialize
+	 * @return the new highlighter for the hypersearch results of the view
+	 */
+	private HighlightHypersearchResults initView(View view)
+	{
+		HighlightHypersearchResults highlighter = new HighlightHypersearchResults(view);
+		highlighter.start();
+		view.getDockableWindowManager().putClientProperty(
+			HighlightHypersearchResults.class, highlighter);
+		return highlighter;
+	} //}}}
+
+	//{{{ uninitView() method
+	/**
+	 * Remove the hypersearch results highlighter from the view.
+	 *
+	 * @param view the view whose hypersearch results to initialize
+	 */
+	private static void uninitView(View view)
+	{
+		HighlightHypersearchResults highlighter = (HighlightHypersearchResults)
+			view.getDockableWindowManager().getClientProperty(
+					HighlightHypersearchResults.class);
+		if (highlighter == null)
+			return;
+		highlighter.stop();
+		view.getDockableWindowManager().putClientProperty(
+			HighlightHypersearchResults.class, null);
+	} //}}}
+
 	//{{{ handleMessage() method
 	public void handleMessage(EBMessage message)
 	{
-		if (message instanceof EditPaneUpdate)
+		if (message instanceof ViewUpdate)
+		{
+			handleViewMessage((ViewUpdate) message);
+		}
+		else if (message instanceof EditPaneUpdate)
 		{
 			handleEditPaneMessage((EditPaneUpdate) message);
 		}
@@ -142,6 +185,22 @@ public class HighlightPlugin extends EBPlugin
 			if (bufferUpdate.getWhat() == BufferUpdate.CLOSED)
 			{
 				highlightManager.bufferClosed(bufferUpdate.getBuffer());
+			}
+		}
+		else if (message instanceof DockableWindowUpdate)
+		{
+			DockableWindowUpdate dockableUpdate = (DockableWindowUpdate) message;
+			if (dockableUpdate.getWhat() == DockableWindowUpdate.ACTIVATED &&
+				HighlightHypersearchResults.HYPERSEARCH.equals(dockableUpdate.getDockable()))
+			{
+				View view = ((DockableWindowManager) dockableUpdate.getSource()).getView();
+				HighlightHypersearchResults highlighter = (HighlightHypersearchResults)
+				view.getDockableWindowManager().getClientProperty(
+					HighlightHypersearchResults.class);
+				if (highlighter == null)
+					initView(view);
+				else
+					highlighter.start();
 			}
 		}
 		else if (message instanceof PropertiesChanged)
@@ -168,6 +227,22 @@ public class HighlightPlugin extends EBPlugin
 		}
 	} //}}}
 
+	//{{{ handleViewMessage() method
+	private void handleViewMessage(ViewUpdate message)
+	{
+		View view = message.getView();
+		Object what = message.getWhat();
+
+		if (what == ViewUpdate.CREATED)
+		{
+			initView(view);
+		}
+		else if (what == ViewUpdate.CLOSED)
+		{
+			uninitView(view);
+		}
+	} //}}}
+	
 	//{{{ handleEditPaneMessage() method
 	private void handleEditPaneMessage(EditPaneUpdate message)
 	{
@@ -344,8 +419,13 @@ public class HighlightPlugin extends EBPlugin
 	//{{{ highlightHyperSearchResult() method
 	public static void highlightHyperSearchResult(View view)
 	{
-		HighlightHypersearchResults h = new HighlightHypersearchResults(view);
-		h.highlight();
+		
+		HighlightHypersearchResults h = (HighlightHypersearchResults)
+			view.getDockableWindowManager().getClientProperty(
+				HighlightHypersearchResults.class);
+		if (h == null)
+			return;
+		h.start();
 	} //}}}
 
 	//{{{ isHighlightEnable() method
@@ -416,6 +496,24 @@ public class HighlightPlugin extends EBPlugin
 		public void visit(JEditTextArea textArea)
 		{
 			uninitTextArea(textArea);
+		}
+	} //}}}
+	
+	//{{{ ViewInitializer class
+	private class ViewInitializer extends JEditVisitorAdapter
+	{
+		public void visit(View view)
+		{
+			initView(view);
+		}
+	} //}}}
+
+	//{{{ ViewUninitializer class
+	private class ViewUninitializer extends JEditVisitorAdapter
+	{
+		public void visit(View view)
+		{
+			uninitView(view);
 		}
 	} //}}}
 }

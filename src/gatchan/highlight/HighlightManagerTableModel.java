@@ -66,7 +66,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	private boolean highlightWordAtCaretEntireWord;
 	private boolean highlightWordAtCaretWhitespace;
 	private boolean highlightWordAtCaretOnlyWords;
-
+	
 	/**
 	 * If true the highlight will be appended, if false the highlight will replace the previous one.
 	 */
