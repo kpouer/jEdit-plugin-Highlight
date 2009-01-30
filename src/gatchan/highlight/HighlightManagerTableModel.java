@@ -42,7 +42,7 @@ import java.util.ListIterator;
 //}}}
 
 /**
- * The tableModel that will contains the highlights. It got two columns, 
+ * The tableModel that will contains the highlights. It got two columns,
  * the first is a checkbox to enable/disable the
  * highlight, the second is the highlight view
  *
@@ -52,7 +52,7 @@ import java.util.ListIterator;
 public class HighlightManagerTableModel extends AbstractTableModel implements HighlightManager
 {
 	private static final String ENABLED_PROP = HighlightPlugin.PROPERTY_PREFIX + "enabled";
-	
+
 	private final List<Highlight> datas = new ArrayList<Highlight>();
 	private static HighlightManagerTableModel highlightManagerTableModel;
 
@@ -282,7 +282,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		return datas.get(i);
 	} //}}}
 
-	//{{{ addElement() method
+	//{{{ addElement() methods
 	/**
 	 * Add a Highlight in the list. Also enables highlighting.
 	 *
@@ -292,9 +292,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		addElement(highlight, true);
 	}
-	//}}}
-	
-	//{{{ addElement() method
+
 	/**
 	 * Add a Highlight in the list.
 	 *
@@ -480,7 +478,6 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		fireHighlightChangeListener(isHighlightEnable());
 	} //}}}
 
-
 	//{{{ HighlightChangeListener methods
 	//{{{ addHighlightChangeListener() method
 	public void addHighlightChangeListener(HighlightChangeListener listener)
@@ -508,7 +505,6 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 	//}}}
 
-	
 	//{{{ countHighlights() method
 	/**
 	 * Returns the number of highlights.
@@ -666,10 +662,10 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		{
 			Highlight.setDefaultColor(jEdit.getColorProperty(HighlightOptionPane.PROP_DEFAULT_COLOR));
 		} //}}}
-		
+
 		appendHighlight = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_APPEND);
 		boolean changed = false;
-		
+
 		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET
 		boolean highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
 		if (this.highlightWordAtCaret != highlightWordAtCaret)
@@ -731,7 +727,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 
 		Highlighter.square = jEdit.getBooleanProperty(HighlightOptionPane.PROP_SQUARE);
 		Highlighter.squareColor = jEdit.getColorProperty(HighlightOptionPane.PROP_SQUARE_COLOR);
-			
+
 		if (changed)
 		{
 			currentWordHighlight.init(currentWordHighlight.getStringToHighlight(), entireWord, ignoreCase, newColor);
@@ -750,5 +746,4 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		rwLock.releaseLock();
 	} //}}}
-
 }
