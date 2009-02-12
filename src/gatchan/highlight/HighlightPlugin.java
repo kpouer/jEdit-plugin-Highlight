@@ -78,7 +78,6 @@ public class HighlightPlugin extends EBPlugin
 	 */
 	public void stop()
 	{
-		highlightManager.dispose();
 		if (highlightManager.countHighlights() == 0 && !highlightManager.isHighlightWordAtCaret())
 			jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "defer");
 		else
@@ -92,6 +91,7 @@ public class HighlightPlugin extends EBPlugin
 
 		jEdit.visit(new TextAreaUninitializer());
 		jEdit.visit(new ViewUninitializer());
+		highlightManager.dispose();
 		highlightManager = null;
 	} //}}}
 
