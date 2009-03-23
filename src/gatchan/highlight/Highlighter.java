@@ -178,7 +178,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			{
 				match = searchMatcher.nextMatch(new SegmentCharSequence(tempLineContent),
 								isFirstLine,
-								isLastLine,
+								true,
 								match == null,
 								false);
 				if (match == null || match.end == match.start)
