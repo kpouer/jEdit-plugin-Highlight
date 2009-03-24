@@ -167,8 +167,6 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		}
 
 		SearchMatcher searchMatcher = highlight.getSearchMatcher();
-		boolean isFirstLine = physicalLine == 0;
-		boolean isLastLine = physicalLine == textArea.getLineCount();
 		boolean subsequence = highlight.isHighlightSubsequence();
 		try
 		{
@@ -177,7 +175,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			while (true)
 			{
 				match = searchMatcher.nextMatch(new SegmentCharSequence(tempLineContent),
-								isFirstLine,
+								(i == 0),
 								true,
 								match == null,
 								false);
