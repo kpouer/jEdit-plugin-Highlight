@@ -15,4 +15,7 @@
 		<pathelement location="${jedit.install.dir}/jedit.jar" />
 	</path>
 
+	<selector id="packageFiles">
+		<filename name="docs/Highlight.html" />
+	</selector>
 </project>

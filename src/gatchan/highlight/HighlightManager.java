@@ -114,4 +114,8 @@ public interface HighlightManager extends CaretListener
 
   void getReadLock();
   void releaseLock();
+
+    //{{{ isHighlightSelection() method
+    boolean isHighlightSelection() //}}}
+            ;
 }

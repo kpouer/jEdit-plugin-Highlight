@@ -118,6 +118,8 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 				}
 				if (manager.isHighlightWordAtCaret())
 					addHighlight(highlights, s, HighlightManagerTableModel.currentWordHighlight);
+                if (manager.isHighlightSelection())
+                    addHighlight(highlights, s, HighlightManagerTableModel.selectionHighlight);
 			}
 			finally
 			{

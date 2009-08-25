@@ -82,7 +82,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		fm = textArea.getPainter().getFontMetrics();
 		if (highlightManager.isHighlightEnable() &&
 		    highlightManager.countHighlights() != 0 ||
-		    HighlightManagerTableModel.currentWordHighlight.isEnabled())
+		    HighlightManagerTableModel.currentWordHighlight.isEnabled() ||
+            HighlightManagerTableModel.selectionHighlight.isEnabled())
 			super.paintScreenLineRange(gfx, firstLine, lastLine, physicalLines, start, end, y, lineHeight);
 	} //}}}
 
@@ -147,6 +148,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		tempLineContent.count = lineContent.count;
 
 		highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, screenLine, physicalLine, y, screenToPhysicalOffset);
+		highlight(HighlightManagerTableModel.selectionHighlight, buffer, gfx, screenLine, physicalLine, y, screenToPhysicalOffset);
 	} //}}}
 
 	//{{{ highlight() method

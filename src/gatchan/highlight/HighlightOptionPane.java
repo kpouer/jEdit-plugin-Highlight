@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2007 Matthieu Casanova
+* Copyright (C) 2004, 2009 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -47,6 +47,11 @@ public class HighlightOptionPane extends AbstractOptionPane
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE = "gatchan.highlight.caretHighlight.ignoreCase";
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD = "gatchan.highlight.caretHighlight.entireWord";
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_COLOR = "gatchan.highlight.caretHighlight.color";
+
+    public static final String PROP_HIGHLIGHT_SELECTION = "gatchan.highlight.selectionHighlight";
+    public static final String PROP_HIGHLIGHT_SELECTION_IGNORE_CASE = "gatchan.highlight.selectionHighlight.ignoreCase";
+    public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "gatchan.highlight.selectionHighlight.color";
+
 	public static final String PROP_HIGHLIGHT_CYCLE_COLOR = "gatchan.highlight.cycleColor";
 	public static final String PROP_HIGHLIGHT_APPEND = "gatchan.highlight.appendHighlight";
 	public static final String PROP_HIGHLIGHT_SUBSEQUENCE = "gatchan.highlight.subsequence";
@@ -76,7 +81,12 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private JCheckBox highlightHypersearch;
 	private TextAreaExtensionLayerChooser layerChooser;
 	private JSlider alphaSlider;
-	
+
+
+    private JCheckBox highlightSelection;
+    private JCheckBox selectionIgnoreCase;
+    private ColorWellButton selectionColor;
+
 	//{{{ HighlightOptionPane constructor
 	public HighlightOptionPane() 
 	{
@@ -126,6 +136,13 @@ public class HighlightOptionPane extends AbstractOptionPane
 					 });
 		squareColor.setEnabled(square.isSelected());
 		addComponent(highlightHypersearch = createCheckBox(PROP_HIGHLIGHT_HYPERSEARCH_RESULTS));
+        addComponent(new JLabel(jEdit.getProperty(PROP_LAYER_PROPERTY + ".text")),
+                 layerChooser = new TextAreaExtensionLayerChooser(jEdit.getIntegerProperty(PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER)));
+
+        addComponent(new JLabel(jEdit.getProperty(PROP_ALPHA + ".text")),
+                 alphaSlider = new JSlider(0,
+                               100,
+                               jEdit.getIntegerProperty(PROP_ALPHA, 50)));
 		
 		addSeparator(PROP_HIGHLIGHT_WORD_AT_CARET + ".text");
 		addComponent(highlightWordAtCaret = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET));
@@ -136,13 +153,13 @@ public class HighlightOptionPane extends AbstractOptionPane
 		addComponent(entireWord = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD));
 		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_WORD_AT_CARET_COLOR + ".text")),
 			     wordAtCaretColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_WORD_AT_CARET_COLOR)));
-		addComponent(new JLabel(jEdit.getProperty(PROP_LAYER_PROPERTY + ".text")), 
-			     layerChooser = new TextAreaExtensionLayerChooser(jEdit.getIntegerProperty(PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER)));
-		
-		addComponent(new JLabel(jEdit.getProperty(PROP_ALPHA + ".text")), 
-			     alphaSlider = new JSlider(0,
-						       100,
-						       jEdit.getIntegerProperty(PROP_ALPHA, 50)));
+
+
+        addSeparator(PROP_HIGHLIGHT_SELECTION + ".text");
+        addComponent(highlightSelection = createCheckBox(PROP_HIGHLIGHT_SELECTION));
+        addComponent(selectionIgnoreCase = createCheckBox(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE));
+        addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_SELECTION_COLOR + ".text")),
+                 selectionColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR)));
 	} //}}}
 	
 	//{{{ _save() method
@@ -172,6 +189,10 @@ public class HighlightOptionPane extends AbstractOptionPane
 		}
 		
 		jEdit.setIntegerProperty(PROP_ALPHA, alphaSlider.getValue());
+
+        jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION, highlightSelection.isSelected());
+        jEdit.setColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR, selectionColor.getSelectedColor());
+        jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE, selectionIgnoreCase.isSelected());
 	} //}}}
 
 	//{{{ createCheckBox() method
