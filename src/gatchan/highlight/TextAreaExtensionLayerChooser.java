@@ -4,7 +4,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2007 Matthieu Casanova
+ * Copyright (C) 2007, 2009 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,10 +23,9 @@
 package gatchan.highlight;
 
 //{{{ imports
-import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
-import javax.swing.JComboBox;
-import java.util.Arrays;
+
+import javax.swing.*;
 //}}}
 
 /**
@@ -35,19 +34,19 @@ import java.util.Arrays;
  */
 public class TextAreaExtensionLayerChooser extends JComboBox
 {
-	private static Object[] layers = new Object[]{	TextAreaPainter.LOWEST_LAYER                 + " (LOWEST_LAYER)" ,
-							TextAreaPainter.BACKGROUND_LAYER             + " (BACKGROUND_LAYER)",
-							TextAreaPainter.LINE_BACKGROUND_LAYER        + " (LINE_BACKGROUND_LAYER)",
-							TextAreaPainter.BELOW_SELECTION_LAYER        + " (BELOW_SELECTION_LAYER)",
-							TextAreaPainter.SELECTION_LAYER              + " (SELECTION_LAYER)",
-							TextAreaPainter.WRAP_GUIDE_LAYER             + " (WRAP_GUIDE_LAYER)",
-							TextAreaPainter.BELOW_MOST_EXTENSIONS_LAYER  + " (BELOW_MOST_EXTENSIONS_LAYER)",
-							TextAreaPainter.DEFAULT_LAYER                + " (DEFAULT_LAYER)",
-							TextAreaPainter.BLOCK_CARET_LAYER            + " (BLOCK_CARET_LAYER)",
-							TextAreaPainter.BRACKET_HIGHLIGHT_LAYER      + " (BRACKET_HIGHLIGHT_LAYER)",
-							TextAreaPainter.TEXT_LAYER                   + " (TEXT_LAYER)",
-							TextAreaPainter.CARET_LAYER                  + " (CARET_LAYER)", 
-							TextAreaPainter.HIGHEST_LAYER	              + " (HIGHEST_LAYER)"};            
+	private static String[] layers = {	TextAreaPainter.LOWEST_LAYER                 + " (LOWEST_LAYER)" ,
+						TextAreaPainter.BACKGROUND_LAYER             + " (BACKGROUND_LAYER)",
+						TextAreaPainter.LINE_BACKGROUND_LAYER        + " (LINE_BACKGROUND_LAYER)",
+						TextAreaPainter.BELOW_SELECTION_LAYER        + " (BELOW_SELECTION_LAYER)",
+						TextAreaPainter.SELECTION_LAYER              + " (SELECTION_LAYER)",
+						TextAreaPainter.WRAP_GUIDE_LAYER             + " (WRAP_GUIDE_LAYER)",
+						TextAreaPainter.BELOW_MOST_EXTENSIONS_LAYER  + " (BELOW_MOST_EXTENSIONS_LAYER)",
+						TextAreaPainter.DEFAULT_LAYER                + " (DEFAULT_LAYER)",
+						TextAreaPainter.BLOCK_CARET_LAYER            + " (BLOCK_CARET_LAYER)",
+						TextAreaPainter.BRACKET_HIGHLIGHT_LAYER      + " (BRACKET_HIGHLIGHT_LAYER)",
+						TextAreaPainter.TEXT_LAYER                   + " (TEXT_LAYER)",
+						TextAreaPainter.CARET_LAYER                  + " (CARET_LAYER)",
+						TextAreaPainter.HIGHEST_LAYER	              + " (HIGHEST_LAYER)"};
 	                                                                                                                
 	//{{{ TextAreaExtensionLayerChooser constructor
 	/**
@@ -80,12 +79,15 @@ public class TextAreaExtensionLayerChooser extends JComboBox
 	public int getLayer() throws NumberFormatException
 	{
 		String value = (String) getSelectedItem();
-		if (Arrays.binarySearch(layers, value) == -1)
+		for (String item: layers)
 		{
-			int layer = Integer.parseInt(value);
-			return layer;
+			if (item.equals(value))
+			{
+				int layer = Integer.parseInt(value.substring(0, value.indexOf(' ')));
+				return layer;
+			}
 		}
-		int layer = Integer.parseInt(value.substring(0, value.indexOf(' ')));
+		int layer = Integer.parseInt(value);
 		return layer;
 	} //}}}
 }
