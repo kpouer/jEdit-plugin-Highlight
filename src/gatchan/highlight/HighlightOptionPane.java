@@ -36,7 +36,6 @@ import java.awt.event.ActionEvent;
 * The option pane of the Highlight plugin.
 *
 * @author Matthieu Casanova
-* @version $Id: HighlightOptionPane.java,v 1.8 2006/03/15 09:27:21 kpouer Exp $
 */
 public class HighlightOptionPane extends AbstractOptionPane 
 {
@@ -48,9 +47,9 @@ public class HighlightOptionPane extends AbstractOptionPane
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD = "gatchan.highlight.caretHighlight.entireWord";
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_COLOR = "gatchan.highlight.caretHighlight.color";
 
-    public static final String PROP_HIGHLIGHT_SELECTION = "gatchan.highlight.selectionHighlight";
-    public static final String PROP_HIGHLIGHT_SELECTION_IGNORE_CASE = "gatchan.highlight.selectionHighlight.ignoreCase";
-    public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "gatchan.highlight.selectionHighlight.color";
+	public static final String PROP_HIGHLIGHT_SELECTION = "gatchan.highlight.selectionHighlight";
+	public static final String PROP_HIGHLIGHT_SELECTION_IGNORE_CASE = "gatchan.highlight.selectionHighlight.ignoreCase";
+	public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "gatchan.highlight.selectionHighlight.color";
 
 	public static final String PROP_HIGHLIGHT_CYCLE_COLOR = "gatchan.highlight.cycleColor";
 	public static final String PROP_HIGHLIGHT_APPEND = "gatchan.highlight.appendHighlight";
@@ -83,9 +82,9 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private JSlider alphaSlider;
 
 
-    private JCheckBox highlightSelection;
-    private JCheckBox selectionIgnoreCase;
-    private ColorWellButton selectionColor;
+	private JCheckBox highlightSelection;
+	private JCheckBox selectionIgnoreCase;
+	private ColorWellButton selectionColor;
 
 	//{{{ HighlightOptionPane constructor
 	public HighlightOptionPane() 
@@ -109,17 +108,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 							     defaultColor.setEnabled(!cycleColor.isSelected());
 						     }
 					     });
-		addComponent(cycleColor = createCheckBox(PROP_HIGHLIGHT_CYCLE_COLOR));
-		addComponent(new JLabel(jEdit.getProperty(PROP_DEFAULT_COLOR + ".text")),
-			     defaultColor = new ColorWellButton(jEdit.getColorProperty(PROP_DEFAULT_COLOR)));
-		cycleColor.addActionListener(new ActionListener() 
-					     {
-						     public void actionPerformed(ActionEvent e) 
-						     {
-							     defaultColor.setEnabled(!cycleColor.isSelected());
-						     }
-					     });
-		
+
 		if (cycleColor.isSelected())
 			defaultColor.setEnabled(false);
 		
@@ -136,10 +125,10 @@ public class HighlightOptionPane extends AbstractOptionPane
 					 });
 		squareColor.setEnabled(square.isSelected());
 		addComponent(highlightHypersearch = createCheckBox(PROP_HIGHLIGHT_HYPERSEARCH_RESULTS));
-        addComponent(new JLabel(jEdit.getProperty(PROP_LAYER_PROPERTY + ".text")),
+		addComponent(new JLabel(jEdit.getProperty(PROP_LAYER_PROPERTY + ".text")),
                  layerChooser = new TextAreaExtensionLayerChooser(jEdit.getIntegerProperty(PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER)));
 
-        addComponent(new JLabel(jEdit.getProperty(PROP_ALPHA + ".text")),
+		addComponent(new JLabel(jEdit.getProperty(PROP_ALPHA + ".text")),
                  alphaSlider = new JSlider(0,
                                100,
                                jEdit.getIntegerProperty(PROP_ALPHA, 50)));
@@ -155,10 +144,10 @@ public class HighlightOptionPane extends AbstractOptionPane
 			     wordAtCaretColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_WORD_AT_CARET_COLOR)));
 
 
-        addSeparator(PROP_HIGHLIGHT_SELECTION + ".text");
-        addComponent(highlightSelection = createCheckBox(PROP_HIGHLIGHT_SELECTION));
-        addComponent(selectionIgnoreCase = createCheckBox(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE));
-        addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_SELECTION_COLOR + ".text")),
+		addSeparator(PROP_HIGHLIGHT_SELECTION + ".text");
+		addComponent(highlightSelection = createCheckBox(PROP_HIGHLIGHT_SELECTION));
+		addComponent(selectionIgnoreCase = createCheckBox(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE));
+		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_SELECTION_COLOR + ".text")),
                  selectionColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR)));
 	} //}}}
 	
