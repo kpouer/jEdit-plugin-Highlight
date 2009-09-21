@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2008 Matthieu Casanova
+* Copyright (C) 2004, 2009 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -39,7 +39,6 @@ import java.util.regex.PatternSyntaxException;
  * highlightList in the textarea and draw a rectangle in it's background.
  *
  * @author Matthieu Casanova
- * @version $Id: Highlighter.java,v 1.19 2006/07/24 09:26:52 kpouer Exp $
  */
 class Highlighter extends TextAreaExtension implements HighlightChangeListener
 {
@@ -83,7 +82,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		if (highlightManager.isHighlightEnable() &&
 		    highlightManager.countHighlights() != 0 ||
 		    HighlightManagerTableModel.currentWordHighlight.isEnabled() ||
-            HighlightManagerTableModel.selectionHighlight.isEnabled())
+		    HighlightManagerTableModel.selectionHighlight.isEnabled())
 			super.paintScreenLineRange(gfx, firstLine, lastLine, physicalLines, start, end, y, lineHeight);
 	} //}}}
 
