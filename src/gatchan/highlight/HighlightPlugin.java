@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2007 Matthieu Casanova
+ * Copyright (C) 2004, 2009 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -43,7 +43,6 @@ import java.io.File;
  * The HighlightPlugin. This is my first plugin for jEdit, some parts of my code were inspired by the ErrorList plugin
  *
  * @author Matthieu Casanova
- * @version $Id: HighlightPlugin.java,v 1.20 2006/06/21 09:40:32 kpouer Exp $
  */
 public class HighlightPlugin extends EBPlugin
 {
@@ -113,6 +112,14 @@ public class HighlightPlugin extends EBPlugin
 			textArea.putClientProperty(Highlighter.class, null);
 			highlightManager.removeHighlightChangeListener(highlighter);
 		}
+		HighlightOverview overview = (HighlightOverview) textArea.getClientProperty(HighlightOverview.class);
+		if (overview != null)
+		{
+			textArea.removeLeftOfScrollBar(overview);
+			textArea.putClientProperty(HighlightOverview.class, null);
+			highlightManager.removeHighlightChangeListener(overview);
+			textArea.revalidate();
+		}
 		textArea.removeCaretListener(highlightManager);
 	} //}}}
 
@@ -123,7 +130,7 @@ public class HighlightPlugin extends EBPlugin
 	 * @param textArea the textarea to initialize
 	 * @return the new highlighter for the textArea
 	 */
-	private Highlighter initTextArea(JEditTextArea textArea)
+	private void initTextArea(JEditTextArea textArea)
 	{
 		Highlighter highlighter = new Highlighter(textArea);
 		highlightManager.addHighlightChangeListener(highlighter);
@@ -131,7 +138,12 @@ public class HighlightPlugin extends EBPlugin
 		painter.addExtension(layer, highlighter);
 		textArea.putClientProperty(Highlighter.class, highlighter);
 		textArea.addCaretListener(highlightManager);
-		return highlighter;
+
+		HighlightOverview overview = new HighlightOverview(textArea);
+		highlightManager.addHighlightChangeListener(overview);
+		textArea.addLeftOfScrollBar(overview);
+		textArea.putClientProperty(HighlightOverview.class, overview);
+		textArea.revalidate();
 	} //}}}
 
 	//{{{ initView() method
