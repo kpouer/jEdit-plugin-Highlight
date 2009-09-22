@@ -25,6 +25,7 @@ package gatchan.highlight;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.TextArea;
+import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.util.IntegerArray;
 
 import javax.swing.*;
@@ -36,6 +37,7 @@ import java.awt.*;
 public class HighlightOverview extends JPanel implements HighlightChangeListener
 {
 	private final IntegerArray items;
+	private int count;
 
 	private TextArea textArea;
 
@@ -49,6 +51,9 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 
 	public HighlightOverview(TextArea textArea)
 	{
+		Font ff = getFont();
+		Font f = new Font(ff.getName(), Font.BOLD, 8);
+		setFont(f);
 		this.textArea = textArea;
 		items = new IntegerArray(32);
 		setRequestFocusEnabled(false);
@@ -68,7 +73,8 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 				buffer.getLineOfOffset(end)) - 1 == end;
 		SearchMatcher matcher = HighlightManagerTableModel.currentWordHighlight.getSearchMatcher();
 		int lastResult = -1;
-		for(int counter = 0; ; counter++)
+		int counter;
+		for(counter = 0; ; counter++)
 		{
 			boolean startOfLine = buffer.getLineStartOffset(
 				buffer.getLineOfOffset(offset)) == offset;
@@ -89,6 +95,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			}
 			offset += match.end;
 		}
+		count = counter;
 		repaint();
 	}
 
@@ -100,7 +107,9 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			return;
 
 		int lineCount = textArea.getBuffer().getLineCount();
-		gfx.setColor(Color.red);
+		gfx.setColor(Color.black);
+//		gfx.drawString(String.valueOf(count), 0, 10);
+		gfx.setColor(jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW_COLOR));
 
 		for (int i = 0;i<items.getSize();i++)
 		{
@@ -111,6 +120,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 
 	private int lineToY(int line, int lineCount)
 	{
+//		return (getHeight() - 12 * Y_OFFSET) * line / lineCount;
 		return (getHeight() - 2 * Y_OFFSET) * line / lineCount;
 	}
 

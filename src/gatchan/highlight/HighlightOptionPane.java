@@ -63,7 +63,10 @@ public class HighlightOptionPane extends AbstractOptionPane
 	public static final String PROP_ALPHA = "gatchan.highlight.alpha";
 	public static final String PROP_SQUARE = "gatchan.highlight.square";
 	public static final String PROP_SQUARE_COLOR = "gatchan.highlight.square.color";
-	
+
+	public static final String PROP_HIGHLIGHT_OVERVIEW = "gatchan.highlight.overview";
+	public static final String PROP_HIGHLIGHT_OVERVIEW_COLOR = "gatchan.highlight.overview.color";
+
 	private JCheckBox highlightWordAtCaret;
 	private JCheckBox wordAtCaretIgnoreCase;
 	private JCheckBox entireWord;
@@ -85,6 +88,9 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private JCheckBox highlightSelection;
 	private JCheckBox selectionIgnoreCase;
 	private ColorWellButton selectionColor;
+
+	private JCheckBox highlightOverview;
+	private ColorWellButton highlightOverviewColor;
 
 	//{{{ HighlightOptionPane constructor
 	public HighlightOptionPane() 
@@ -149,6 +155,12 @@ public class HighlightOptionPane extends AbstractOptionPane
 		addComponent(selectionIgnoreCase = createCheckBox(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE));
 		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_SELECTION_COLOR + ".text")),
                  selectionColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR)));
+
+		addSeparator(PROP_HIGHLIGHT_OVERVIEW+".text");
+		addComponent(highlightOverview = createCheckBox(PROP_HIGHLIGHT_OVERVIEW));
+		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_OVERVIEW_COLOR + ".text")),
+				 highlightOverviewColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_OVERVIEW_COLOR)));
+
 	} //}}}
 	
 	//{{{ _save() method
@@ -169,7 +181,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 		jEdit.setColorProperty(PROP_DEFAULT_COLOR, defaultColor.getSelectedColor());
 		jEdit.setBooleanProperty(PROP_SQUARE, square.isSelected());
 		jEdit.setColorProperty(PROP_SQUARE_COLOR, squareColor.getSelectedColor());
-		try 
+		try
 		{
 			jEdit.setIntegerProperty(PROP_LAYER_PROPERTY, layerChooser.getLayer());
 		} 
@@ -179,9 +191,12 @@ public class HighlightOptionPane extends AbstractOptionPane
 		
 		jEdit.setIntegerProperty(PROP_ALPHA, alphaSlider.getValue());
 
-        jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION, highlightSelection.isSelected());
-        jEdit.setColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR, selectionColor.getSelectedColor());
-        jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE, selectionIgnoreCase.isSelected());
+		jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION, highlightSelection.isSelected());
+		jEdit.setColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR, selectionColor.getSelectedColor());
+		jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE, selectionIgnoreCase.isSelected());
+
+		jEdit.setBooleanProperty(PROP_HIGHLIGHT_OVERVIEW, highlightOverview.isSelected());
+		jEdit.setColorProperty(PROP_HIGHLIGHT_OVERVIEW_COLOR, highlightOverviewColor.getSelectedColor());
 	} //}}}
 
 	//{{{ createCheckBox() method
