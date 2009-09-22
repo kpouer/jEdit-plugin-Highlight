@@ -30,6 +30,8 @@ import org.gjt.sp.util.IntegerArray;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * @author Szalai Endre
@@ -49,7 +51,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	private static int Y_OFFSET = 16;
 	private static Dimension preferredSize = new Dimension(OVERVIEW_WIDTH, 0);
 
-	public HighlightOverview(TextArea textArea)
+	public HighlightOverview(final TextArea textArea)
 	{
 		Font ff = getFont();
 		Font f = new Font(ff.getName(), Font.BOLD, 8);
@@ -57,6 +59,16 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		this.textArea = textArea;
 		items = new IntegerArray(32);
 		setRequestFocusEnabled(false);
+		addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				int lineCount = textArea.getLineCount();
+				int line = yToLine(e.getY(), lineCount);
+				textArea.scrollTo(line - textArea.getVisibleLines() / 2, 0, true);
+			}
+		});
 	}
 
 	public void highlightUpdated(boolean highlightEnabled)
@@ -106,14 +118,14 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		if (items.getSize() == 0)
 			return;
 
-		int lineCount = textArea.getBuffer().getLineCount();
-		gfx.setColor(Color.black);
+		int lineCount = textArea.getLineCount();
+//		gfx.setColor(Color.black);
 //		gfx.drawString(String.valueOf(count), 0, 10);
 		gfx.setColor(jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW_COLOR));
 
 		for (int i = 0;i<items.getSize();i++)
 		{
-			int y = Y_OFFSET + lineToY(items.get(i), lineCount) - ITEM_BORDER;
+			int y = lineToY(items.get(i), lineCount);
 			gfx.fillRect(ITEM_BORDER, y, ITEM_WIDTH, ITEM_HEIGHT);
 		}
 	}
@@ -121,7 +133,12 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	private int lineToY(int line, int lineCount)
 	{
 //		return (getHeight() - 12 * Y_OFFSET) * line / lineCount;
-		return (getHeight() - 2 * Y_OFFSET) * line / lineCount;
+		return Y_OFFSET + (getHeight() - 2 * Y_OFFSET) * line / lineCount - ITEM_BORDER;
+	}
+
+	private int yToLine(int y, int lineCount)
+	{
+		return (y + ITEM_BORDER - Y_OFFSET) * lineCount / (getHeight() - 2 * Y_OFFSET);
 	}
 
 	public Dimension getPreferredSize()
