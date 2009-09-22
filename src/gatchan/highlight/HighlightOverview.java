@@ -66,7 +66,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			{
 				int lineCount = textArea.getLineCount();
 				int line = yToLine(e.getY(), lineCount);
-				textArea.scrollTo(Math.max(line - textArea.getVisibleLines() / 2, 0), 0, true);
+				textArea.setFirstLine(Math.max(line - textArea.getVisibleLines() / 2, 0));
 			}
 		});
 	}
