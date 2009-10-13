@@ -22,6 +22,7 @@
  */
 package gatchan.highlight;
 
+//{{{ Imports
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.TextArea;
@@ -32,6 +33,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+//}}}
 
 /**
  * @author Szalai Endre
@@ -51,6 +53,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	private static int Y_OFFSET = 16;
 	private static Dimension preferredSize = new Dimension(OVERVIEW_WIDTH, 0);
 
+	//{{{ HighlightOverview constructor
 	public HighlightOverview(final TextArea textArea)
 	{
 		Font ff = getFont();
@@ -69,15 +72,16 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 				textArea.setFirstLine(Math.max(line - textArea.getVisibleLines() / 2, 0));
 			}
 		});
-	}
+	} //}}}
 
+	//{{{ highlightUpdated() method
 	public void highlightUpdated(boolean highlightEnabled)
 	{
 		items.clear();
-		if (!highlightEnabled)
-		{
+		if (!highlightEnabled || !HighlightManagerTableModel.currentWordHighlight.isEnabled() ||
+			textArea.getSelectionCount() != 0)
 			return;
-		}
+
 		int offset = 0;
 		JEditBuffer buffer = textArea.getBuffer();
 		int end = buffer.getLength();
@@ -109,9 +113,9 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		}
 		count = counter;
 		repaint();
-	}
+	} //}}}
 
-
+	//{{{ paintComponent() method
 	public void paintComponent(Graphics gfx)
 	{
 		super.paintComponent(gfx);
@@ -128,21 +132,23 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			int y = lineToY(items.get(i), lineCount);
 			gfx.fillRect(ITEM_BORDER, y, ITEM_WIDTH, ITEM_HEIGHT);
 		}
-	}
-
+	} //}}}
+                     
+	//{{{ lineToY() method
 	private int lineToY(int line, int lineCount)
 	{
-//		return (getHeight() - 12 * Y_OFFSET) * line / lineCount;
 		return Y_OFFSET + (getHeight() - 2 * Y_OFFSET) * line / lineCount - ITEM_BORDER;
-	}
+	} //}}}
 
+	//{{{ yToLine() method
 	private int yToLine(int y, int lineCount)
 	{
 		return (y + ITEM_BORDER - Y_OFFSET) * lineCount / (getHeight() - 2 * Y_OFFSET);
-	}
+	} //}}}
 
+	//{{{ getPreferredSize() method
 	public Dimension getPreferredSize()
 	{
 		return preferredSize;
-	}
+	} //}}}
 }

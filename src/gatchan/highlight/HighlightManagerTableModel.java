@@ -658,7 +658,8 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			Selection selectionatOffset = textArea.getSelectionAtOffset(e.getDot());
 			if (textArea.getLineLength(line) == 0 ||
 			    selectionatOffset == null ||
-			    selectionatOffset.getStartLine() != selectionatOffset.getEndLine())
+			    selectionatOffset.getStartLine() != selectionatOffset.getEndLine() ||
+				selectionatOffset.getEnd() - selectionatOffset.getStart() == 0)
 			{
 				selectionHighlight.setEnabled(false);
 			}
