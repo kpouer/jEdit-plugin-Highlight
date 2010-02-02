@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2007 Matthieu Casanova
+ * Copyright (C) 2004, 2010 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -392,7 +392,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 */
 	public void bufferClosed(Buffer buffer)
 	{
-		List<Highlight> highlights = (List<Highlight>) buffer.getProperty("highlights");
+		List<Highlight> highlights = (List<Highlight>) buffer.getProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
 		if (highlights != null)
 		{
 			for (int i = 0; i < highlights.size(); i++)
@@ -440,12 +440,14 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		if (highlights != null)
 		{
-			BufferedWriter writer = null;
+			PrintWriter writer = null;
 			try
 			{
-				writer = new BufferedWriter(new FileWriter(highlights));
-				writer.write(FILE_VERSION);
-				writer.write('\n');
+				File parentFile = highlights.getParentFile();
+				if (!parentFile.isDirectory())
+					parentFile.mkdirs();
+				writer = new PrintWriter(highlights);
+				writer.println(FILE_VERSION);
 				try
 				{
 					rwLock.getWriteLock();
@@ -455,8 +457,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 						Highlight highlight = listIterator.next();
 						if (highlight.getScope() == Highlight.PERMANENT_SCOPE)
 						{
-							writer.write(highlight.serialize());
-							writer.write('\n');
+							writer.println(highlight.serialize());
 						}
 						else
 						{

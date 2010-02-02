@@ -29,8 +29,13 @@ package gatchan.highlight;
 public class InvalidHighlightException extends Exception
 {
 
-  public InvalidHighlightException(String message)
-  {
-    super(message);
-  }
+	public InvalidHighlightException(String message)
+	{
+		super(message);
+	}
+
+	public InvalidHighlightException(Throwable cause)
+	{
+		super(cause);
+	}
 }
