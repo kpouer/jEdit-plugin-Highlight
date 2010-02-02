@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2009 Matthieu Casanova
+ * Copyright (C) 2004, 2010 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -85,7 +85,7 @@ public class HighlightPlugin extends EBPlugin
 		Buffer[] buffers = jEdit.getBuffers();
 		for (int i = 0; i < buffers.length; i++)
 		{
-			buffers[i].unsetProperty("highlights");
+			buffers[i].unsetProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
 		}
 
 		jEdit.visit(new TextAreaUninitializer());
