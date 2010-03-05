@@ -22,14 +22,13 @@
 package gatchan.highlight;
 
 //{{{ Imports
-import org.gjt.sp.jedit.jEdit;
+
 import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
-import org.gjt.sp.util.SegmentCharSequence;
 
-import javax.swing.text.Segment;
 import java.awt.*;
 import java.util.regex.PatternSyntaxException;
 //}}}
@@ -43,8 +42,6 @@ import java.util.regex.PatternSyntaxException;
 class Highlighter extends TextAreaExtension implements HighlightChangeListener
 {
 	private final JEditTextArea textArea;
-	private final Segment tempLineContent = new Segment();
-	private final Segment lineContent = new Segment();
 	private final Point point = new Point();
 	private FontMetrics fm;
 
@@ -54,6 +51,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	public static boolean square;
 
 	public static Color squareColor;
+
+	public static final int MAX_LINE_LENGTH = 10000;
 
 	//{{{ Highlighter constructor
 	Highlighter(JEditTextArea textArea)
@@ -113,41 +112,45 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 				   int end,
 				   int y)
 	{
-		textArea.getLineText(physicalLine, lineContent);
-		if (lineContent.count == 0)
-			return;
+		JEditBuffer buffer = textArea.getBuffer();
+		int lineStart = buffer.getLineStartOffset(physicalLine);
+		int length = buffer.getLineLength(physicalLine);
 
 		int startOffset = textArea.getLineStartOffset(physicalLine);
 		int endOffset = textArea.getLineEndOffset(physicalLine);
 		int screenToPhysicalOffset = start - startOffset;
-		lineContent.offset += screenToPhysicalOffset;
-		lineContent.count -= screenToPhysicalOffset;
-		lineContent.count -= endOffset - end;
 
-		JEditBuffer buffer = textArea.getBuffer();
-		tempLineContent.array = lineContent.array;
-		tempLineContent.offset = lineContent.offset;
-		tempLineContent.count = lineContent.count;
+
+		int l = length - screenToPhysicalOffset - endOffset + end;
+		if (l > MAX_LINE_LENGTH)
+			l = MAX_LINE_LENGTH;
+		CharSequence lineContent = buffer.getSegment(lineStart + screenToPhysicalOffset,
+			l);
+		if (lineContent.length() == 0)
+			return;
+
+		CharSequence tempLineContent = lineContent;
 		try
 		{
 			highlightManager.getReadLock();
 			for (int i = 0; i < highlightManager.countHighlights(); i++)
 			{
 				Highlight highlight = highlightManager.getHighlight(i);
-				highlight(highlight, buffer, gfx, screenLine, physicalLine, y, screenToPhysicalOffset);
-				tempLineContent.offset = lineContent.offset;
-				tempLineContent.count = lineContent.count;
+				highlight(highlight, buffer, gfx, screenLine, physicalLine, y, screenToPhysicalOffset,
+					tempLineContent);
+				tempLineContent = lineContent;
 			}
 		}
 		finally
 		{
 			highlightManager.releaseLock();
 		}
-		tempLineContent.offset = lineContent.offset;
-		tempLineContent.count = lineContent.count;
+		tempLineContent = lineContent;
 
-		highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, screenLine, physicalLine, y, screenToPhysicalOffset);
-		highlight(HighlightManagerTableModel.selectionHighlight, buffer, gfx, screenLine, physicalLine, y, screenToPhysicalOffset);
+		highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, screenLine, physicalLine, y,
+			screenToPhysicalOffset, tempLineContent);
+		highlight(HighlightManagerTableModel.selectionHighlight, buffer, gfx, screenLine, physicalLine, y,
+			screenToPhysicalOffset, tempLineContent);
 	} //}}}
 
 	//{{{ highlight() method
@@ -157,7 +160,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			       int screenLine,
 			       int physicalLine,
 			       int y,
-			       int screenToPhysicalOffset)
+			       int screenToPhysicalOffset,
+			       CharSequence tempLineContent)
 	{
 		if (!highlight.isEnabled() ||
 		    !highlight.isValid() ||
@@ -175,8 +179,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			SearchMatcher.Match match = null;
 			while (true)
 			{
-				match = searchMatcher.nextMatch(new SegmentCharSequence(tempLineContent),
-								(i == 0),
+				match = searchMatcher.nextMatch(tempLineContent,
+								i == 0,
 								true,
 								match == null,
 								false);
@@ -184,22 +188,13 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 					break;
 				_highlight(highlight.getColor(), gfx, physicalLine, match.start + i + screenToPhysicalOffset, match.end + i + screenToPhysicalOffset, y);
 				highlight.updateLastSeen();
-				if (subsequence)
-				{
-					tempLineContent.count -= match.start + 1;
-					tempLineContent.offset += match.start + 1;
-					i += match.start + 1;
-				}
-				else
-				{
-					tempLineContent.count -= match.end;
-
-					tempLineContent.offset += match.end;
-					i += match.end;
-				}
-
-				if (tempLineContent.count <= 0)
+				int skip = subsequence ? match.start + 1 : match.end;
+				i += skip;
+				int length = tempLineContent.length() - skip;
+				if (length <= 0)
 					break;
+				tempLineContent = tempLineContent.subSequence(skip,
+					length + skip);
 			}
 		}
 		catch (PatternSyntaxException e)

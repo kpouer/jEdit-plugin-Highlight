@@ -4,7 +4,7 @@
  * :folding=explicit:collapseFolds=1:
  *
  * Copyright (C) 2009 Szalai Endre
- * Portions Copyright (C) 2009 Matthieu Casanova
+ * Portions Copyright (C) 2009, 2010 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -43,15 +43,15 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	private final IntegerArray items;
 	private int count;
 
-	private TextArea textArea;
+	private final TextArea textArea;
 
 	private static final int ITEM_HEIGHT = 4;
 	private static final int OVERVIEW_WIDTH = 12;
 	private static final int ITEM_BORDER = 2;
 	private static final int ITEM_WIDTH = OVERVIEW_WIDTH - 2 * ITEM_BORDER;
 	// To be in the same line as the scrollbar
-	private static int Y_OFFSET = 16;
-	private static Dimension preferredSize = new Dimension(OVERVIEW_WIDTH, 0);
+	private static final int Y_OFFSET = 16;
+	private static final Dimension preferredSize = new Dimension(OVERVIEW_WIDTH, 0);
 
 	//{{{ HighlightOverview constructor
 	public HighlightOverview(final TextArea textArea)
@@ -109,13 +109,17 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 				items.add(newLine);
 				lastResult = newLine;
 			}
-			offset += match.end;
+			int nextLine = newLine + 1;
+			if (nextLine >= buffer.getLineCount())
+				break;
+			offset = buffer.getLineStartOffset(nextLine);
 		}
 		count = counter;
 		repaint();
 	} //}}}
 
 	//{{{ paintComponent() method
+	@Override
 	public void paintComponent(Graphics gfx)
 	{
 		super.paintComponent(gfx);
@@ -147,6 +151,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	} //}}}
 
 	//{{{ getPreferredSize() method
+	@Override
 	public Dimension getPreferredSize()
 	{
 		return preferredSize;
