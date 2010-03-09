@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2009 Matthieu Casanova
+* Copyright (C) 2004, 2010 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -22,7 +22,6 @@
 package gatchan.highlight;
 
 //{{{ Imports
-
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.search.SearchMatcher;
@@ -136,7 +135,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			for (int i = 0; i < highlightManager.countHighlights(); i++)
 			{
 				Highlight highlight = highlightManager.getHighlight(i);
-				highlight(highlight, buffer, gfx, screenLine, physicalLine, y, screenToPhysicalOffset,
+				highlight(highlight, buffer, gfx, physicalLine, y, screenToPhysicalOffset,
 					tempLineContent);
 				tempLineContent = lineContent;
 			}
@@ -147,9 +146,9 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		}
 		tempLineContent = lineContent;
 
-		highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, screenLine, physicalLine, y,
+		highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, physicalLine, y,
 			screenToPhysicalOffset, tempLineContent);
-		highlight(HighlightManagerTableModel.selectionHighlight, buffer, gfx, screenLine, physicalLine, y,
+		highlight(HighlightManagerTableModel.selectionHighlight, buffer, gfx, physicalLine, y,
 			screenToPhysicalOffset, tempLineContent);
 	} //}}}
 
@@ -157,7 +156,6 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	private void highlight(Highlight highlight,
 			       JEditBuffer buffer,
 			       Graphics2D gfx,
-			       int screenLine,
 			       int physicalLine,
 			       int y,
 			       int screenToPhysicalOffset,
