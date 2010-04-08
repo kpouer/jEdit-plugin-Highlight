@@ -23,6 +23,7 @@ package gatchan.highlight;
 
 //{{{ Imports
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.visitors.JEditVisitorAdapter;
 import org.gjt.sp.jedit.search.SearchAndReplace;
 import org.gjt.sp.jedit.gui.DockableWindowManager;
@@ -44,7 +45,7 @@ import java.io.File;
  *
  * @author Matthieu Casanova
  */
-public class HighlightPlugin extends EBPlugin
+public class HighlightPlugin extends EditPlugin
 {
 	private static HighlightManager highlightManager;
 
@@ -56,27 +57,33 @@ public class HighlightPlugin extends EBPlugin
 
 	private int layer;
 	private float alpha;
+	private boolean highlightOverview;
 
 	//{{{ start() method
 	/**
 	 * Initialize the plugin. When starting this plugin will add an Highlighter on each text area
 	 */
+	@Override
 	public void start()
 	{
 		layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
+		highlightOverview = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW);
 		File highlightFile = dataMigration();
 		highlightManager = HighlightManagerTableModel.createInstance(highlightFile);
 		highlightManager.propertiesChanged();
 		jEdit.visit(new TextAreaInitializer());
 		jEdit.visit(new ViewInitializer());
+		EditBus.addToBus(this);
 	} //}}}
 
 	//{{{ stop() method
 	/**
 	 * uninitialize the plugin. we will remove the Highlighter on each text area
 	 */
+	@Override
 	public void stop()
 	{
+		EditBus.removeFromBus(this);
 		if (highlightManager.countHighlights() == 0 && !highlightManager.isHighlightWordAtCaret())
 			jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "defer");
 		else
@@ -100,7 +107,7 @@ public class HighlightPlugin extends EBPlugin
 	 *
 	 * @param textArea the textarea from wich we will remove the highlighter
 	 * @see #stop()
-	 * @see #handleEditPaneMessage(EditPaneUpdate)
+	 * @see #handleEditPaneUpdate(org.gjt.sp.jedit.msg.EditPaneUpdate) 
 	 */
 	private static void uninitTextArea(JEditTextArea textArea)
 	{
@@ -112,14 +119,7 @@ public class HighlightPlugin extends EBPlugin
 			textArea.putClientProperty(Highlighter.class, null);
 			highlightManager.removeHighlightChangeListener(highlighter);
 		}
-		HighlightOverview overview = (HighlightOverview) textArea.getClientProperty(HighlightOverview.class);
-		if (overview != null)
-		{
-			textArea.removeLeftOfScrollBar(overview);
-			textArea.putClientProperty(HighlightOverview.class, null);
-			highlightManager.removeHighlightChangeListener(overview);
-			textArea.revalidate();
-		}
+		removeHighlightOverview(textArea);
 		textArea.removeCaretListener(highlightManager);
 	} //}}}
 
@@ -139,11 +139,34 @@ public class HighlightPlugin extends EBPlugin
 		textArea.putClientProperty(Highlighter.class, highlighter);
 		textArea.addCaretListener(highlightManager);
 
-		HighlightOverview overview = new HighlightOverview(textArea);
-		highlightManager.addHighlightChangeListener(overview);
-		textArea.addLeftOfScrollBar(overview);
-		textArea.putClientProperty(HighlightOverview.class, overview);
+		addHighlightOverview(textArea);
 		textArea.revalidate();
+	} //}}}
+
+	//{{{ addHighlightOverview() method
+	private void addHighlightOverview(JEditTextArea textArea)
+	{
+		HighlightOverview currentOverview = (HighlightOverview) textArea.getClientProperty(HighlightOverview.class);
+		if (highlightOverview && currentOverview == null) 
+		{
+			HighlightOverview overview = new HighlightOverview(textArea);
+			highlightManager.addHighlightChangeListener(overview);
+			textArea.addLeftOfScrollBar(overview);
+			textArea.putClientProperty(HighlightOverview.class, overview);
+		}
+	} //}}}
+
+	//{{{ addHighlightOverview() method
+	private static void removeHighlightOverview(JEditTextArea textArea)
+	{
+		HighlightOverview overview = (HighlightOverview) textArea.getClientProperty(HighlightOverview.class);
+		if (overview != null)
+		{
+			textArea.removeLeftOfScrollBar(overview);
+			textArea.putClientProperty(HighlightOverview.class, null);
+			highlightManager.removeHighlightChangeListener(overview);
+			textArea.revalidate();
+		}
 	} //}}}
 
 	//{{{ initView() method
@@ -181,69 +204,43 @@ public class HighlightPlugin extends EBPlugin
 	} //}}}
 
 	//{{{ handleMessage() method
-	public void handleMessage(EBMessage message)
+	@EBHandler
+	public void handlePropertiesChanged(PropertiesChanged propertiesChanged)
 	{
-		if (message instanceof ViewUpdate)
+		boolean newOverview = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW);
+		int layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
+		float alpha = ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f;
+		if (this.layer != layer || this.alpha != alpha || newOverview != highlightOverview)
 		{
-			handleViewMessage((ViewUpdate) message);
-		}
-		else if (message instanceof EditPaneUpdate)
-		{
-			handleEditPaneMessage((EditPaneUpdate) message);
-		}
-		else if (message instanceof BufferUpdate)
-		{
-			BufferUpdate bufferUpdate = (BufferUpdate) message;
-			if (bufferUpdate.getWhat() == BufferUpdate.CLOSED)
+			highlightOverview = newOverview;
+			this.layer = layer;
+			this.alpha = alpha;
+			jEdit.visit(new JEditVisitorAdapter()
 			{
-				highlightManager.bufferClosed(bufferUpdate.getBuffer());
-			}
+				@Override
+				public void visit(JEditTextArea textArea)
+				{
+					TextAreaPainter painter = textArea.getPainter();
+					Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
+					highlighter.setAlphaComposite(HighlightPlugin.this.alpha);
+					painter.removeExtension(highlighter);
+					painter.addExtension(HighlightPlugin.this.layer, highlighter);
+					if (highlightOverview)
+						addHighlightOverview(textArea);
+					else
+						removeHighlightOverview(textArea);
+				}
+			});
 		}
-		else if (message instanceof DockableWindowUpdate)
-		{
-			DockableWindowUpdate dockableUpdate = (DockableWindowUpdate) message;
-			if (dockableUpdate.getWhat() == DockableWindowUpdate.ACTIVATED &&
-				HighlightHypersearchResults.HYPERSEARCH.equals(dockableUpdate.getDockable()))
-			{
-				View view = ((DockableWindowManager) dockableUpdate.getSource()).getView();
-				HighlightHypersearchResults highlighter = (HighlightHypersearchResults)
-				view.getDockableWindowManager().getClientProperty(
-					HighlightHypersearchResults.class);
-				if (highlighter == null)
-					initView(view);
-				else
-					highlighter.start();
-			}
-		}
-		else if (message instanceof PropertiesChanged)
-		{
-			int layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
-			float alpha = ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f;
-			if (this.layer != layer || this.alpha != alpha)
-			{
-				this.layer = layer;
-				this.alpha = alpha;
-				jEdit.visit(new JEditVisitorAdapter()
-					    {
-						    public void visit(JEditTextArea textArea)
-						    {
-							    TextAreaPainter painter = textArea.getPainter();
-							    Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
-							    highlighter.setAlphaComposite(HighlightPlugin.this.alpha);
-							    painter.removeExtension(highlighter);
-							    painter.addExtension(HighlightPlugin.this.layer, highlighter);
-						    }
-					    });
-			}
-			highlightManager.propertiesChanged();
-		}
+		highlightManager.propertiesChanged();
 	} //}}}
 
-	//{{{ handleViewMessage() method
-	private void handleViewMessage(ViewUpdate message)
+
+	@EBHandler
+	public void handleViewUpdate(ViewUpdate vu)
 	{
-		View view = message.getView();
-		Object what = message.getWhat();
+		View view = vu.getView();
+		Object what = vu.getWhat();
 
 		if (what == ViewUpdate.CREATED)
 		{
@@ -253,13 +250,14 @@ public class HighlightPlugin extends EBPlugin
 		{
 			uninitView(view);
 		}
-	} //}}}
-	
+	}
+
 	//{{{ handleEditPaneMessage() method
-	private void handleEditPaneMessage(EditPaneUpdate message)
+	@EBHandler
+	public void handleEditPaneUpdate(EditPaneUpdate editPaneUpdate)
 	{
-		JEditTextArea textArea = message.getEditPane().getTextArea();
-		Object what = message.getWhat();
+		JEditTextArea textArea = editPaneUpdate.getEditPane().getTextArea();
+		Object what = editPaneUpdate.getWhat();
 
 		if (what == EditPaneUpdate.CREATED)
 		{
@@ -268,6 +266,34 @@ public class HighlightPlugin extends EBPlugin
 		else if (what == EditPaneUpdate.DESTROYED)
 		{
 			uninitTextArea(textArea);
+		}
+	} //}}}
+
+	//{{{ handleBufferPaneUpdate() method
+	@EBHandler
+	public void handleBufferPaneUpdate(BufferUpdate bufferUpdate)
+	{
+		if (bufferUpdate.getWhat() == BufferUpdate.CLOSED)
+		{
+			highlightManager.bufferClosed(bufferUpdate.getBuffer());
+		}
+	} //}}}
+
+	//{{{ handleBufferPaneUpdate() method
+	@EBHandler
+	public void handleDockableWindowUpdate(DockableWindowUpdate dockableUpdate)
+	{
+		if (dockableUpdate.getWhat() == DockableWindowUpdate.ACTIVATED &&
+			HighlightHypersearchResults.HYPERSEARCH.equals(dockableUpdate.getDockable()))
+		{
+			View view = ((DockableWindowManager) dockableUpdate.getSource()).getView();
+			HighlightHypersearchResults highlighter = (HighlightHypersearchResults)
+			view.getDockableWindowManager().getClientProperty(
+				HighlightHypersearchResults.class);
+			if (highlighter == null)
+				initView(view);
+			else
+				highlighter.start();
 		}
 	} //}}}
 
