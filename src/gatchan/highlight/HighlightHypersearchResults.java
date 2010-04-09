@@ -2,11 +2,11 @@ package gatchan.highlight;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.Collections;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
+import javax.swing.text.Segment;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
@@ -17,6 +17,8 @@ import org.gjt.sp.jedit.search.HyperSearchResult;
 import org.gjt.sp.jedit.search.HyperSearchResults;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.search.SearchMatcher.Match;
+import org.gjt.sp.util.ReverseCharSequence;
+import org.gjt.sp.util.SegmentCharSequence;
 
 public class HighlightHypersearchResults implements HighlightChangeListener
 {
@@ -73,7 +75,7 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 	{
 		private TreeCellRenderer renderer;
 
-		public HighlightTreeCellRenderer(TreeCellRenderer renderer)
+		HighlightTreeCellRenderer(TreeCellRenderer renderer)
 		{
 			this.renderer = renderer;
 		}
@@ -85,11 +87,11 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree, Object value,
-		                                              boolean sel, boolean expanded, boolean leaf, int row,
-		                                              boolean hasFocus)
+							      boolean sel, boolean expanded, boolean leaf, int row,
+							      boolean hasFocus)
 		{
 			Component defaultComponent = renderer.getTreeCellRendererComponent(tree,
-			                                                                   value, sel, expanded, leaf, row, hasFocus);
+				value, sel, expanded, leaf, row, hasFocus);
 			if (!(value instanceof DefaultMutableTreeNode))
 				return defaultComponent;
 			if (!jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_HYPERSEARCH_RESULTS))
@@ -101,30 +103,32 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 			HyperSearchResult result = (HyperSearchResult) obj;
 			String s = getHighlightedString(result.toString());
 			return renderer.getTreeCellRendererComponent(tree,
-			                                             new DefaultMutableTreeNode(s), sel, expanded, leaf, row, hasFocus);
+				new DefaultMutableTreeNode(s), sel, expanded, leaf, row, hasFocus);
 		}
 
 		private String getHighlightedString(String s)
 		{
 			HighlightManager manager = HighlightManagerTableModel.getManager();
-			Vector<HighlightPosition> highlights = new Vector<HighlightPosition>();
+			List<HighlightPosition> highlights = new LinkedList<HighlightPosition>();
 			try
 			{
 				manager.getReadLock();
-				for (int hi = 0; hi < manager.countHighlights(); hi++)
+				int highlightCount = manager.countHighlights();
+				for (int hi = 0; hi < highlightCount; hi++)
 				{
 					Highlight highlight = manager.getHighlight(hi);
 					addHighlight(highlights, s, highlight);
 				}
-				if (manager.isHighlightWordAtCaret())
-					addHighlight(highlights, s, HighlightManagerTableModel.currentWordHighlight);
-                if (manager.isHighlightSelection())
-                    addHighlight(highlights, s, HighlightManagerTableModel.selectionHighlight);
 			}
 			finally
 			{
 				manager.releaseLock();
 			}
+			if (manager.isHighlightWordAtCaret())
+				addHighlight(highlights, s, HighlightManagerTableModel.currentWordHighlight);
+			if (manager.isHighlightSelection())
+				addHighlight(highlights, s, HighlightManagerTableModel.selectionHighlight);
+
 			Collections.sort(highlights);
 			StringBuilder sb = new StringBuilder("<html><body>");
 			int i = 0;
@@ -134,9 +138,9 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 				appendString2html(sb, s.substring(i, hlPos.pos));
 				if (hlPos.start)
 				{
-					Color c = hlPos.highlight.getColor();
 					sb.append("<font style bgcolor=\"#");
-					appendColorSpec(sb, c);
+					Color c = hlPos.highlight.getColor();
+					sb.append(Integer.toHexString(c.getRGB()).substring(2));
 					sb.append("\"/>");
 					stack.add(hlPos.highlight);
 				}
@@ -144,14 +148,14 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 				{
 					sb.append("</font>");
 					stack.remove(hlPos.highlight);
-					if (stack.size() > 0)
+					if (!stack.isEmpty())
 					{
 						// Intersecting highlights - need to end both, then put back
 						// the effective one.
 						Highlight h = stack.lastElement();
-						Color c = h.getColor();
 						sb.append("</font><font style bgcolor=\"#");
-						appendColorSpec(sb, c);
+						Color c = h.getColor();
+						sb.append(Integer.toHexString(c.getRGB()).substring(2));
 						sb.append("\"/>");
 					}
 				}
@@ -162,7 +166,7 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 			return sb.toString();
 		}
 
-		private void addHighlight(Vector<HighlightPosition> highlights, String s, Highlight highlight)
+		private void addHighlight(Collection<HighlightPosition> highlights, String s, Highlight highlight)
 		{
 			SearchMatcher matcher = highlight.getSearchMatcher();
 			int i = 0;
@@ -175,20 +179,10 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 			}
 		}
 
-		private void appendColorSpec(StringBuilder sb, Color c)
-		{
-			sb.append(Integer.toHexString(c.getRed()));
-			if (c.getGreen() <= 0xf)
-				sb.append("0");
-			sb.append(Integer.toHexString(c.getGreen()));
-			if (c.getBlue() <= 0xf)
-				sb.append("0");
-			sb.append(Integer.toHexString(c.getBlue()));
-		}
-
 		private void appendString2html(StringBuilder sb, String s)
 		{
-			for (int i = 0; i < s.length(); i++)
+			int length = s.length();
+			for (int i = 0; i < length; i++)
 			{
 				char c = s.charAt(i);
 				String r;
@@ -223,7 +217,7 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 			public Highlight highlight;
 			public boolean start;
 
-			public HighlightPosition(int p, Highlight h, boolean s)
+			HighlightPosition(int p, Highlight h, boolean s)
 			{
 				pos = p;
 				highlight = h;
