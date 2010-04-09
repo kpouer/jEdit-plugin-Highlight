@@ -594,12 +594,16 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		JEditTextArea textArea = (JEditTextArea) e.getSource();
 		int line = textArea.getCaretLine();
+		boolean updated = false;
 		if (highlightWordAtCaret)
 		{
-
 			if (textArea.getLineLength(line) == 0 || textArea.getSelectionCount() != 0)
 			{
-				currentWordHighlight.setEnabled(false);
+				if (currentWordHighlight.isEnabled())
+				{
+					updated = true;
+					currentWordHighlight.setEnabled(false);
+				}
 			}
 			else
 			{
@@ -620,35 +624,52 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				     !Character.isLetterOrDigit(ch) &&
 				     noWordSep.indexOf(ch) == -1))
 				{
-					currentWordHighlight.setEnabled(false);
+					if (currentWordHighlight.isEnabled())
+					{
+						updated = true;
+						currentWordHighlight.setEnabled(false);
+					}
 				}
 				else
 				{
-
-
 					int wordEnd = TextUtilities.findWordEnd(lineText, offset + 1, noWordSep);
 
 					if (wordEnd - wordStart < 2)
 					{
-						currentWordHighlight.setEnabled(false);
+						if (currentWordHighlight.isEnabled())
+						{
+							updated = true;
+							currentWordHighlight.setEnabled(false);
+						}
 					}
 					else
 					{
-
-						currentWordHighlight.setEnabled(true);
+						if (!currentWordHighlight.isEnabled())
+						{
+							updated = true;
+							currentWordHighlight.setEnabled(true);
+						}
 						String stringToHighlight = lineText.substring(wordStart, wordEnd);
 						if (highlightWordAtCaretEntireWord)
 						{
 							stringToHighlight = "\\b" + stringToHighlight + "\\b";
-							currentWordHighlight.init(stringToHighlight,
-										  true,
-										  currentWordHighlight.isIgnoreCase(),
-										  currentWordHighlight.getColor());
+							if (!stringToHighlight.equals(currentWordHighlight.getStringToHighlight()))
+							{
+								updated = true;
+								currentWordHighlight.init(stringToHighlight,
+									true,
+									currentWordHighlight.isIgnoreCase(),
+									currentWordHighlight.getColor());
+							}
 
 						}
 						else
 						{
-							currentWordHighlight.setStringToHighlight(stringToHighlight);
+							if (!stringToHighlight.equals(currentWordHighlight.getStringToHighlight()))
+							{
+								updated = true;
+								currentWordHighlight.setStringToHighlight(stringToHighlight);
+							}
 						}
 					}
 				}
@@ -672,8 +693,8 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				selectionHighlight.setStringToHighlight(stringToHighlight);
 			}
 		}
-
-		fireHighlightChangeListener(isHighlightEnable());
+		if (updated)
+			fireHighlightChangeListener(isHighlightEnable());
 	} //}}}
 
 	//{{{ isHighlightWordAtCaret() method
