@@ -138,17 +138,17 @@ public class Highlight
 		if (regexp)
 		{
 			if (searchMatcher == null ||
-			    !s.equals(stringToHighlight) ||
-		    !this.regexp ||
-		    ignoreCase != this.ignoreCase)
+				!s.equals(stringToHighlight) ||
+				!this.regexp ||
+				ignoreCase != this.ignoreCase)
 			{
 				searchMatcher = new PatternSearchMatcher(s, ignoreCase);
 			}
 		}
 		else if (searchMatcher == null ||
-			 !s.equals(stringToHighlight) ||
-		 this.regexp ||
-		 ignoreCase != this.ignoreCase)
+			!s.equals(stringToHighlight) ||
+			this.regexp ||
+			ignoreCase != this.ignoreCase)
 		{
 			searchMatcher = new BoyerMooreSearchMatcher(s, ignoreCase);
 		}
