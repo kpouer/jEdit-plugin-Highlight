@@ -6,7 +6,6 @@ import java.util.*;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
-import javax.swing.text.Segment;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
@@ -17,13 +16,11 @@ import org.gjt.sp.jedit.search.HyperSearchResult;
 import org.gjt.sp.jedit.search.HyperSearchResults;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.search.SearchMatcher.Match;
-import org.gjt.sp.util.ReverseCharSequence;
-import org.gjt.sp.util.SegmentCharSequence;
 
 public class HighlightHypersearchResults implements HighlightChangeListener
 {
 	public static final String HYPERSEARCH = "hypersearch-results";
-	private View view;
+	private final View view;
 
 	public HighlightHypersearchResults(View view)
 	{
@@ -73,7 +70,7 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 	@SuppressWarnings("serial")
 	class HighlightTreeCellRenderer extends DefaultTreeCellRenderer
 	{
-		private TreeCellRenderer renderer;
+		private final TreeCellRenderer renderer;
 
 		HighlightTreeCellRenderer(TreeCellRenderer renderer)
 		{
