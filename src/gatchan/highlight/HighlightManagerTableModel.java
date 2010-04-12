@@ -60,7 +60,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	private final List<HighlightChangeListener> highlightChangeListeners = new ArrayList<HighlightChangeListener>(2);
 	private final File highlights;
 
-	private RWLock rwLock = new RWLock();
+	private final RWLock rwLock = new RWLock();
 
 	public static Highlight currentWordHighlight;
 	public static Highlight selectionHighlight;
@@ -243,7 +243,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		}
 		if (columnIndex == 0)
 		{
-			return Boolean.valueOf(((Highlight) o).isEnabled());
+			return ((Highlight) o).isEnabled();
 		}
 		return o;
 	} //}}}
@@ -264,7 +264,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			{
 				rwLock.releaseLock();
 			}
-			highlight.setEnabled(((Boolean) aValue).booleanValue());
+			highlight.setEnabled((Boolean) aValue);
 		}
 		else
 		{
