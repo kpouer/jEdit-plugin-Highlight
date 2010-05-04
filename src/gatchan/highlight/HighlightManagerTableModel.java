@@ -611,7 +611,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				int offset = textArea.getCaretPosition() - lineStart;
 
 				JEditBuffer buffer = textArea.getBuffer();
-				String lineText = buffer.getLineText(line);
+				CharSequence lineText = buffer.getLineSegment(line);
 				String noWordSep = buffer.getStringProperty("noWordSep");
 
 				if (offset != 0)
@@ -649,7 +649,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 							updated = true;
 							currentWordHighlight.setEnabled(true);
 						}
-						String stringToHighlight = lineText.substring(wordStart, wordEnd);
+						String stringToHighlight = lineText.subSequence(wordStart, wordEnd).toString();
 						if (highlightWordAtCaretEntireWord)
 						{
 							stringToHighlight = "\\b" + stringToHighlight + "\\b";
