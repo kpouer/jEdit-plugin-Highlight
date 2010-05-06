@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2007 Matthieu Casanova
+ * Copyright (C) 2004, 2010 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -60,7 +60,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	private final List<HighlightChangeListener> highlightChangeListeners = new ArrayList<HighlightChangeListener>(2);
 	private final File highlights;
 
-	private RWLock rwLock = new RWLock();
+	private final RWLock rwLock = new RWLock();
 
 	public static Highlight currentWordHighlight;
 	public static Highlight selectionHighlight;
@@ -243,7 +243,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		}
 		if (columnIndex == 0)
 		{
-			return Boolean.valueOf(((Highlight) o).isEnabled());
+			return ((Highlight) o).isEnabled();
 		}
 		return o;
 	} //}}}
@@ -264,7 +264,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			{
 				rwLock.releaseLock();
 			}
-			highlight.setEnabled(((Boolean) aValue).booleanValue());
+			highlight.setEnabled((Boolean) aValue);
 		}
 		else
 		{
@@ -392,7 +392,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 */
 	public void bufferClosed(Buffer buffer)
 	{
-		List<Highlight> highlights = (List<Highlight>) buffer.getProperty("highlights");
+		List<Highlight> highlights = (List<Highlight>) buffer.getProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
 		if (highlights != null)
 		{
 			for (int i = 0; i < highlights.size(); i++)
@@ -440,12 +440,14 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		if (highlights != null)
 		{
-			BufferedWriter writer = null;
+			PrintWriter writer = null;
 			try
 			{
-				writer = new BufferedWriter(new FileWriter(highlights));
-				writer.write(FILE_VERSION);
-				writer.write('\n');
+				File parentFile = highlights.getParentFile();
+				if (!parentFile.isDirectory())
+					parentFile.mkdirs();
+				writer = new PrintWriter(highlights);
+				writer.println(FILE_VERSION);
 				try
 				{
 					rwLock.getWriteLock();
@@ -455,8 +457,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 						Highlight highlight = listIterator.next();
 						if (highlight.getScope() == Highlight.PERMANENT_SCOPE)
 						{
-							writer.write(highlight.serialize());
-							writer.write('\n');
+							writer.println(highlight.serialize());
 						}
 						else
 						{
@@ -593,12 +594,16 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		JEditTextArea textArea = (JEditTextArea) e.getSource();
 		int line = textArea.getCaretLine();
+		boolean updated = false;
 		if (highlightWordAtCaret)
 		{
-
 			if (textArea.getLineLength(line) == 0 || textArea.getSelectionCount() != 0)
 			{
-				currentWordHighlight.setEnabled(false);
+				if (currentWordHighlight.isEnabled())
+				{
+					updated = true;
+					currentWordHighlight.setEnabled(false);
+				}
 			}
 			else
 			{
@@ -606,7 +611,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				int offset = textArea.getCaretPosition() - lineStart;
 
 				JEditBuffer buffer = textArea.getBuffer();
-				String lineText = buffer.getLineText(line);
+				CharSequence lineText = buffer.getLineSegment(line);
 				String noWordSep = buffer.getStringProperty("noWordSep");
 
 				if (offset != 0)
@@ -619,35 +624,52 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				     !Character.isLetterOrDigit(ch) &&
 				     noWordSep.indexOf(ch) == -1))
 				{
-					currentWordHighlight.setEnabled(false);
+					if (currentWordHighlight.isEnabled())
+					{
+						updated = true;
+						currentWordHighlight.setEnabled(false);
+					}
 				}
 				else
 				{
-
-
 					int wordEnd = TextUtilities.findWordEnd(lineText, offset + 1, noWordSep);
 
 					if (wordEnd - wordStart < 2)
 					{
-						currentWordHighlight.setEnabled(false);
+						if (currentWordHighlight.isEnabled())
+						{
+							updated = true;
+							currentWordHighlight.setEnabled(false);
+						}
 					}
 					else
 					{
-
-						currentWordHighlight.setEnabled(true);
-						String stringToHighlight = lineText.substring(wordStart, wordEnd);
+						if (!currentWordHighlight.isEnabled())
+						{
+							updated = true;
+							currentWordHighlight.setEnabled(true);
+						}
+						String stringToHighlight = lineText.subSequence(wordStart, wordEnd).toString();
 						if (highlightWordAtCaretEntireWord)
 						{
 							stringToHighlight = "\\b" + stringToHighlight + "\\b";
-							currentWordHighlight.init(stringToHighlight,
-										  true,
-										  currentWordHighlight.isIgnoreCase(),
-										  currentWordHighlight.getColor());
+							if (!stringToHighlight.equals(currentWordHighlight.getStringToHighlight()))
+							{
+								updated = true;
+								currentWordHighlight.init(stringToHighlight,
+									true,
+									currentWordHighlight.isIgnoreCase(),
+									currentWordHighlight.getColor());
+							}
 
 						}
 						else
 						{
-							currentWordHighlight.setStringToHighlight(stringToHighlight);
+							if (!stringToHighlight.equals(currentWordHighlight.getStringToHighlight()))
+							{
+								updated = true;
+								currentWordHighlight.setStringToHighlight(stringToHighlight);
+							}
 						}
 					}
 				}
@@ -671,8 +693,8 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				selectionHighlight.setStringToHighlight(stringToHighlight);
 			}
 		}
-
-		fireHighlightChangeListener(isHighlightEnable());
+		if (updated)
+			fireHighlightChangeListener(isHighlightEnable());
 	} //}}}
 
 	//{{{ isHighlightWordAtCaret() method
