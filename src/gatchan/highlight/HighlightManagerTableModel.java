@@ -683,14 +683,22 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			    selectionatOffset.getStartLine() != selectionatOffset.getEndLine() ||
 				selectionatOffset.getEnd() - selectionatOffset.getStart() == 0)
 			{
-				selectionHighlight.setEnabled(false);
+				if (selectionHighlight.isEnabled())
+				{
+					updated = true;
+					selectionHighlight.setEnabled(false);
+				}
 			}
 			else
 			{
-				selectionHighlight.setEnabled(true);
 				String stringToHighlight = textArea.getSelectedText(selectionatOffset);
-				textArea.getSelectedText(selectionatOffset);
-				selectionHighlight.setStringToHighlight(stringToHighlight);
+				if (!selectionHighlight.isEnabled() ||
+					!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+				{
+					updated = true;
+					selectionHighlight.setEnabled(true);
+					selectionHighlight.setStringToHighlight(stringToHighlight);
+				}
 			}
 		}
 		if (updated)
