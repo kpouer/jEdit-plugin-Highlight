@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004 Matthieu Casanova
+ * Copyright (C) 2004, 2010 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -90,6 +90,11 @@ public final class HighlightDialog extends EnhancedDialog
 	{
 		this(owner, new Highlight());
 	} //}}}
+
+	public void setString(String s)
+	{
+		panel.setString(s);
+	}
 
 	//{{{ ok() method
 	public void ok()

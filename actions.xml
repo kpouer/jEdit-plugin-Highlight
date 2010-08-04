@@ -58,7 +58,7 @@
 	<ACTION NAME="gatchan-highlight-dialog">
 		<CODE>
 			textArea.requestFocus();
-			gatchan.highlight.HighlightPlugin.highlightDialog(view);
+			gatchan.highlight.HighlightPlugin.highlightDialog(view, textArea);
 		</CODE>
 	</ACTION>
 	<ACTION NAME="gatchan-removeAllHighlights">

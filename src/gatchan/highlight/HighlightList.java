@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004 Matthieu Casanova
+ * Copyright (C) 2004, 2010 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -265,7 +265,8 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 			}
 			else if (newButton == source)
 			{
-				HighlightPlugin.highlightDialog(jEdit.getActiveView());
+				View activeView = jEdit.getActiveView();
+				HighlightPlugin.highlightDialog(activeView, activeView.getTextArea());
 			}
 			else if (enableHighlights == source)
 			{

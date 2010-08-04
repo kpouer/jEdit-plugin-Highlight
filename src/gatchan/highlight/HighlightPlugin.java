@@ -24,6 +24,7 @@ package gatchan.highlight;
 //{{{ Imports
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.EditBus.EBHandler;
+import org.gjt.sp.jedit.textarea.TextArea;
 import org.gjt.sp.jedit.visitors.JEditVisitorAdapter;
 import org.gjt.sp.jedit.search.SearchAndReplace;
 import org.gjt.sp.jedit.gui.DockableWindowManager;
@@ -337,7 +338,7 @@ public class HighlightPlugin extends EditPlugin
 	 * @param textArea the textArea
 	 * @return the current word
 	 */
-	private static String getCurrentWord(JEditTextArea textArea)
+	private static String getCurrentWord(TextArea textArea)
 	{
 		String text = textArea.getSelectedText();
 		if (text == null)
@@ -418,9 +419,15 @@ public class HighlightPlugin extends EditPlugin
 	 *
 	 * @param view the current view
 	 */
-	public static void highlightDialog(View view)
+	public static void highlightDialog(View view, TextArea textArea)
 	{
+		String currentWord = getCurrentWord(textArea);
 		HighlightDialog d = new HighlightDialog(view);
+
+		if (currentWord.length() != 0)
+		{
+			d.setString(currentWord);
+		}
 		d.setVisible(true);
 	} //}}}
 
