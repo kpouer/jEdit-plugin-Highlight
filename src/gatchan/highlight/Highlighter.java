@@ -22,6 +22,8 @@
 package gatchan.highlight;
 
 //{{{ Imports
+import gatchan.highlight.color.ColorHighlighter;
+import gatchan.highlight.color.HexaColor;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.search.SearchMatcher;
@@ -29,6 +31,7 @@ import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.regex.PatternSyntaxException;
 //}}}
 
@@ -53,6 +56,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 
 	public static final int MAX_LINE_LENGTH = 10000;
 
+	private java.util.List<ColorHighlighter> colorHighlighters;
+
 	//{{{ Highlighter constructor
 	Highlighter(JEditTextArea textArea)
 	{
@@ -60,6 +65,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
 		highlightManager = HighlightManagerTableModel.getManager();
 		this.textArea = textArea;
+		colorHighlighters = new ArrayList<ColorHighlighter>();
+		colorHighlighters.add(new HexaColor());
 	} //}}}
 
 	//{{{ setAlphaComposite() method
@@ -77,10 +84,10 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, int[] start, int[] end, int y, int lineHeight)
 	{
 		fm = textArea.getPainter().getFontMetrics();
-		if (highlightManager.isHighlightEnable() &&
-		    highlightManager.countHighlights() != 0 ||
-		    HighlightManagerTableModel.currentWordHighlight.isEnabled() ||
-		    HighlightManagerTableModel.selectionHighlight.isEnabled())
+//		if (highlightManager.isHighlightEnable() &&
+//		    highlightManager.countHighlights() != 0 ||
+//		    HighlightManagerTableModel.currentWordHighlight.isEnabled() ||
+//		    HighlightManagerTableModel.selectionHighlight.isEnabled())
 			super.paintScreenLineRange(gfx, firstLine, lastLine, physicalLines, start, end, y, lineHeight);
 	} //}}}
 
@@ -150,6 +157,10 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			screenToPhysicalOffset, tempLineContent);
 		highlight(HighlightManagerTableModel.selectionHighlight, buffer, gfx, physicalLine, y,
 			screenToPhysicalOffset, tempLineContent);
+		for (ColorHighlighter colorHighlighter : colorHighlighters)
+		{
+			colorHighlighter.paintColor(textArea, gfx, physicalLine, y, lineContent, blend, fm);
+		}
 	} //}}}
 
 	//{{{ highlight() method
@@ -184,7 +195,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 								false);
 				if (match == null || match.end == match.start)
 					break;
-				_highlight(highlight.getColor(), gfx, physicalLine, match.start + i + screenToPhysicalOffset, match.end + i + screenToPhysicalOffset, y);
+				_highlight(highlight.getColor(), gfx, physicalLine, match.start + i +
+					screenToPhysicalOffset, match.end + i + screenToPhysicalOffset, y);
 				highlight.updateLastSeen();
 				int skip = subsequence ? match.start + 1 : match.end;
 				i += skip;
