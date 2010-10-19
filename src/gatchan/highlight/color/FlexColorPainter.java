@@ -1,0 +1,126 @@
+/*
+ * jEdit - Programmer's Text Editor
+ * :tabSize=8:indentSize=8:noTabs=false:
+ * :folding=explicit:collapseFolds=1:
+ *
+ * Copyright © 2010 Matthieu Casanova
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+package gatchan.highlight.color;
+
+import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.jedit.textarea.TextArea;
+import org.gjt.sp.jedit.textarea.TextAreaExtension;
+import org.gjt.sp.util.Log;
+
+import java.awt.*;
+import java.io.IOException;
+import java.io.StringReader;
+
+/**
+ * @author Matthieu Casanova
+ */
+public class FlexColorPainter extends TextAreaExtension
+{
+	public static final int MAX_LINE_LENGTH = 10000;
+	private final TextArea textArea;
+	private final Point point = new Point();
+
+	public FlexColorPainter(TextArea textArea)
+	{
+		this.textArea = textArea;
+	}
+
+	@Override
+	public void paintValidLine(Graphics2D gfx, int screenLine, int physicalLine, int start, int end, int y)
+	{
+		JEditBuffer buffer = textArea.getBuffer();
+		int lineStart = buffer.getLineStartOffset(physicalLine);
+		int length = buffer.getLineLength(physicalLine);
+
+		int startOffset = textArea.getLineStartOffset(physicalLine);
+		int endOffset = textArea.getLineEndOffset(physicalLine);
+		int screenToPhysicalOffset = start - startOffset;
+
+
+		int l = length - screenToPhysicalOffset - endOffset + end;
+		if (l > MAX_LINE_LENGTH)
+			l = MAX_LINE_LENGTH;
+		String lineContent = buffer.getText(lineStart + screenToPhysicalOffset,
+			l);
+		if (lineContent.length() == 0)
+			return;
+
+
+		FlexColorScanner flexColor = new FlexColorScanner(new StringReader(lineContent));
+		try
+		{
+			ColorToken token = flexColor.yylex();
+			while (token != null)
+			{
+				paint(token, gfx, physicalLine, y);
+				try
+				{
+					token = flexColor.yylex();
+				}
+				catch (IOException e)
+				{
+					Log.log(Log.ERROR, this, e);
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			Log.log(Log.ERROR, this, e);
+		}
+
+	}
+
+	private void paint(ColorToken token,
+				Graphics2D gfx,
+				int physicalLine,
+				int y)
+	{
+		System.out.println(token);
+		Point p = textArea.offsetToXY(physicalLine, token.getStart(), point);
+		if (p == null)
+		{
+			System.out.println("error");
+			// The start offset was not visible
+			return;
+		}
+		int startX = p.x;
+
+		p = textArea.offsetToXY(physicalLine, token.getEnd(), point);
+		if (p == null)
+		{
+			System.out.println("error");
+			// The end offset was not visible
+			return;
+		}
+		int endX = p.x;
+		Color oldColor = gfx.getColor();
+		Composite oldComposite = gfx.getComposite();
+		gfx.setColor(token.getColor());
+		FontMetrics fm = textArea.getPainter().getFontMetrics();
+		gfx.fillRect(startX, y, endX - startX, fm.getHeight() - 1);
+
+
+
+		gfx.setColor(oldColor);
+		gfx.setComposite(oldComposite);
+	} //}}}
+}

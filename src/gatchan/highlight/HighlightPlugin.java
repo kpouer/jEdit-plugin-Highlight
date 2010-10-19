@@ -22,6 +22,7 @@
 package gatchan.highlight;
 
 //{{{ Imports
+import gatchan.highlight.color.FlexColorPainter;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.EditBus.EBHandler;
 import org.gjt.sp.jedit.textarea.TextArea;
@@ -120,6 +121,12 @@ public class HighlightPlugin extends EditPlugin
 			textArea.putClientProperty(Highlighter.class, null);
 			highlightManager.removeHighlightChangeListener(highlighter);
 		}
+		FlexColorPainter flexColorPainter = (FlexColorPainter) textArea.getClientProperty(FlexColorPainter.class);
+		if (flexColorPainter != null)
+		{
+			painter.removeExtension(flexColorPainter);
+			textArea.putClientProperty(FlexColorPainter.class, null);
+		}
 		removeHighlightOverview(textArea);
 		textArea.removeCaretListener(highlightManager);
 	} //}}}
@@ -139,7 +146,9 @@ public class HighlightPlugin extends EditPlugin
 		painter.addExtension(layer, highlighter);
 		textArea.putClientProperty(Highlighter.class, highlighter);
 		textArea.addCaretListener(highlightManager);
-
+		FlexColorPainter flexColorPainter = new FlexColorPainter(textArea);
+		textArea.putClientProperty(FlexColorPainter.class, flexColorPainter);
+		painter.addExtension(layer, flexColorPainter);
 		addHighlightOverview(textArea);
 		textArea.revalidate();
 	} //}}}
