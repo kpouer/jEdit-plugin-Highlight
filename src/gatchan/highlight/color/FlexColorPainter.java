@@ -21,7 +21,12 @@
 
 package gatchan.highlight.color;
 
+import gatchan.highlight.HighlightManager;
+import gatchan.highlight.HighlightManagerTableModel;
+import gatchan.highlight.HighlightOptionPane;
+import gatchan.highlight.HighlightPlugin;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.textarea.TextArea;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
 import org.gjt.sp.util.Log;
@@ -38,11 +43,21 @@ public class FlexColorPainter extends TextAreaExtension
 	public static final int MAX_LINE_LENGTH = 10000;
 	private final TextArea textArea;
 	private final Point point = new Point();
+	private final HighlightManager highlightManager;
 
 	public FlexColorPainter(TextArea textArea)
 	{
 		this.textArea = textArea;
+		highlightManager = HighlightManagerTableModel.getManager();
 	}
+
+	//{{{ paintScreenLineRange() method
+	@Override
+	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, int[] start, int[] end, int y, int lineHeight)
+	{
+		if (jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_COLORS))
+			super.paintScreenLineRange(gfx, firstLine, lastLine, physicalLines, start, end, y, lineHeight);
+	} //}}}
 
 	@Override
 	public void paintValidLine(Graphics2D gfx, int screenLine, int physicalLine, int start, int end, int y)

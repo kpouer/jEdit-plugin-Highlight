@@ -95,7 +95,7 @@ gatchan.highlight.selectionHighlight.text=Highlight selection under caret
 gatchan.highlight.selectionHighlight.ignoreCase.text=ignore case
 gatchan.highlight.selectionHighlight.color=#FFFF66
 gatchan.highlight.selectionHighlight.color.text=Color of the selection highlight :
-
+gatchan.highlight.colorsenabled.text=Highlight colors in the buffer
 
 gatchan.highlight.overview.text=Highlight overview
 gatchan.highlight.overview=true
