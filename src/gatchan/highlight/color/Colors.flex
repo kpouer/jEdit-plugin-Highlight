@@ -31,12 +31,11 @@ package gatchan.highlight.color;
 
 whitespace = [ \t]
 ignore = [^] | whitespace
-
+miscToken = [:letter:]+
 
 rgbhexa1 = #[a-fA-F0-9]{6}
 rgbhexa2 = 0x[a-fA-F0-9]{6}
 
-rgb = rgb("0x[a-fA-F0-9]{6}")
 %%
 
 <YYINITIAL> 
@@ -191,4 +190,5 @@ rgb = rgb("0x[a-fA-F0-9]{6}")
 	WhiteSmoke	{ return new ColorToken(yychar,yychar + yylength(), "0xF5F5F5"); }
 	Yellow	{ return new ColorToken(yychar,yychar + yylength(), "0xFFFF00"); }
 	YellowGreen	{ return new ColorToken(yychar,yychar + yylength(), "0x9ACD32"); }
+	{miscToken}	{ /* ignored */ }
 }
