@@ -21,10 +21,7 @@
 
 package gatchan.highlight.color;
 
-import gatchan.highlight.HighlightManager;
-import gatchan.highlight.HighlightManagerTableModel;
 import gatchan.highlight.HighlightOptionPane;
-import gatchan.highlight.HighlightPlugin;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.textarea.TextArea;
@@ -43,12 +40,10 @@ public class FlexColorPainter extends TextAreaExtension
 	public static final int MAX_LINE_LENGTH = 10000;
 	private final TextArea textArea;
 	private final Point point = new Point();
-	private final HighlightManager highlightManager;
 
 	public FlexColorPainter(TextArea textArea)
 	{
 		this.textArea = textArea;
-		highlightManager = HighlightManagerTableModel.getManager();
 	}
 
 	//{{{ paintScreenLineRange() method
@@ -109,11 +104,9 @@ public class FlexColorPainter extends TextAreaExtension
 				int physicalLine,
 				int y)
 	{
-		System.out.println(token);
 		Point p = textArea.offsetToXY(physicalLine, token.getStart(), point);
 		if (p == null)
 		{
-			System.out.println("error");
 			// The start offset was not visible
 			return;
 		}
@@ -122,7 +115,6 @@ public class FlexColorPainter extends TextAreaExtension
 		p = textArea.offsetToXY(physicalLine, token.getEnd(), point);
 		if (p == null)
 		{
-			System.out.println("error");
 			// The end offset was not visible
 			return;
 		}
