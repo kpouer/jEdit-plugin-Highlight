@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2010 Matthieu Casanova
+ * Copyright (C) 2004, 2011 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -433,7 +433,7 @@ public class HighlightPlugin extends EditPlugin
 		String currentWord = getCurrentWord(textArea);
 		HighlightDialog d = new HighlightDialog(view);
 
-		if (currentWord.length() != 0)
+		if (currentWord != null && currentWord.length() != 0)
 		{
 			d.setString(currentWord);
 		}
