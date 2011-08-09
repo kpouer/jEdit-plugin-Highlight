@@ -129,7 +129,6 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 			Collections.sort(highlights);
 			StringBuilder sb = new StringBuilder("<html><body>");
 			int i = 0;
-			Vector<Highlight> stack = new Vector<Highlight>();
 			for (HighlightPosition hlPos : highlights)
 			{
 				appendString2html(sb, s.substring(i, hlPos.pos));
@@ -138,23 +137,11 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 					sb.append("<font style bgcolor=\"#");
 					Color c = hlPos.highlight.getColor();
 					sb.append(Integer.toHexString(c.getRGB()).substring(2));
-					sb.append("\"/>");
-					stack.add(hlPos.highlight);
+					sb.append("\">");
 				}
 				else
 				{
 					sb.append("</font>");
-					stack.remove(hlPos.highlight);
-					if (!stack.isEmpty())
-					{
-						// Intersecting highlights - need to end both, then put back
-						// the effective one.
-						Highlight h = stack.lastElement();
-						sb.append("</font><font style bgcolor=\"#");
-						Color c = h.getColor();
-						sb.append(Integer.toHexString(c.getRGB()).substring(2));
-						sb.append("\"/>");
-					}
 				}
 				i = hlPos.pos;
 			}
@@ -188,9 +175,9 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 					case '"':
 						r = "&quot;";
 						break;
-					case '\'':
+					/*case '\'':
 						r = "&apos;";
-						break;
+						break;  */
 					case '&':
 						r = "&amp;";
 						break;
