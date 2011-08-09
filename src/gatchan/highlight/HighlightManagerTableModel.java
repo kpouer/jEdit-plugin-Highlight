@@ -812,12 +812,6 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			changedSelection = true;
 		} //}}}
 
-		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE
-		if (currentWordHighlight.setHighlightSubsequence(jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE)))
-		{
-			changed = true;
-		} //}}}
-
 		Highlighter.square = jEdit.getBooleanProperty(HighlightOptionPane.PROP_SQUARE);
 		Highlighter.squareColor = jEdit.getColorProperty(HighlightOptionPane.PROP_SQUARE_COLOR);
 

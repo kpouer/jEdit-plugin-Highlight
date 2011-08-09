@@ -4,7 +4,7 @@
 plugin.gatchan.highlight.HighlightPlugin.activate=startup
 plugin.gatchan.highlight.HighlightPlugin.name=Highlight
 plugin.gatchan.highlight.HighlightPlugin.author=Matthieu Casanova
-plugin.gatchan.highlight.HighlightPlugin.version=1.9.1
+plugin.gatchan.highlight.HighlightPlugin.version=1.9.5
 plugin.gatchan.highlight.HighlightPlugin.docs=docs/Highlight.html
 plugin.gatchan.highlight.HighlightPlugin.description=Highlight is a visual plugin that will highlight words (or matched regexp) with different colors.
 plugin.gatchan.highlight.HighlightPlugin.depend.0=jdk 1.5
@@ -66,15 +66,12 @@ options.name.gatchan.highlight.label=Highlight
 #{{{ properties for option pane
 
 gatchan.highlight.option-pane.commonProperties.text=Common properties
-gatchan.highlight.subsequence.text=Highlight subsequences (if checked, the same highlight can be found several times inside the same word. This will not change previous highlights)
-gatchan.highlight.subsequence=true
 gatchan.highlight.cycleColor.text=Cycle the color when creating highlights :
 gatchan.highlight.defaultColor=#66FFFF
 gatchan.highlight.defaultColor.text=Choose the color of the highlights
 gatchan.highlight.appendHighlight=true
 gatchan.highlight.appendHighlight.text=Append highlights (if not checked an highlight will replace the previous one)
 
-gatchan.highlight.caretHighlight.subsequence.text=Highlight subsequences (if checked, the same highlight can be found several times inside the same word)
 gatchan.highlight.caretHighlight.whitespace.text=Highlight whitespace words
 gatchan.highlight.caretHighlight.onlyWords.text=Highlight only words
 gatchan.highlight.hyperSearchResults.text=Highlight hypersearch results

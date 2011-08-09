@@ -53,8 +53,6 @@ public class HighlightOptionPane extends AbstractOptionPane
 
 	public static final String PROP_HIGHLIGHT_CYCLE_COLOR = "gatchan.highlight.cycleColor";
 	public static final String PROP_HIGHLIGHT_APPEND = "gatchan.highlight.appendHighlight";
-	public static final String PROP_HIGHLIGHT_SUBSEQUENCE = "gatchan.highlight.subsequence";
-	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE = "gatchan.highlight.caretHighlight.subsequence";
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE = "gatchan.highlight.caretHighlight.whitespace";
 	public static final String PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS = "gatchan.highlight.caretHighlight.onlyWords";
 	public static final String PROP_HIGHLIGHT_HYPERSEARCH_RESULTS = "gatchan.highlight.hyperSearchResults";
@@ -77,9 +75,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private ColorWellButton squareColor;
 	private JCheckBox cycleColor;
 	private JCheckBox highlightAppend;
-	private JCheckBox highlightSubsequence;
 	private ColorWellButton defaultColor;
-	private JCheckBox caretHighlightSubsequence;
 	private JCheckBox wordAtCaretWhitespace;
 	private JCheckBox wordAtCaretOnlyWords;
 	private JCheckBox highlightHypersearch;
@@ -105,7 +101,6 @@ public class HighlightOptionPane extends AbstractOptionPane
 	protected void _init() 
 	{
 		addSeparator(PROP_COMMON_PROPERTIES);
-		addComponent(highlightSubsequence = createCheckBox(PROP_HIGHLIGHT_SUBSEQUENCE));
 		addComponent(highlightAppend = createCheckBox(PROP_HIGHLIGHT_APPEND));
 		addComponent(cycleColor = createCheckBox(PROP_HIGHLIGHT_CYCLE_COLOR));
 		addComponent(new JLabel(jEdit.getProperty(PROP_DEFAULT_COLOR + ".text")),
@@ -144,7 +139,6 @@ public class HighlightOptionPane extends AbstractOptionPane
 		
 		addSeparator(PROP_HIGHLIGHT_WORD_AT_CARET + ".text");
 		addComponent(highlightWordAtCaret = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET));
-		addComponent(caretHighlightSubsequence = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE));
 		addComponent(wordAtCaretIgnoreCase = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE));
 		addComponent(wordAtCaretWhitespace = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE));
 		addComponent(wordAtCaretOnlyWords = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS));
@@ -172,14 +166,12 @@ public class HighlightOptionPane extends AbstractOptionPane
 	protected void _save() 
 	{
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET, highlightWordAtCaret.isSelected());
-		jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_SUBSEQUENCE, caretHighlightSubsequence.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE, wordAtCaretIgnoreCase.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD, entireWord.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE, wordAtCaretWhitespace.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS, wordAtCaretOnlyWords.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_HYPERSEARCH_RESULTS, highlightHypersearch.isSelected());
 		
-		jEdit.setBooleanProperty(PROP_HIGHLIGHT_SUBSEQUENCE, highlightSubsequence.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_CYCLE_COLOR, cycleColor.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_APPEND, highlightAppend.isSelected());
 		jEdit.setColorProperty(PROP_HIGHLIGHT_WORD_AT_CARET_COLOR, wordAtCaretColor.getSelectedColor());

@@ -26,6 +26,7 @@ import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
+import org.gjt.sp.jedit.textarea.Selection;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
 
 import java.awt.*;
@@ -112,18 +113,17 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 				   int y)
 	{
 		JEditBuffer buffer = textArea.getBuffer();
-		int lineStart = buffer.getLineStartOffset(physicalLine);
+		int lineStartOffset = buffer.getLineStartOffset(physicalLine);
+		int lineEndOffset = buffer.getLineEndOffset(physicalLine);
 		int length = buffer.getLineLength(physicalLine);
 
-		int startOffset = textArea.getLineStartOffset(physicalLine);
-		int endOffset = textArea.getLineEndOffset(physicalLine);
-		int screenToPhysicalOffset = start - startOffset;
+		int screenToPhysicalOffset = start - lineStartOffset;
 
 
-		int l = length - screenToPhysicalOffset - endOffset + end;
+		int l = length - screenToPhysicalOffset - lineEndOffset + end;
 		if (l > MAX_LINE_LENGTH)
 			l = MAX_LINE_LENGTH;
-		CharSequence lineContent = buffer.getSegment(lineStart + screenToPhysicalOffset,
+		CharSequence lineContent = buffer.getSegment(lineStartOffset + screenToPhysicalOffset,
 			l);
 		if (lineContent.length() == 0)
 			return;
@@ -145,11 +145,16 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			highlightManager.releaseLock();
 		}
 		tempLineContent = lineContent;
-
-		highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, physicalLine, y,
-			screenToPhysicalOffset, tempLineContent);
-		highlight(HighlightManagerTableModel.selectionHighlight, buffer, gfx, physicalLine, y,
-			screenToPhysicalOffset, tempLineContent);
+		if (textArea.getSelectionCount() == 0)
+		{
+			highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, physicalLine, y,
+				screenToPhysicalOffset, tempLineContent);
+		}
+		else
+		{
+			highlight(HighlightManagerTableModel.selectionHighlight, buffer, gfx, physicalLine, y,
+				screenToPhysicalOffset, tempLineContent);
+		}
 	} //}}}
 
 	//{{{ highlight() method
@@ -170,7 +175,6 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		}
 
 		SearchMatcher searchMatcher = highlight.getSearchMatcher();
-		boolean subsequence = highlight.isHighlightSubsequence();
 		try
 		{
 			int i = 0;
@@ -184,16 +188,20 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 								false);
 				if (match == null || match.end == match.start)
 					break;
-				_highlight(highlight.getColor(), gfx, physicalLine, match.start + i +
-					screenToPhysicalOffset, match.end + i + screenToPhysicalOffset, y);
+				Selection selectionAtOffset = textArea.getSelectionAtOffset(match.start + i +
+					screenToPhysicalOffset);
+				if (selectionAtOffset == null)
+				{
+					_highlight(highlight.getColor(), gfx, physicalLine, match.start + i +
+						screenToPhysicalOffset, match.end + i + screenToPhysicalOffset, y);
+				}
 				highlight.updateLastSeen();
-				int skip = subsequence ? match.start + 1 : match.end;
-				i += skip;
-				int length = tempLineContent.length() - skip;
+				i += match.end;
+				int length = tempLineContent.length() - match.end;
 				if (length <= 0)
 					break;
-				tempLineContent = tempLineContent.subSequence(skip,
-					length + skip);
+				tempLineContent = tempLineContent.subSequence(match.end,
+					length + match.end);
 			}
 		}
 		catch (PatternSyntaxException e)

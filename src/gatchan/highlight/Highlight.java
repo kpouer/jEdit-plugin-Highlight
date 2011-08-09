@@ -65,8 +65,6 @@ public class Highlight
 
 	private static final int HIGHLIGHT_VERSION = 1;
 
-	private boolean highlightSubsequence = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_SUBSEQUENCE);
-
 	/**
 	* The default color. If null we will cycle the colors.
 	*/
@@ -435,29 +433,5 @@ public class Highlight
 	public void setStringToHighlight(String stringToHighlight)
 	{
 		init(stringToHighlight, regexp, ignoreCase, color);
-	} //}}}
-
-	//{{{ isHighlightSubsequence() method
-	public boolean isHighlightSubsequence()
-	{
-		return highlightSubsequence;
-	} //}}}
-
-	//{{{ setHighlightSubsequence() method
-	/**
-	* Activate or deactivate the feature "highlight subsequence"
-	* Highlight subsequences (if checked, the same highlight can be found several times inside the same word)
-	*
-	* @param highlightSubsequence true to activate the feature, false otherwise
-	* @return <code>true</code> if the value was changed
-	*/
-	public boolean setHighlightSubsequence(boolean highlightSubsequence)
-	{
-		if (this.highlightSubsequence != highlightSubsequence)
-		{
-			this.highlightSubsequence = highlightSubsequence;
-			return true;
-		}
-		return false;
 	} //}}}
 }
