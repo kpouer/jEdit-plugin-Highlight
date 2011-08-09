@@ -189,7 +189,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 				if (match == null || match.end == match.start)
 					break;
 				Selection selectionAtOffset = textArea.getSelectionAtOffset(match.start + i +
-					screenToPhysicalOffset);
+					screenToPhysicalOffset + textArea.getLineStartOffset(physicalLine));
 				if (selectionAtOffset == null)
 				{
 					_highlight(highlight.getColor(), gfx, physicalLine, match.start + i +
