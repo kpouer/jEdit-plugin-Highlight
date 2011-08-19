@@ -148,7 +148,7 @@ public class HighlightPlugin extends EditPlugin
 		textArea.addCaretListener(highlightManager);
 		FlexColorPainter flexColorPainter = new FlexColorPainter(textArea);
 		textArea.putClientProperty(FlexColorPainter.class, flexColorPainter);
-		painter.addExtension(layer, flexColorPainter);
+		painter.addExtension(layer-1, flexColorPainter);
 		addHighlightOverview(textArea);
 		textArea.revalidate();
 	} //}}}
