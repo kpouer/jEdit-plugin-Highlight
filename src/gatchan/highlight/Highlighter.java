@@ -250,45 +250,6 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		gfx.setComposite(oldComposite);
 	} //}}}
 
-	//{{{ _highlight() method
-	/*private void _highlight(Color highlightColor,
-				Graphics2D gfx,
-				int physicalLine,
-				int startOffset,
-				int endOffset,
-				int y)
-	{
-		Point p = textArea.offsetToXY(physicalLine, startOffset, point);
-		if (p == null)
-		{
-			// The start offset was not visible
-			return;
-		}
-		int startX = p.x;
-
-		p = textArea.offsetToXY(physicalLine, endOffset, point);
-		if (p == null)
-		{
-			// The end offset was not visible
-			return;
-		}
-		int endX = p.x;
-		Color oldColor = gfx.getColor();
-		Composite oldComposite = gfx.getComposite();
-		gfx.setColor(highlightColor);
-		gfx.setComposite(blend);
-		gfx.fillRect(startX, y, endX - startX, fm.getHeight() - 1);
-
-		if (square)
-		{
-			gfx.setColor(squareColor);
-			gfx.drawRect(startX, y, endX - startX, fm.getHeight() - 1);
-		}
-
-		gfx.setColor(oldColor);
-		gfx.setComposite(oldComposite);
-	} *///}}}
-
 	//{{{ highlightUpdated() method
 	public void highlightUpdated(boolean highlightEnabled)
 	{
