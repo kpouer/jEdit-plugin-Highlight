@@ -94,7 +94,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	//{{{ HighlightOptionPane constructor
 	public HighlightOptionPane() 
 	{
-		super("gatchan.highlight");
+		super("gatchan.highlight.option-pane");
 	} //}}}
 	
 	//{{{ _init() method
