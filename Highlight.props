@@ -28,7 +28,7 @@ plugin.gatchan.highlight.HighlightPlugin.menu=\
                                                 gatchan-disableHighlights \
                                                 gatchan-toggleHighlights \
                                                 - \
-                                                highlighter-panel \
+                                                highlighter-panel
 
 gatchan-highlight.label=Highlight
 gatchan-highlight-session.label=Highlight (session scope)

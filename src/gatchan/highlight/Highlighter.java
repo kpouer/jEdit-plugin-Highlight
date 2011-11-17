@@ -238,6 +238,45 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		Composite oldComposite = gfx.getComposite();
 		gfx.setColor(highlightColor);
 		gfx.setComposite(blend);
+		gfx.fillRoundRect(startX, y, endX - startX, fm.getHeight() - 1, 5, 5);
+
+		if (square)
+		{
+			gfx.setColor(squareColor);
+			gfx.drawRoundRect(startX, y, endX - startX, fm.getHeight() - 1,5,5);
+		}
+
+		gfx.setColor(oldColor);
+		gfx.setComposite(oldComposite);
+	} //}}}
+
+	//{{{ _highlight() method
+	/*private void _highlight(Color highlightColor,
+				Graphics2D gfx,
+				int physicalLine,
+				int startOffset,
+				int endOffset,
+				int y)
+	{
+		Point p = textArea.offsetToXY(physicalLine, startOffset, point);
+		if (p == null)
+		{
+			// The start offset was not visible
+			return;
+		}
+		int startX = p.x;
+
+		p = textArea.offsetToXY(physicalLine, endOffset, point);
+		if (p == null)
+		{
+			// The end offset was not visible
+			return;
+		}
+		int endX = p.x;
+		Color oldColor = gfx.getColor();
+		Composite oldComposite = gfx.getComposite();
+		gfx.setColor(highlightColor);
+		gfx.setComposite(blend);
 		gfx.fillRect(startX, y, endX - startX, fm.getHeight() - 1);
 
 		if (square)
@@ -248,7 +287,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 
 		gfx.setColor(oldColor);
 		gfx.setComposite(oldComposite);
-	} //}}}
+	} *///}}}
 
 	//{{{ highlightUpdated() method
 	public void highlightUpdated(boolean highlightEnabled)
