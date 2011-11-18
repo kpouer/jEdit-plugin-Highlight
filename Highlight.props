@@ -4,7 +4,7 @@
 plugin.gatchan.highlight.HighlightPlugin.activate=startup
 plugin.gatchan.highlight.HighlightPlugin.name=Highlight
 plugin.gatchan.highlight.HighlightPlugin.author=Matthieu Casanova
-plugin.gatchan.highlight.HighlightPlugin.version=1.9.6
+plugin.gatchan.highlight.HighlightPlugin.version=1.9.7
 plugin.gatchan.highlight.HighlightPlugin.docs=docs/Highlight.html
 plugin.gatchan.highlight.HighlightPlugin.description=Highlight is a visual plugin that will highlight words (or matched regexp) with different colors.
 plugin.gatchan.highlight.HighlightPlugin.depend.0=jdk 1.5
@@ -94,6 +94,7 @@ gatchan.highlight.selectionHighlight.color=#FFFF66
 gatchan.highlight.selectionHighlight.color.text=Color of the selection highlight :
 gatchan.highlight.colorsenabled.text=Highlight colors in the buffer
 
+gatchan.highlight.misc.text=Highlight misc options
 gatchan.highlight.overview.text=Highlight overview
 gatchan.highlight.overview=true
 #}}}

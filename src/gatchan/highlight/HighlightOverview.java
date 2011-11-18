@@ -4,7 +4,7 @@
  * :folding=explicit:collapseFolds=1:
  *
  * Copyright (C) 2009 Szalai Endre
- * Portions Copyright (C) 2009, 2010 Matthieu Casanova
+ * Portions Copyright (C) 2009, 2011 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +26,6 @@ package gatchan.highlight;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.TextArea;
-import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.util.IntegerArray;
 
 import javax.swing.*;
@@ -80,7 +79,10 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		items.clear();
 		if (!highlightEnabled || !HighlightManagerTableModel.currentWordHighlight.isEnabled() ||
 			textArea.getSelectionCount() != 0)
+		{
+			repaint();
 			return;
+		}
 
 		int offset = 0;
 		JEditBuffer buffer = textArea.getBuffer();
@@ -129,7 +131,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		int lineCount = textArea.getLineCount();
 //		gfx.setColor(Color.black);
 //		gfx.drawString(String.valueOf(count), 0, 10);
-		gfx.setColor(jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW_COLOR));
+		gfx.setColor(HighlightManagerTableModel.currentWordHighlight.getColor());
 
 		for (int i = 0;i<items.getSize();i++)
 		{
