@@ -40,6 +40,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 //}}}
 
 /**
@@ -60,7 +61,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	private final List<HighlightChangeListener> highlightChangeListeners = new ArrayList<HighlightChangeListener>(2);
 	private final File highlights;
 
-	private final RWLock rwLock = new RWLock();
+	private final ReentrantReadWriteLock lock;
 
 	public static Highlight currentWordHighlight;
 	public static Highlight selectionHighlight;
@@ -118,6 +119,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	//{{{ HighlightManagerTableModel constructor
 	private HighlightManagerTableModel(File highlightFile)
 	{
+		lock = new ReentrantReadWriteLock();
 		highlights = highlightFile;
 		currentWordHighlight = new Highlight();
 		selectionHighlight = new Highlight();
@@ -189,12 +191,12 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		try
 		{
-			rwLock.getReadLock();
+			lock.readLock().lock();
 			return datas.size();
 		}
 		finally
 		{
-			rwLock.releaseLock();
+			lock.readLock().unlock();
 		}
 	} //}}}
 
@@ -234,12 +236,12 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		Object o;
 		try
 		{
-			rwLock.getReadLock();
+			lock.readLock().lock();
 			o = datas.get(rowIndex);
 		}
 		finally
 		{
-			rwLock.releaseLock();
+			lock.readLock().unlock();
 		}
 		if (columnIndex == 0)
 		{
@@ -257,12 +259,12 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			Highlight highlight;
 			try
 			{
-				rwLock.getReadLock();
+				lock.readLock().lock();
 				highlight = datas.get(rowIndex);
 			}
 			finally
 			{
-				rwLock.releaseLock();
+				lock.readLock().unlock();
 			}
 			highlight.setEnabled((Boolean) aValue);
 		}
@@ -270,12 +272,12 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		{
 			try
 			{
-				rwLock.getWriteLock();
+				lock.writeLock().lock();
 				datas.set(rowIndex, (Highlight) aValue);
 			}
 			finally
 			{
-				rwLock.releaseLock();
+				lock.writeLock().unlock();
 			}
 		}
 		fireTableCellUpdated(rowIndex, columnIndex);
@@ -313,25 +315,37 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 */
 	private void addElement(Highlight highlight, boolean enable)
 	{
-		rwLock.getWriteLock();
-		if (datas.contains(highlight))
-		{
-			rwLock.releaseLock();
-		}
-		else
+		if (indexOf(highlight) != -1)
 		{
 			if (appendHighlight || datas.isEmpty())
 			{
-				datas.add(highlight);
-				int firstRow = datas.size() - 1;
-				rwLock.releaseLock();
+				int firstRow;
+				try
+				{
+					lock.writeLock().lock();
+					datas.add(highlight);
+					firstRow = datas.size() - 1;
+				}
+				finally
+				{
+					lock.writeLock().unlock();
+				}
 				fireTableRowsInserted(firstRow, firstRow);
 			}
 			else
 			{
-				int firstRow = datas.size() - 1;
-				Highlight replacedHighlight = datas.get(firstRow);
-				rwLock.releaseLock();
+				int firstRow;
+				Highlight replacedHighlight;
+				try
+				{
+					lock.readLock().lock();
+					firstRow = datas.size() - 1;
+					replacedHighlight = datas.get(firstRow);
+				}
+				finally
+				{
+					lock.readLock().unlock();
+				}
 				replacedHighlight.init(highlight.getStringToHighlight(),
 						       highlight.isRegexp(),
 						       highlight.isIgnoreCase(),
@@ -354,12 +368,12 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		try
 		{
-			rwLock.getWriteLock();
+			lock.writeLock().lock();
 			datas.remove(index);
 		}
 		finally
 		{
-			rwLock.releaseLock();
+			lock.writeLock().unlock();
 		}
 		fireTableRowsDeleted(index, index);
 	}
@@ -371,17 +385,24 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 */
 	private void removeRow(Highlight item)
 	{
-		int index;
+		int index = indexOf(item);
+		if (index != -1)
+			removeRow(index);
+	} //}}}
+
+	//{{{ bufferClosed() method
+	private int indexOf(Highlight highlight)
+	{
 		try
 		{
-			rwLock.getReadLock();
-			index = datas.indexOf(item);
+			lock.readLock().lock();
+			int i = datas.indexOf(highlight);
+			return i;
 		}
 		finally
 		{
-			rwLock.releaseLock();
+			lock.readLock().unlock();
 		}
-		removeRow(index);
 	} //}}}
 
 	//{{{ bufferClosed() method
@@ -411,13 +432,13 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		int rowMax;
 		try
 		{
-			rwLock.getWriteLock();
+			lock.writeLock().lock();
 			rowMax = datas.size();
 			datas.clear();
 		}
 		finally
 		{
-			rwLock.releaseLock();
+			lock.writeLock().unlock();
 		}
 		if (rowMax != 0)
 		{
@@ -450,7 +471,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				writer.println(FILE_VERSION);
 				try
 				{
-					rwLock.getWriteLock();
+					lock.writeLock().lock();
 					ListIterator<Highlight> listIterator = datas.listIterator();
 					while (listIterator.hasNext())
 					{
@@ -467,7 +488,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				}
 				finally
 				{
-					rwLock.releaseLock();
+					lock.writeLock().unlock();
 				}
 			}
 			catch (IOException e)
@@ -560,7 +581,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			List<Highlight> expired = null;
 			try
 			{
-				rwLock.getReadLock();
+				lock.readLock().lock();
 				for (int i = 0; i < datas.size(); i++)
 				{
 					Highlight highlight = datas.get(i);
@@ -576,7 +597,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			}
 			finally
 			{
-				rwLock.releaseLock();
+				lock.readLock().unlock();
 			}
 			if (expired != null)
 			{
@@ -830,12 +851,12 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	//{{{ getReadLock() method
 	public void getReadLock()
 	{
-		rwLock.getReadLock();
+		lock.readLock().lock();
 	} //}}}
 
 	//{{{ releaseLock() method
 	public void releaseLock()
 	{
-		rwLock.releaseLock();
+		lock.readLock().unlock();
 	} //}}}
 }
