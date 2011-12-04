@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright © 2010 Matthieu Casanova
+ * Copyright © 2010, 2011 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -34,11 +34,10 @@ public class ColorToken
 	private final int start;
 	private final int end;
 
-	private Color color;
+	private final Color color;
 
 	public ColorToken(int start, int end, String hexa)
 	{
-		System.out.println(start + " " + end + " " + hexa);
 		this.start = start;
 		this.end = end;
 		color = Color.decode(hexa);
@@ -62,6 +61,6 @@ public class ColorToken
 	@Override
 	public String toString()
 	{
-		return "ColorToken[" + color + ',' + start + ',' + end + "]";
+		return "ColorToken[" + color + ',' + start + ',' + end + ']';
 	}
 }

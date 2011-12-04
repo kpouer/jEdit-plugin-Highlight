@@ -123,7 +123,12 @@ public class FlexColorPainter extends TextAreaExtension
 		Composite oldComposite = gfx.getComposite();
 		gfx.setColor(token.getColor());
 		FontMetrics fm = textArea.getPainter().getFontMetrics();
-		gfx.fillRect(startX, y, endX - startX, fm.getHeight() - 1);
+//		gfx.fillRect(startX, y, endX - startX, fm.getHeight() - 1);
+
+		int y2 = y + fm.getHeight() - 2;
+		int y3 = y + fm.getHeight() - 1;
+		gfx.drawLine(startX, y2, endX, y2);
+		gfx.drawLine(startX, y3, endX, y3);
 
 
 

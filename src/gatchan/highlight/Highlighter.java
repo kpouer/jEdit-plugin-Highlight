@@ -238,12 +238,12 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		Composite oldComposite = gfx.getComposite();
 		gfx.setColor(highlightColor);
 		gfx.setComposite(blend);
-		gfx.fillRect(startX, y, endX - startX, fm.getHeight() - 1);
+		gfx.fillRoundRect(startX, y, endX - startX, fm.getHeight() - 1, 5, 5);
 
 		if (square)
 		{
 			gfx.setColor(squareColor);
-			gfx.drawRect(startX, y, endX - startX, fm.getHeight() - 1);
+			gfx.drawRoundRect(startX, y, endX - startX, fm.getHeight() - 1,5,5);
 		}
 
 		gfx.setColor(oldColor);
