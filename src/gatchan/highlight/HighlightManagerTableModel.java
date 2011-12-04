@@ -315,7 +315,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 */
 	private void addElement(Highlight highlight, boolean enable)
 	{
-		if (indexOf(highlight) != -1)
+		if (indexOf(highlight) == -1)
 		{
 			if (appendHighlight || datas.isEmpty())
 			{
