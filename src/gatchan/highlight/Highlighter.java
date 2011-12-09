@@ -188,12 +188,24 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 								false);
 				if (match == null || match.end == match.start)
 					break;
-				Selection selectionAtOffset = textArea.getSelectionAtOffset(match.start + i +
-					screenToPhysicalOffset + textArea.getLineStartOffset(physicalLine));
+				int offset = match.start + i +
+					     screenToPhysicalOffset + textArea.getLineStartOffset(physicalLine);
+				Selection selectionAtOffset = textArea.getSelectionAtOffset(offset);
 				if (selectionAtOffset == null)
 				{
-					_highlight(highlight.getColor(), gfx, physicalLine, match.start + i +
-						screenToPhysicalOffset, match.end + i + screenToPhysicalOffset, y);
+					int caretOffsetInLine = textArea.getCaretPosition() - textArea.getLineStartOffset(textArea.getCaretLine());
+					int endOffset = match.end + i + screenToPhysicalOffset;
+					int startOffset = match.start + i + screenToPhysicalOffset;
+					if (highlight != HighlightManagerTableModel.currentWordHighlight ||
+					    textArea.getCaretLine() != physicalLine ||
+					     caretOffsetInLine < startOffset || caretOffsetInLine > endOffset)
+					{
+						_highlight(highlight.getColor(), gfx, physicalLine, startOffset, endOffset, y, true);
+					}
+					else
+					{
+						_highlight(highlight.getColor(), gfx, physicalLine, startOffset, endOffset, y, false);
+					}
 				}
 				highlight.updateLastSeen();
 				i += match.end;
@@ -217,7 +229,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 				int physicalLine,
 				int startOffset,
 				int endOffset,
-				int y)
+				int y,
+				boolean filled)
 	{
 		Point p = textArea.offsetToXY(physicalLine, startOffset, point);
 		if (p == null)
@@ -238,11 +251,16 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		Composite oldComposite = gfx.getComposite();
 		gfx.setColor(highlightColor);
 		gfx.setComposite(blend);
-		gfx.fillRoundRect(startX, y, endX - startX, fm.getHeight() - 1, 5, 5);
+		if (filled)
+			gfx.fillRoundRect(startX, y, endX - startX, fm.getHeight() - 1, 5, 5);
 
 		if (square)
 		{
 			gfx.setColor(squareColor);
+			gfx.drawRoundRect(startX, y, endX - startX, fm.getHeight() - 1,5,5);
+		}
+		else if (!filled)
+		{
 			gfx.drawRoundRect(startX, y, endX - startX, fm.getHeight() - 1,5,5);
 		}
 
