@@ -39,6 +39,7 @@ import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.Log;
 import org.gjt.sp.util.IOUtilities;
 
+import java.awt.Color;
 import java.io.File;
 //}}}
 
@@ -60,6 +61,8 @@ public class HighlightPlugin extends EditPlugin
 	private int layer;
 	private float alpha;
 	private boolean highlightOverview;
+	private boolean highlightOverviewSameColor;
+	private Color highlightOverviewColor;
 
 	//{{{ start() method
 	/**
@@ -159,11 +162,15 @@ public class HighlightPlugin extends EditPlugin
 		HighlightOverview currentOverview = (HighlightOverview) textArea.getClientProperty(HighlightOverview.class);
 		if (highlightOverview && currentOverview == null) 
 		{
-			HighlightOverview overview = new HighlightOverview(textArea);
-			highlightManager.addHighlightChangeListener(overview);
-			textArea.addLeftOfScrollBar(overview);
-			textArea.putClientProperty(HighlightOverview.class, overview);
+			currentOverview = new HighlightOverview(textArea);
+			highlightManager.addHighlightChangeListener(currentOverview);
+			textArea.addLeftOfScrollBar(currentOverview);
+			textArea.putClientProperty(HighlightOverview.class, currentOverview);
 		}
+		if (!jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW_SAMECOLOR))
+			currentOverview.setOverviewColor(jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW_COLOR));
+		else
+			currentOverview.setOverviewColor(null);
 	} //}}}
 
 	//{{{ addHighlightOverview() method
@@ -218,11 +225,16 @@ public class HighlightPlugin extends EditPlugin
 	public void handlePropertiesChanged(PropertiesChanged propertiesChanged)
 	{
 		boolean newOverview = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW);
+		boolean newOverviewSameColor = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW_SAMECOLOR);
+		Color newOverviewColor = jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW_COLOR);
 		int layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
 		float alpha = ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f;
-		if (this.layer != layer || this.alpha != alpha || newOverview != highlightOverview)
+		if (this.layer != layer || this.alpha != alpha || newOverview != highlightOverview || newOverviewSameColor != highlightOverviewSameColor ||
+			(highlightOverviewColor != null && !highlightOverviewColor.equals(newOverviewColor)))
 		{
 			highlightOverview = newOverview;
+			highlightOverviewSameColor = newOverviewSameColor;
+			highlightOverviewColor = newOverviewColor;
 			this.layer = layer;
 			this.alpha = alpha;
 			jEdit.visit(new JEditVisitorAdapter()

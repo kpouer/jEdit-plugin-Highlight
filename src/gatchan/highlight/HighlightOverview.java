@@ -51,6 +51,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	// To be in the same line as the scrollbar
 	private static final int Y_OFFSET = 16;
 	private static final Dimension preferredSize = new Dimension(OVERVIEW_WIDTH, 0);
+	private Color color;
 
 	//{{{ HighlightOverview constructor
 	public HighlightOverview(final TextArea textArea)
@@ -129,9 +130,11 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			return;
 
 		int lineCount = textArea.getLineCount();
-//		gfx.setColor(Color.black);
 //		gfx.drawString(String.valueOf(count), 0, 10);
-		gfx.setColor(HighlightManagerTableModel.currentWordHighlight.getColor());
+		if (color != null)
+			gfx.setColor(color);
+		else
+			gfx.setColor(HighlightManagerTableModel.currentWordHighlight.getColor());
 
 		for (int i = 0;i<items.getSize();i++)
 		{
@@ -158,4 +161,9 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	{
 		return preferredSize;
 	} //}}}
+
+	public void setOverviewColor(Color color)
+	{
+		this.color = color;
+	}
 }

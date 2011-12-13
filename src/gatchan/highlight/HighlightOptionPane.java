@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 201 Matthieu Casanova
+* Copyright (C) 2004, 2011 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -63,6 +63,8 @@ public class HighlightOptionPane extends AbstractOptionPane
 	public static final String PROP_SQUARE_COLOR = "gatchan.highlight.square.color";
 
 	public static final String PROP_HIGHLIGHT_OVERVIEW = "gatchan.highlight.overview";
+	public static final String PROP_HIGHLIGHT_OVERVIEW_SAMECOLOR = "gatchan.highlight.overview.samecolor";
+	public static final String PROP_HIGHLIGHT_OVERVIEW_COLOR = "gatchan.highlight.overview.color";
 
 	public static final String PROP_HIGHLIGHT_COLORS = "gatchan.highlight.colorsenabled";
 
@@ -72,6 +74,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private ColorWellButton wordAtCaretColor;
 	private JCheckBox square;
 	private ColorWellButton squareColor;
+	private ColorWellButton highlightOverviewColor;
 	private JCheckBox cycleColor;
 	private JCheckBox highlightAppend;
 	private ColorWellButton defaultColor;
@@ -87,6 +90,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private ColorWellButton selectionColor;
 
 	private JCheckBox highlightOverview;
+	private JCheckBox highlightOverviewSameColor;
 	private JCheckBox highlightColorEnabled;
 
 	//{{{ HighlightOptionPane constructor
@@ -154,6 +158,21 @@ public class HighlightOptionPane extends AbstractOptionPane
 
 		addSeparator("gatchan.highlight.misc.text");
 		addComponent(highlightOverview = createCheckBox(PROP_HIGHLIGHT_OVERVIEW));
+		addComponent(highlightOverviewSameColor = createCheckBox(PROP_HIGHLIGHT_OVERVIEW_SAMECOLOR));
+		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_OVERVIEW_COLOR + ".text")),
+			     highlightOverviewColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_OVERVIEW_COLOR)));
+
+		highlightOverviewColor.setEnabled(!highlightOverviewSameColor.isSelected());
+
+		highlightOverviewSameColor.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				highlightOverviewColor.setEnabled(!highlightOverviewSameColor.isSelected());
+			}
+		});
+
 		addComponent(highlightColorEnabled = createCheckBox(PROP_HIGHLIGHT_COLORS));
 
 	} //}}}
@@ -190,6 +209,8 @@ public class HighlightOptionPane extends AbstractOptionPane
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE, selectionIgnoreCase.isSelected());
 
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_OVERVIEW, highlightOverview.isSelected());
+		jEdit.setBooleanProperty(PROP_HIGHLIGHT_OVERVIEW_SAMECOLOR, highlightOverviewSameColor.isSelected());
+		jEdit.setColorProperty(PROP_HIGHLIGHT_OVERVIEW_COLOR, highlightOverviewColor.getSelectedColor());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_COLORS, highlightColorEnabled.isSelected());
 	} //}}}
 
