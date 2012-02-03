@@ -23,8 +23,10 @@
 package gatchan.highlight;
 
 //{{{ Imports
+import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.search.SearchMatcher;
+import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextArea;
 import org.gjt.sp.util.IntegerArray;
 
@@ -42,7 +44,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	private final IntegerArray items;
 	private int count;
 
-	private final TextArea textArea;
+	private final JEditTextArea textArea;
 
 	private static final int ITEM_HEIGHT = 4;
 	private static final int OVERVIEW_WIDTH = 12;
@@ -54,7 +56,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	private Color color;
 
 	//{{{ HighlightOverview constructor
-	public HighlightOverview(final TextArea textArea)
+	public HighlightOverview(final JEditTextArea textArea)
 	{
 		Font ff = getFont();
 		Font f = new Font(ff.getName(), Font.BOLD, 8);
@@ -118,6 +120,12 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			offset = buffer.getLineStartOffset(nextLine);
 		}
 		count = counter;
+		View view = textArea.getView();
+		if (view.isActive())
+		{
+			if (view.getTextArea() == textArea)
+				view.getStatus().setMessage(counter + " occurences of the current word");
+		}
 		repaint();
 	} //}}}
 
