@@ -124,7 +124,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		if (view.isActive())
 		{
 			if (view.getTextArea() == textArea)
-				view.getStatus().setMessage(counter + " occurences of the current word");
+				view.getStatus().setMessage(counter + " lines contains the current word");
 		}
 		repaint();
 	} //}}}
