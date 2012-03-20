@@ -139,7 +139,6 @@ public class HighlightPlugin extends EditPlugin
 	 * Initialize the textarea with a highlight painter.
 	 *
 	 * @param textArea the textarea to initialize
-	 * @return the new highlighter for the textArea
 	 */
 	private void initTextArea(JEditTextArea textArea)
 	{
@@ -152,7 +151,8 @@ public class HighlightPlugin extends EditPlugin
 		FlexColorPainter flexColorPainter = new FlexColorPainter(textArea);
 		textArea.putClientProperty(FlexColorPainter.class, flexColorPainter);
 		painter.addExtension(layer-1, flexColorPainter);
-		addHighlightOverview(textArea);
+		if (highlightOverview)
+			addHighlightOverview(textArea);
 		textArea.revalidate();
 	} //}}}
 
@@ -160,7 +160,7 @@ public class HighlightPlugin extends EditPlugin
 	private void addHighlightOverview(JEditTextArea textArea)
 	{
 		HighlightOverview currentOverview = (HighlightOverview) textArea.getClientProperty(HighlightOverview.class);
-		if (highlightOverview && currentOverview == null) 
+		if (currentOverview == null)
 		{
 			currentOverview = new HighlightOverview(textArea);
 			highlightManager.addHighlightChangeListener(currentOverview);
