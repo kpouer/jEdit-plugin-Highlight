@@ -1,0 +1,66 @@
+# Encoding: UTF-8
+# Translator: Jojaba [http://jojaba.free.fr]
+
+plugin.gatchan.highlight.HighlightPlugin.description=Highlight est un plugin visuel qui mettra des mots (ou des expreg) en surbrillance en utilisant différentes couleurs.
+
+gatchan-highlight.label=Mettre en surbrillance
+gatchan-highlight-session.label=Mettre en surbrillance (toute la session)
+gatchan-highlight-buffer.label=Mettre en surbrillance (le tampon courant)
+gatchan-highlight-entireword.label=Mettre en surbrillance le mot entier
+gatchan-highlight-entireword-session.label=Mettre en surbrillance le mot entier (toute la session)
+gatchan-highlight-entireword-buffer.label=Mettre en surbrillance le mot entier (le tampon courant)
+gatchan-highlight-dialog.label=Boîte de dialogue pour surbrillance
+gatchan-highlightcurrentSearch.label=Mettre en surbrillance la recherche courante
+gatchan-highlightcurrentSearch-session.label=Mettre en surbrillance la recherche courante (toute la session)
+gatchan-highlightcurrentSearch-buffer.label=Mettre en surbrillance la recherche courante (le tampon courant)
+gatchan-highlightHyperSearchResults.label=Mettre en surbrillance les résultats d'hyper-recherche
+gatchan-removeAllHighlights.label=Tout supprimer
+gatchan-enableHighlights.label=Activer la surbrillance
+gatchan-disableHighlights.label=Désactiver la surbrillance
+gatchan-toggleHighlights.label=Activer/désactiver la surbrillance
+
+highlighter-panel.title=Mise en surbrillance
+highlighter-panel.label=Panneau de mise en surbrillance
+
+gatchan-highlight.errordialog.invalidHighlight.message = Surbrillance invalide
+gatchan-highlight.errordialog.invalidHighlight.title = Erreur pour mise en surbrillance
+
+gatchan-highlight.errordialog.unableToAccessProjectDirectory.title = Erreur pour mise en surbrillance
+
+gatchan.highlight.expire.tooltip=Le délai en secondes avant disparition de la surbrillance si inutilisée. 0 signifie illimité.
+
+options.gatchan.highlight.option-pane.label=Highlight
+
+options.name.gatchan.highlight.label=Highlight
+
+#{{{ properties for option pane
+
+gatchan.highlight.option-pane.commonProperties.text=Propriétés générales
+gatchan.highlight.cycleColor.text=Alterner la couleur lors de la création de surbrillance :
+gatchan.highlight.defaultColor.text=Choisir la couleur de surbrillance
+gatchan.highlight.appendHighlight.text=Ajouter les surbrillances (si non cochée, une couleur de surbrillance remplacera la couleur précédente)
+
+gatchan.highlight.caretHighlight.whitespace.text=Mettre en surbrillance les mots avec espaces
+gatchan.highlight.caretHighlight.onlyWords.text=Mettre en surbrillance uniquement les mots
+gatchan.highlight.hyperSearchResults.text=Mettre en surbrillance les résultats d'hyper-recherche
+gatchan.highlight.caretHighlight.text=Mettre en surbrillance le mot au curseur
+gatchan.highlight.caretHighlight.ignoreCase.text=ignorer la casse
+gatchan.highlight.caretHighlight.entireWord.text=Mot entier (cette options peu être lente)
+gatchan.highlight.caretHighlight.color.text=Couleur de la surbrillance du curseur :
+gatchan.highlight.layer.text=Choisissez le calque qui sera utilisé pour dessiner le rectangle
+gatchan.highlight.alpha.text=Choisir la transparence :
+
+gatchan.highlight.square.text=Encadrer le mot en surbrillance
+gatchan.highlight.square.color.text=Choisir la couleur du cadre
+
+gatchan.highlight.selectionHighlight.text=Mettre en surbrillance la sélection sous le curseur
+gatchan.highlight.selectionHighlight.ignoreCase.text=ignorer la casse
+gatchan.highlight.selectionHighlight.color.text=Colour de la surbrillance de la sélection :
+gatchan.highlight.colorsenabled.text=Couleur de surbrillances dans le tampon
+
+gatchan.highlight.misc.text=Divers options de mise en surbrillance
+gatchan.highlight.overview.text=Aperçu de la surbrillance
+gatchan.highlight.overview.samecolor.text=Utiliser la même couleur dans l'aperçu de surbrillance
+gatchan.highlight.overview.color.text=Couleur de l'aperçu de surbrillance
+#}}}
+
