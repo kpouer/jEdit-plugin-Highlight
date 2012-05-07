@@ -1,0 +1,3 @@
+1.9.10 (not released)
+-Fixed NPE during initialization if highlight overview is disabled (#3509281)
+-The plugin will no longer switch to defer mode (#3522011)

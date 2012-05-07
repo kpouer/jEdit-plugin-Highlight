@@ -89,10 +89,7 @@ public class HighlightPlugin extends EditPlugin
 	public void stop()
 	{
 		EditBus.removeFromBus(this);
-		if (highlightManager.countHighlights() == 0 && !highlightManager.isHighlightWordAtCaret())
-			jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "defer");
-		else
-			jEdit.setProperty("plugin.gatchan.highlight.HighlightPlugin.activate", "startup");
+		jEdit.resetProperty("plugin.gatchan.highlight.HighlightPlugin.activate");
 
 		Buffer[] buffers = jEdit.getBuffers();
 		for (int i = 0; i < buffers.length; i++)
