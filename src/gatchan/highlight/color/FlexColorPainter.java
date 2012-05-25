@@ -71,7 +71,7 @@ public class FlexColorPainter extends TextAreaExtension
 			l = MAX_LINE_LENGTH;
 		String lineContent = buffer.getText(lineStart + screenToPhysicalOffset,
 			l);
-		if (lineContent.length() == 0)
+		if (lineContent.isEmpty())
 			return;
 
 
@@ -81,7 +81,7 @@ public class FlexColorPainter extends TextAreaExtension
 			ColorToken token = flexColor.yylex();
 			while (token != null)
 			{
-				paint(token, gfx, physicalLine, y);
+				paint(token, gfx, physicalLine, start, y);
 				try
 				{
 					token = flexColor.yylex();
@@ -99,12 +99,13 @@ public class FlexColorPainter extends TextAreaExtension
 
 	}
 
-	private void paint(ColorToken token,
-				Graphics2D gfx,
-				int physicalLine,
-				int y)
+	private void paint(ColorToken token, Graphics2D gfx, int physicalLine, int start, int y)
 	{
-		Point p = textArea.offsetToXY(physicalLine, token.getStart(), point);
+		int phycialLineStartOffset = textArea.getLineStartOffset(physicalLine);
+		int screenStartOffset = start + token.getStart();
+		int screenEndOffset = start + token.getEnd();
+		Point p = textArea.offsetToXY(physicalLine, screenStartOffset - phycialLineStartOffset, point);
+
 		if (p == null)
 		{
 			// The start offset was not visible
@@ -112,7 +113,7 @@ public class FlexColorPainter extends TextAreaExtension
 		}
 		int startX = p.x;
 
-		p = textArea.offsetToXY(physicalLine, token.getEnd(), point);
+		p = textArea.offsetToXY(physicalLine, screenEndOffset - phycialLineStartOffset, point);
 		if (p == null)
 		{
 			// The end offset was not visible
@@ -123,7 +124,6 @@ public class FlexColorPainter extends TextAreaExtension
 		Composite oldComposite = gfx.getComposite();
 		gfx.setColor(token.getColor());
 		FontMetrics fm = textArea.getPainter().getFontMetrics();
-//		gfx.fillRect(startX, y, endX - startX, fm.getHeight() - 1);
 
 		int y2 = y + fm.getHeight() - 2;
 		int y3 = y + fm.getHeight() - 1;

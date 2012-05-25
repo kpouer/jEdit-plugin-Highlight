@@ -1,3 +1,4 @@
-1.9.10 (not released)
+1.9.10
 -Fixed NPE during initialization if highlight overview is disabled (#3509281)
 -The plugin will no longer switch to defer mode (#3522011)
+-Fix color highlight when using softwrap (patch #3521997)
