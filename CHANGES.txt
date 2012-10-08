@@ -1,4 +1,5 @@
-x.x.x (unreleased)
+1.9.11 (unreleased)
+-Fixed word at caret and selection highlight not highlighted immediately when activating the option (#3574730)
 
 1.9.10
 -Fixed NPE during initialization if highlight overview is disabled (#3509281)

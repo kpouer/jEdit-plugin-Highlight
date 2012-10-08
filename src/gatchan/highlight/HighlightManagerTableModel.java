@@ -204,6 +204,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	/**
 	 * @return 4
 	 */
+	@Override
 	public int getColumnCount()
 	{
 		return 4;
@@ -231,6 +232,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ getValueAt() method
+	@Override
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		Object o;
@@ -291,6 +293,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 * @param i the index of the highlight
 	 * @return a highlight
 	 */
+	@Override
 	public Highlight getHighlight(int i)
 	{
 		return datas.get(i);
@@ -302,6 +305,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 *
 	 * @param highlight the highlight to be added
 	 */
+	@Override
 	public void addElement(Highlight highlight)
 	{
 		addElement(highlight, true);
@@ -364,6 +368,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 *
 	 * @param index the index
 	 */
+	@Override
 	public void removeRow(int index)
 	{
 		try
@@ -411,6 +416,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 *
 	 * @param buffer the closed buffer
 	 */
+	@Override
 	public void bufferClosed(Buffer buffer)
 	{
 		List<Highlight> highlights = (List<Highlight>) buffer.getProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
@@ -427,6 +433,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	/**
 	 * remove all Highlights.
 	 */
+	@Override
 	public void removeAll()
 	{
 		int rowMax;
@@ -447,6 +454,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ dispose() method
+	@Override
 	public void dispose()
 	{
 		timer.stop();
@@ -514,6 +522,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 
 	//{{{ HighlightChangeListener methods
 	//{{{ addHighlightChangeListener() method
+	@Override
 	public void addHighlightChangeListener(HighlightChangeListener listener)
 	{
 		if (!highlightChangeListeners.contains(listener))
@@ -523,12 +532,14 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ removeHighlightChangeListener() method
+	@Override
 	public void removeHighlightChangeListener(HighlightChangeListener listener)
 	{
 		highlightChangeListeners.remove(listener);
 	} //}}}
 
 	//{{{ fireHighlightChangeListener() method
+	@Override
 	public void fireHighlightChangeListener(boolean highlightEnable)
 	{
 		for (int i = 0; i < highlightChangeListeners.size(); i++)
@@ -545,6 +556,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 *
 	 * @return how many highlights are in
 	 */
+	@Override
 	public int countHighlights()
 	{
 		return getRowCount();
@@ -556,6 +568,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 *
 	 * @return returns true if highlights are displayed, false otherwise
 	 */
+	@Override
 	public boolean isHighlightEnable()
 	{
 		return jEdit.getBooleanProperty(ENABLED_PROP);
@@ -567,6 +580,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 *
 	 * @param highlightEnable the news status
 	 */
+	@Override
 	public void setHighlightEnable(boolean highlightEnable)
 	{
 		jEdit.setBooleanProperty(ENABLED_PROP, highlightEnable);
@@ -576,6 +590,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	//{{{ RemoveExpired class
 	private class RemoveExpired implements ActionListener
 	{
+		@Override
 		public void actionPerformed(ActionEvent e)
 		{
 			List<Highlight> expired = null;
@@ -611,9 +626,15 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ caretUpdate() method
+	@Override
 	public void caretUpdate(CaretEvent e)
 	{
 		JEditTextArea textArea = (JEditTextArea) e.getSource();
+		caretUpdate(textArea);
+	}
+
+	public void caretUpdate(JEditTextArea textArea)
+	{
 		int line = textArea.getCaretLine();
 		boolean updated = false;
 		if (highlightWordAtCaret)
@@ -698,7 +719,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		}
 		if (highlightSelection)
 		{
-			Selection selectionatOffset = textArea.getSelectionAtOffset(e.getDot());
+			Selection selectionatOffset = textArea.getSelectionAtOffset(textArea.getCaretPosition());
 			if (textArea.getLineLength(line) == 0 ||
 			    selectionatOffset == null ||
 			    selectionatOffset.getStartLine() != selectionatOffset.getEndLine() ||
@@ -727,19 +748,21 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ isHighlightWordAtCaret() method
+	@Override
 	public boolean isHighlightWordAtCaret()
 	{
 		return highlightWordAtCaret;
 	} //}}}
 
-
 	//{{{ isHighlightSelection() method
+	@Override
 	public boolean isHighlightSelection()
 	{
 		return highlightSelection;
 	} //}}}
 
 	//{{{ propertiesChanged() method
+	@Override
 	public void propertiesChanged()
 	{
 		//{{{ PROP_HIGHLIGHT_CYCLE_COLOR
@@ -755,6 +778,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		appendHighlight = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_APPEND);
 		boolean changed = false;
 		boolean changedSelection = false;
+		boolean shouldUpdateCaret = false;
 
 		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET
 		boolean highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
@@ -762,8 +786,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		{
 			changed = true;
 			this.highlightWordAtCaret = highlightWordAtCaret;
-			if (!highlightWordAtCaret)
-				currentWordHighlight.setEnabled(false);
+			currentWordHighlight.setEnabled(highlightWordAtCaret);
+			if (highlightWordAtCaret)
+				shouldUpdateCaret = true;
 		} //}}}
 
 		//{{{ PROP_HIGHLIGHT_SELECTION
@@ -772,9 +797,13 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		{
 			changedSelection = true;
 			this.highlightSelection = highlightSelection;
-			if (!highlightSelection)
-				selectionHighlight.setEnabled(false);
+			selectionHighlight.setEnabled(highlightSelection);
+			if (highlightSelection)
+				shouldUpdateCaret = true;
 		} //}}}
+
+		if (shouldUpdateCaret)
+			caretUpdate(jEdit.getActiveView().getTextArea());
 
 		//{{{ PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD
 		boolean entireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD);
@@ -849,12 +878,14 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ getReadLock() method
+	@Override
 	public void getReadLock()
 	{
 		lock.readLock().lock();
 	} //}}}
 
 	//{{{ releaseLock() method
+	@Override
 	public void releaseLock()
 	{
 		lock.readLock().unlock();
