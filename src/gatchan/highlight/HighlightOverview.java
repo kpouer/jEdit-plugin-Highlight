@@ -75,24 +75,33 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	} //}}}
 
 	//{{{ highlightUpdated() method
+	@Override
 	public void highlightUpdated(boolean highlightEnabled)
 	{
 		items.clear();
-		if (!highlightEnabled || !HighlightManagerTableModel.currentWordHighlight.isEnabled() ||
-			textArea.getSelectionCount() != 0)
+		if (!highlightEnabled || (!HighlightManagerTableModel.currentWordHighlight.isEnabled() &&
+								  !HighlightManagerTableModel.selectionHighlight.isEnabled()))
 		{
 			repaint();
 			return;
 		}
 
-		int offset = 0;
 		JEditBuffer buffer = textArea.getBuffer();
 		int end = buffer.getLength();
 		boolean endOfLine = buffer.getLineEndOffset(
 				buffer.getLineOfOffset(end)) - 1 == end;
-		SearchMatcher matcher = HighlightManagerTableModel.currentWordHighlight.getSearchMatcher();
+		SearchMatcher matcher;
+		if (HighlightManagerTableModel.selectionHighlight.isEnabled())
+		{
+			matcher = HighlightManagerTableModel.selectionHighlight.getSearchMatcher();
+		}
+		else
+		{
+			matcher = HighlightManagerTableModel.currentWordHighlight.getSearchMatcher();
+		}
 		int lastResult = -1;
 		int counter;
+		int offset = 0;
 		for(counter = 0; ; counter++)
 		{
 			boolean startOfLine = buffer.getLineStartOffset(
@@ -134,12 +143,19 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		if (items.getSize() == 0)
 			return;
 
+
 		int lineCount = textArea.getLineCount();
 //		gfx.drawString(String.valueOf(count), 0, 10);
 		if (color != null)
 			gfx.setColor(color);
+		else if (HighlightManagerTableModel.selectionHighlight.isEnabled())
+		{
+			gfx.setColor(HighlightManagerTableModel.selectionHighlight.getColor());
+		}
 		else
+		{
 			gfx.setColor(HighlightManagerTableModel.currentWordHighlight.getColor());
+		}
 
 		for (int i = 0;i<items.getSize();i++)
 		{
