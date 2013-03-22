@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2010 Matthieu Casanova
+ * Copyright (C) 2004, 2013 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -53,7 +53,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class HighlightManagerTableModel extends AbstractTableModel implements HighlightManager
 {
-	private static final String ENABLED_PROP = HighlightPlugin.PROPERTY_PREFIX + "enabled";
+	private static final String ENABLED_PROP = "plugin.Highlight.enabled";
 
 	private final List<Highlight> datas = new ArrayList<Highlight>();
 	private static HighlightManagerTableModel highlightManagerTableModel;

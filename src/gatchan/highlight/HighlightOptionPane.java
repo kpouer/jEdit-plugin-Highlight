@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2011 Matthieu Casanova
+* Copyright (C) 2004, 2013 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -67,6 +67,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	public static final String PROP_HIGHLIGHT_OVERVIEW_COLOR = "gatchan.highlight.overview.color";
 
 	public static final String PROP_HIGHLIGHT_COLORS = "gatchan.highlight.colorsenabled";
+	public static final String PROP_HIGHLIGHT_ROUND_CORNER = "gatchan.highlight.roundcorner";
 
 	private JCheckBox highlightWordAtCaret;
 	private JCheckBox wordAtCaretIgnoreCase;
@@ -92,6 +93,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private JCheckBox highlightOverview;
 	private JCheckBox highlightOverviewSameColor;
 	private JCheckBox highlightColorEnabled;
+	private JCheckBox roundCornerEnabled;
 
 	//{{{ HighlightOptionPane constructor
 	public HighlightOptionPane()
@@ -139,6 +141,8 @@ public class HighlightOptionPane extends AbstractOptionPane
                  alphaSlider = new JSlider(0,
                                100,
                                jEdit.getIntegerProperty(PROP_ALPHA, 50)));
+
+		addComponent(roundCornerEnabled = createCheckBox(PROP_HIGHLIGHT_ROUND_CORNER));
 
 		addSeparator(PROP_HIGHLIGHT_WORD_AT_CARET + ".text");
 		addComponent(highlightWordAtCaret = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET));
@@ -212,6 +216,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_OVERVIEW_SAMECOLOR, highlightOverviewSameColor.isSelected());
 		jEdit.setColorProperty(PROP_HIGHLIGHT_OVERVIEW_COLOR, highlightOverviewColor.getSelectedColor());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_COLORS, highlightColorEnabled.isSelected());
+		jEdit.setBooleanProperty(PROP_HIGHLIGHT_ROUND_CORNER, roundCornerEnabled.isSelected());
 	} //}}}
 
 	//{{{ createCheckBox() method

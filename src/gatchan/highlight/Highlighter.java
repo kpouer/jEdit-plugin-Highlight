@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2010 Matthieu Casanova
+* Copyright (C) 2004, 2013 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@ import org.gjt.sp.jedit.search.SearchMatcher;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.Selection;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
+import org.gjt.sp.jedit.textarea.TextAreaPainter;
 
 import java.awt.*;
 import java.util.regex.PatternSyntaxException;
@@ -43,7 +44,6 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 {
 	private final JEditTextArea textArea;
 	private final Point point = new Point();
-	private FontMetrics fm;
 
 	private final HighlightManager highlightManager;
 	private AlphaComposite blend;
@@ -54,6 +54,10 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 
 	public static final int MAX_LINE_LENGTH = 10000;
 
+	private boolean roundcorner;
+
+	private final TextAreaPainter painter;
+
 	//{{{ Highlighter constructor
 	Highlighter(JEditTextArea textArea)
 	{
@@ -61,6 +65,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
 		highlightManager = HighlightManagerTableModel.getManager();
 		this.textArea = textArea;
+		painter = textArea.getPainter();
 	} //}}}
 
 	//{{{ setAlphaComposite() method
@@ -73,11 +78,20 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		}
 	} //}}}
 
+	//{{{ setRoundcorner() method
+	/**
+	 * gatchan.highlight.roundcorner
+	 * @param roundcorner
+	 */
+	public void setRoundcorner(boolean roundcorner)
+	{
+		this.roundcorner = roundcorner;
+	} //}}}
+
 	//{{{ paintScreenLineRange() method
 	@Override
 	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, int[] start, int[] end, int y, int lineHeight)
 	{
-		fm = textArea.getPainter().getFontMetrics();
 		if (highlightManager.isHighlightEnable() &&
 		    highlightManager.countHighlights() != 0 ||
 		    HighlightManagerTableModel.currentWordHighlight.isEnabled() ||
@@ -252,23 +266,48 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		gfx.setColor(highlightColor);
 		gfx.setComposite(blend);
 		if (filled)
-			gfx.fillRoundRect(startX, y, endX - startX, fm.getHeight() - 1, 5, 5);
+		{
+			int lineHeight = painter.getLineHeight();
+			int charHeight = painter.getFontHeight();
+			int charOffset = lineHeight - charHeight;
+			if (roundcorner)
+			{
+				gfx.fillRoundRect(startX, y + charOffset, endX - startX, charHeight - 1, 5, 5);
+			}
+			else
+			{
+				gfx.fillRect(startX, y + charOffset, endX - startX, charHeight - 1);
+			}
+		}
 
 		if (square)
 		{
 			gfx.setColor(squareColor);
-			gfx.drawRoundRect(startX, y, endX - startX, fm.getHeight() - 1,5,5);
+			drawRect(gfx, y, startX, endX);
 		}
 		else if (!filled)
 		{
-			gfx.drawRoundRect(startX, y, endX - startX, fm.getHeight() - 1,5,5);
+			drawRect(gfx, y, startX, endX);
 		}
 
 		gfx.setColor(oldColor);
 		gfx.setComposite(oldComposite);
 	} //}}}
 
+	//{{{ drawRect() method
+	private void drawRect(Graphics2D gfx, int y, int startX, int endX)
+	{
+		int lineHeight = painter.getLineHeight();
+		int charHeight = painter.getFontHeight();
+		int charOffset = lineHeight - charHeight;
+		if (roundcorner)
+			gfx.drawRoundRect(startX, y + charOffset, endX - startX, charHeight - 1,5,5);
+		else
+			gfx.drawRect(startX, y + charOffset, endX - startX, charHeight - 1);
+	} //}}}
+
 	//{{{ highlightUpdated() method
+	@Override
 	public void highlightUpdated(boolean highlightEnabled)
 	{
 		int firstLine = textArea.getFirstPhysicalLine();

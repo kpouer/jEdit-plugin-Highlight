@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2011 Matthieu Casanova
+ * Copyright (C) 2004, 2013 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -52,17 +52,13 @@ public class HighlightPlugin extends EditPlugin
 {
 	private static HighlightManager highlightManager;
 
-	public static final String LAYER_PROPERTY = "plugin.highlight";
-	public static final String NAME = "highlight";
-	public static final String PROPERTY_PREFIX = "plugin.Highlight.";
-	public static final String MENU = "highlight.menu";
-	public static final String OPTION_PREFIX = "options.highlight.";
-
 	private int layer;
 	private float alpha;
+	private boolean roundCorner;
 	private boolean highlightOverview;
 	private boolean highlightOverviewSameColor;
 	private Color highlightOverviewColor;
+	private int extraLineSpacing;
 
 	//{{{ start() method
 	/**
@@ -226,7 +222,11 @@ public class HighlightPlugin extends EditPlugin
 		Color newOverviewColor = jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW_COLOR);
 		int layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
 		float alpha = ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f;
-		if (this.layer != layer || this.alpha != alpha || newOverview != highlightOverview || newOverviewSameColor != highlightOverviewSameColor ||
+		boolean roundCorner = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_ROUND_CORNER);
+		int extraLineSpacing = jEdit.getIntegerProperty("options.textarea.extraLineSpacing");
+		if (this.extraLineSpacing != extraLineSpacing || this.roundCorner != roundCorner || this.layer != layer ||
+			this.alpha != alpha || newOverview != highlightOverview ||
+			newOverviewSameColor != highlightOverviewSameColor ||
 			(highlightOverviewColor != null && !highlightOverviewColor.equals(newOverviewColor)))
 		{
 			highlightOverview = newOverview;
@@ -234,6 +234,8 @@ public class HighlightPlugin extends EditPlugin
 			highlightOverviewColor = newOverviewColor;
 			this.layer = layer;
 			this.alpha = alpha;
+			this.roundCorner = roundCorner;
+			this.extraLineSpacing = extraLineSpacing;
 			jEdit.visit(new JEditVisitorAdapter()
 			{
 				@Override
@@ -242,6 +244,7 @@ public class HighlightPlugin extends EditPlugin
 					TextAreaPainter painter = textArea.getPainter();
 					Highlighter highlighter = (Highlighter) textArea.getClientProperty(Highlighter.class);
 					highlighter.setAlphaComposite(HighlightPlugin.this.alpha);
+					highlighter.setRoundcorner(HighlightPlugin.this.roundCorner);
 					painter.removeExtension(highlighter);
 					painter.addExtension(HighlightPlugin.this.layer, highlighter);
 					if (highlightOverview)
