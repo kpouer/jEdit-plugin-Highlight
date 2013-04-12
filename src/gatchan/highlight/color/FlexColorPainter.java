@@ -29,8 +29,10 @@ import org.gjt.sp.jedit.textarea.TextAreaExtension;
 import org.gjt.sp.util.Log;
 
 import java.awt.*;
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.StringReader;
+import javax.swing.text.Segment;
 
 /**
  * @author Matthieu Casanova
@@ -40,10 +42,14 @@ public class FlexColorPainter extends TextAreaExtension
 	public static final int MAX_LINE_LENGTH = 10000;
 	private final TextArea textArea;
 	private final Point point = new Point();
+	private final Segment seg;
+	private FlexColorScanner flexColor;
 
 	public FlexColorPainter(TextArea textArea)
 	{
 		this.textArea = textArea;
+		seg = new Segment();
+		flexColor = new FlexColorScanner(new StringReader(""));
 	}
 
 	//{{{ paintScreenLineRange() method
@@ -58,24 +64,14 @@ public class FlexColorPainter extends TextAreaExtension
 	public void paintValidLine(Graphics2D gfx, int screenLine, int physicalLine, int start, int end, int y)
 	{
 		JEditBuffer buffer = textArea.getBuffer();
-		int lineStart = buffer.getLineStartOffset(physicalLine);
-		int length = buffer.getLineLength(physicalLine);
-
-		int startOffset = textArea.getLineStartOffset(physicalLine);
-		int endOffset = textArea.getLineEndOffset(physicalLine);
-		int screenToPhysicalOffset = start - startOffset;
-
-
-		int l = length - screenToPhysicalOffset - endOffset + end;
-		if (l > MAX_LINE_LENGTH)
-			l = MAX_LINE_LENGTH;
-		String lineContent = buffer.getText(lineStart + screenToPhysicalOffset,
-			l);
-		if (lineContent.isEmpty())
+		int lineStartOffset = buffer.getLineStartOffset(physicalLine);
+		int lineEndOffset = buffer.getLineEndOffset(physicalLine);
+		int length = Math.min(lineEndOffset - lineStartOffset - 1, MAX_LINE_LENGTH);
+		if (length == 0)
 			return;
+		buffer.getText(start, length, seg);
 
-
-		FlexColorScanner flexColor = new FlexColorScanner(new StringReader(lineContent));
+		flexColor.yyreset(new CharArrayReader(seg.array, seg.offset, seg.count));
 		try
 		{
 			ColorToken token = flexColor.yylex();
@@ -96,7 +92,7 @@ public class FlexColorPainter extends TextAreaExtension
 		{
 			Log.log(Log.ERROR, this, e);
 		}
-
+		seg.array = null;
 	}
 
 	private void paint(ColorToken token, Graphics2D gfx, int physicalLine, int start, int y)
