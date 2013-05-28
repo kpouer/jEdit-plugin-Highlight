@@ -235,6 +235,10 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 			// the regexp was invalid
 			highlight.setValid(false);
 		}
+		catch (InterruptedException ie) 
+		{
+			highlight.setValid(false);	
+		}
 	} //}}}
 
 	//{{{ _highlight() method

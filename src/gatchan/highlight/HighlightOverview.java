@@ -100,32 +100,40 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			matcher = HighlightManagerTableModel.currentWordHighlight.getSearchMatcher();
 		}
 		int lastResult = -1;
-		int counter;
 		int offset = 0;
-		for(counter = 0; ; counter++)
-		{
-			boolean startOfLine = buffer.getLineStartOffset(
-				buffer.getLineOfOffset(offset)) == offset;
-
-			SearchMatcher.Match match = matcher.nextMatch(
-				buffer.getSegment(offset, end - offset),
-				startOfLine,endOfLine,counter == 0,
-				false);
-			if(match == null)
-				break;
-
-			int newLine = buffer.getLineOfOffset(
-				offset + match.start);
-			if(lastResult != newLine)
+		int counter = 0;
+		try 
+		{			
+			for(counter = 0; ; counter++)
 			{
-				items.add(newLine);
-				lastResult = newLine;
+				boolean startOfLine = buffer.getLineStartOffset(
+					buffer.getLineOfOffset(offset)) == offset;
+	
+				SearchMatcher.Match match = matcher.nextMatch(
+					buffer.getSegment(offset, end - offset),
+					startOfLine,endOfLine,counter == 0,
+					false);
+				if(match == null)
+					break;
+	
+				int newLine = buffer.getLineOfOffset(
+					offset + match.start);
+				if(lastResult != newLine)
+				{
+					items.add(newLine);
+					lastResult = newLine;
+				}
+				int nextLine = newLine + 1;
+				if (nextLine >= buffer.getLineCount())
+					break;
+				offset = buffer.getLineStartOffset(nextLine);
 			}
-			int nextLine = newLine + 1;
-			if (nextLine >= buffer.getLineCount())
-				break;
-			offset = buffer.getLineStartOffset(nextLine);
 		}
+		catch (InterruptedException ie) 
+		{ 
+			return; 
+		}
+		
 		View view = textArea.getView();
 		if (view.isActive())
 		{

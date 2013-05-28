@@ -155,11 +155,16 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 			SearchMatcher matcher = highlight.getSearchMatcher();
 			int i = 0;
 			Match m;
-			while ((m = matcher.nextMatch(s.substring(i), true, true, true, false)) != null)
+			try {
+				while ((m = matcher.nextMatch(s.substring(i), true, true, true, false)) != null)
+					{
+						highlights.add(new HighlightPosition(i + m.start, highlight, true));
+						highlights.add(new HighlightPosition(i + m.end, highlight, false));
+						i += m.end;
+					}
+				} 
+			catch (InterruptedException ie) 
 			{
-				highlights.add(new HighlightPosition(i + m.start, highlight, true));
-				highlights.add(new HighlightPosition(i + m.end, highlight, false));
-				i += m.end;
 			}
 		}
 
