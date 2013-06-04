@@ -60,6 +60,7 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 			tree.setCellRenderer(((HighlightTreeCellRenderer) renderer).getOriginal());
 	}
 
+	@Override
 	public void highlightUpdated(boolean highlightEnabled)
 	{
 		JTree tree = getHyperSearchTree();
@@ -153,22 +154,23 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 		private void addHighlight(Collection<HighlightPosition> highlights, String s, Highlight highlight)
 		{
 			SearchMatcher matcher = highlight.getSearchMatcher();
-			int i = 0;
-			Match m;
-			try {
+			try
+			{
+				Match m;
+				int i = 0;
 				while ((m = matcher.nextMatch(s.substring(i), true, true, true, false)) != null)
-					{
-						highlights.add(new HighlightPosition(i + m.start, highlight, true));
-						highlights.add(new HighlightPosition(i + m.end, highlight, false));
-						i += m.end;
-					}
-				} 
+				{
+					highlights.add(new HighlightPosition(i + m.start, highlight, true));
+					highlights.add(new HighlightPosition(i + m.end, highlight, false));
+					i += m.end;
+				}
+			}
 			catch (InterruptedException ie) 
 			{
 			}
 		}
 
-		private void appendString2html(StringBuilder sb, String s)
+		private void appendString2html(StringBuilder sb, CharSequence s)
 		{
 			int length = s.length();
 			for (int i = 0; i < length; i++)

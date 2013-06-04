@@ -99,20 +99,18 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		{
 			matcher = HighlightManagerTableModel.currentWordHighlight.getSearchMatcher();
 		}
-		int lastResult = -1;
-		int offset = 0;
-		int counter = 0;
+		int counter;
 		try 
-		{			
+		{
+			int offset = 0;
+			int lastResult = -1;
 			for(counter = 0; ; counter++)
 			{
 				boolean startOfLine = buffer.getLineStartOffset(
 					buffer.getLineOfOffset(offset)) == offset;
 	
-				SearchMatcher.Match match = matcher.nextMatch(
-					buffer.getSegment(offset, end - offset),
-					startOfLine,endOfLine,counter == 0,
-					false);
+				SearchMatcher.Match match = matcher.nextMatch(buffer.getSegment(offset, end - offset),
+															  startOfLine,endOfLine,counter == 0, false);
 				if(match == null)
 					break;
 	
