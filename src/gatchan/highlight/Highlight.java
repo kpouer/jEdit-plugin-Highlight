@@ -434,4 +434,22 @@ public class Highlight
 	{
 		init(stringToHighlight, regexp, ignoreCase, color);
 	} //}}}
+
+	@Override
+	public String toString()
+	{
+		return "Highlight{" +
+			   "stringToHighlight='" + stringToHighlight + '\'' +
+			   ", regexp=" + regexp +
+			   ", ignoreCase=" + ignoreCase +
+			   ", valid=" + valid +
+			   ", searchMatcher=" + searchMatcher +
+			   ", color=" + color +
+			   ", enabled=" + enabled +
+			   ", scope=" + scope +
+			   ", buffer=" + buffer +
+			   ", duration=" + duration +
+			   ", lastSeen=" + lastSeen +
+			   '}';
+	}
 }

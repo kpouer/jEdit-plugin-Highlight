@@ -72,6 +72,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	private boolean highlightWordAtCaretOnlyWords;
 
 	private boolean highlightSelection;
+	private boolean highlightSelectionEntireWord;
 
 	/**
 	 * If true the highlight will be appended, if false the highlight will replace the previous one.
@@ -164,6 +165,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		}
 		highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
 		highlightSelection = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_SELECTION);
+		highlightSelectionEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD);
 		highlightWordAtCaretEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD);
 		highlightWordAtCaretWhitespace = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE);
 		highlightWordAtCaretOnlyWords = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS);
@@ -172,7 +174,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 					  jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_IGNORE_CASE),
 					  jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_COLOR));
 		selectionHighlight.init(" ",
-					false,
+					highlightSelectionEntireWord,
 					jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_SELECTION_IGNORE_CASE),
 					jEdit.getColorProperty(HighlightOptionPane.PROP_HIGHLIGHT_SELECTION_COLOR));
 		currentWordHighlight.setEnabled(false);
@@ -734,12 +736,29 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			else
 			{
 				String stringToHighlight = textArea.getSelectedText(selectionatOffset);
-				if (!selectionHighlight.isEnabled() ||
-					!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+				if (highlightSelectionEntireWord)
 				{
-					updated = true;
-					selectionHighlight.setEnabled(true);
-					selectionHighlight.setStringToHighlight(stringToHighlight);
+					stringToHighlight = "\\b" + stringToHighlight + "\\b";
+					if (!selectionHighlight.isEnabled() ||
+						!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+					{
+						updated = true;
+						selectionHighlight.setEnabled(true);
+						selectionHighlight.init(stringToHighlight,
+												  true,
+												  selectionHighlight.isIgnoreCase(),
+												  selectionHighlight.getColor());
+					}
+				}
+				else
+				{
+					if (!selectionHighlight.isEnabled() ||
+						!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+					{
+						updated = true;
+						selectionHighlight.setEnabled(true);
+						selectionHighlight.setStringToHighlight(stringToHighlight);
+					}
 				}
 			}
 		}
@@ -853,6 +872,19 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		if (!currentWordHighlight.getColor().equals(newColor))
 		{
 			changed = true;
+		} //}}}
+
+		//{{{ PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD
+		boolean selectionEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD);
+		if (highlightSelectionEntireWord != selectionEntireWord)
+		{
+			changed = true;
+			highlightSelectionEntireWord = selectionEntireWord;
+			if (selectionEntireWord)
+			{
+				String s = selectionHighlight.getStringToHighlight();
+				selectionHighlight.setStringToHighlight("\\b" + s + "\\b");
+			}
 		} //}}}
 
 		//{{{ PROP_HIGHLIGHT_SELECTION_COLOR

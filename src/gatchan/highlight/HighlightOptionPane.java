@@ -50,6 +50,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	public static final String PROP_HIGHLIGHT_SELECTION = "gatchan.highlight.selectionHighlight";
 	public static final String PROP_HIGHLIGHT_SELECTION_IGNORE_CASE = "gatchan.highlight.selectionHighlight.ignoreCase";
 	public static final String PROP_HIGHLIGHT_SELECTION_COLOR = "gatchan.highlight.selectionHighlight.color";
+	public static final String PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD = "gatchan.highlight.selectionHighlight.entireWord";
 
 	public static final String PROP_HIGHLIGHT_CYCLE_COLOR = "gatchan.highlight.cycleColor";
 	public static final String PROP_HIGHLIGHT_APPEND = "gatchan.highlight.appendHighlight";
@@ -84,11 +85,12 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private JCheckBox highlightHypersearch;
 	private TextAreaExtensionLayerChooser layerChooser;
 	private JSlider alphaSlider;
-
-
 	private JCheckBox highlightSelection;
+
+
 	private JCheckBox selectionIgnoreCase;
 	private ColorWellButton selectionColor;
+	private JCheckBox selectionEntireWord;
 
 	private JCheckBox highlightOverview;
 	private JCheckBox highlightOverviewSameColor;
@@ -157,6 +159,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 		addSeparator(PROP_HIGHLIGHT_SELECTION + ".text");
 		addComponent(highlightSelection = createCheckBox(PROP_HIGHLIGHT_SELECTION));
 		addComponent(selectionIgnoreCase = createCheckBox(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE));
+		addComponent(selectionEntireWord = createCheckBox(PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD));
 		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_SELECTION_COLOR + ".text")),
                  selectionColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR)));
 
@@ -211,6 +214,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION, highlightSelection.isSelected());
 		jEdit.setColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR, selectionColor.getSelectedColor());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE, selectionIgnoreCase.isSelected());
+		jEdit.setBooleanProperty(PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD, selectionEntireWord.isSelected());
 
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_OVERVIEW, highlightOverview.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_OVERVIEW_SAMECOLOR, highlightOverviewSameColor.isSelected());
