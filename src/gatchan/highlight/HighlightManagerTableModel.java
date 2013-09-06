@@ -22,6 +22,8 @@
 package gatchan.highlight;
 
 //{{{ imports
+import java.io.Closeable;
+
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
@@ -160,7 +162,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			}
 			finally
 			{
-				IOUtilities.closeQuietly(reader);
+				IOUtilities.closeQuietly((Closeable)reader);
 			}
 		}
 		highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
@@ -507,7 +509,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			}
 			finally
 			{
-				IOUtilities.closeQuietly(writer);
+				IOUtilities.closeQuietly((Closeable)writer);
 			}
 		}
 		else
