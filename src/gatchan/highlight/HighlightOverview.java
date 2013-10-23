@@ -33,6 +33,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.regex.PatternSyntaxException;
 //}}}
 
 /**
@@ -108,9 +109,17 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			{
 				boolean startOfLine = buffer.getLineStartOffset(
 					buffer.getLineOfOffset(offset)) == offset;
-	
-				SearchMatcher.Match match = matcher.nextMatch(buffer.getSegment(offset, end - offset),
-															  startOfLine,endOfLine,counter == 0, false);
+
+				SearchMatcher.Match match = null;
+				try
+				{
+					match = matcher.nextMatch(buffer.getSegment(offset, end - offset),
+						startOfLine,endOfLine,counter == 0, false);
+				}
+				catch (PatternSyntaxException ignored)
+				{
+				}
+
 				if(match == null)
 					break;
 	
