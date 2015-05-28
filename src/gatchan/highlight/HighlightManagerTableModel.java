@@ -22,14 +22,11 @@
 package gatchan.highlight;
 
 //{{{ imports
-import java.io.Closeable;
-
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.Selection;
 import org.gjt.sp.util.Log;
-import org.gjt.sp.util.IOUtilities;
 
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
@@ -128,10 +125,8 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		selectionHighlight = new Highlight();
 		if (highlights != null && highlights.exists())
 		{
-			BufferedReader reader = null;
-			try
+			try(BufferedReader reader = new BufferedReader(new FileReader(highlights)))
 			{
-				reader = new BufferedReader(new FileReader(highlights));
 				String line = reader.readLine();
 				boolean getStatus = false;
 				if (FILE_VERSION.equals(line))
@@ -151,18 +146,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 					}
 					line = reader.readLine();
 				}
-			}
-			catch (FileNotFoundException e)
+			} catch (IOException e)
 			{
 				Log.log(Log.ERROR, this, e);
-			}
-			catch (IOException e)
-			{
-				Log.log(Log.ERROR, this, e);
-			}
-			finally
-			{
-				IOUtilities.closeQuietly((Closeable)reader);
 			}
 		}
 		highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
@@ -191,6 +177,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 *
 	 * @return the number of highlights
 	 */
+	@Override
 	public int getRowCount()
 	{
 		try
@@ -473,13 +460,11 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	{
 		if (highlights != null)
 		{
-			PrintWriter writer = null;
-			try
+			try(PrintWriter writer = new PrintWriter(highlights))
 			{
 				File parentFile = highlights.getParentFile();
 				if (!parentFile.isDirectory())
 					parentFile.mkdirs();
-				writer = new PrintWriter(highlights);
 				writer.println(FILE_VERSION);
 				try
 				{
@@ -506,10 +491,6 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			catch (IOException e)
 			{
 				Log.log(Log.ERROR, this, e);
-			}
-			finally
-			{
-				IOUtilities.closeQuietly((Closeable)writer);
 			}
 		}
 		else
@@ -723,43 +704,51 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		}
 		if (highlightSelection)
 		{
-			Selection selectionatOffset = textArea.getSelectionAtOffset(textArea.getCaretPosition());
-			if (textArea.getLineLength(line) == 0 ||
-			    selectionatOffset == null ||
-			    selectionatOffset.getStartLine() != selectionatOffset.getEndLine() ||
-				selectionatOffset.getEnd() - selectionatOffset.getStart() == 0)
+			if (!selectionHighlight.isEnabled() && !textArea.hasFocus())
 			{
-				if (selectionHighlight.isEnabled())
-				{
-					updated = true;
-					selectionHighlight.setEnabled(false);
-				}
+				updated = true;
+				selectionHighlight.setEnabled(true);
 			}
 			else
 			{
-				String stringToHighlight = textArea.getSelectedText(selectionatOffset);
-				if (highlightSelectionEntireWord)
+				Selection selectionatOffset = textArea.getSelectionAtOffset(textArea.getCaretPosition());
+				if (textArea.getLineLength(line) == 0 ||
+						selectionatOffset == null ||
+						selectionatOffset.getStartLine() != selectionatOffset.getEndLine() ||
+						selectionatOffset.getEnd() - selectionatOffset.getStart() == 0)
 				{
-					stringToHighlight = "\\b" + stringToHighlight + "\\b";
-					if (!selectionHighlight.isEnabled() ||
-						!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+					if (selectionHighlight.isEnabled())
 					{
 						updated = true;
-						selectionHighlight.setEnabled(true);
-						selectionHighlight.init(stringToHighlight,
-												  true,
-												  selectionHighlight.isIgnoreCase(),
-												  selectionHighlight.getColor());
+						selectionHighlight.setEnabled(false);
 					}
 				}
 				else
 				{
-					if (!selectionHighlight.isEnabled() ||
-						!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+					String stringToHighlight = textArea.getSelectedText(selectionatOffset);
+					if (highlightSelectionEntireWord)
 					{
-						updated = true;
-						selectionHighlight.setEnabled(true);
-						selectionHighlight.setStringToHighlight(stringToHighlight);
+						stringToHighlight = "\\b" + stringToHighlight + "\\b";
+						if (!selectionHighlight.isEnabled() ||
+								!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+						{
+							updated = true;
+							selectionHighlight.setEnabled(true);
+							selectionHighlight.init(stringToHighlight,
+									true,
+									selectionHighlight.isIgnoreCase(),
+									selectionHighlight.getColor());
+						}
+					}
+					else
+					{
+						if (!selectionHighlight.isEnabled() ||
+								!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+						{
+							updated = true;
+							selectionHighlight.setEnabled(true);
+							selectionHighlight.setStringToHighlight(stringToHighlight);
+						}
 					}
 				}
 			}
