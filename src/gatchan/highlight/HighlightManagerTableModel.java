@@ -730,16 +730,24 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 					String stringToHighlight = textArea.getSelectedText(selectionatOffset);
 					if (highlightSelectionEntireWord)
 					{
-						stringToHighlight = "\\b" + stringToHighlight + "\\b";
-						if (!selectionHighlight.isEnabled() ||
-								!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+						if (isOnlyWhitespaces(stringToHighlight))
 						{
+							selectionHighlight.setEnabled(false);
 							updated = true;
-							selectionHighlight.setEnabled(true);
-							selectionHighlight.init(stringToHighlight,
-									true,
-									selectionHighlight.isIgnoreCase(),
-									selectionHighlight.getColor());
+						}
+						else
+						{
+							stringToHighlight = "\\b" + stringToHighlight + "\\b";
+							if (!selectionHighlight.isEnabled() ||
+									!stringToHighlight.equals(selectionHighlight.getStringToHighlight()))
+							{
+								updated = true;
+								selectionHighlight.setEnabled(true);
+								selectionHighlight.init(stringToHighlight,
+										true,
+										selectionHighlight.isIgnoreCase(),
+										selectionHighlight.getColor());
+							}
 						}
 					}
 					else
@@ -876,6 +884,8 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			if (selectionEntireWord)
 			{
 				String s = selectionHighlight.getStringToHighlight();
+				if (isOnlyWhitespaces(s))
+					selectionHighlight.setEnabled(false);
 				selectionHighlight.setStringToHighlight("\\b" + s + "\\b");
 			}
 		} //}}}
@@ -922,5 +932,16 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public void releaseLock()
 	{
 		lock.readLock().unlock();
+	} //}}}
+
+	//{{{ releaseLock() method
+	public static boolean isOnlyWhitespaces(CharSequence s)
+	{
+		for (int i = 0;i < s.length();i++)
+		{
+			if (!Character.isWhitespace(s.charAt(i)))
+				return false;
+		}
+		return true;
 	} //}}}
 }
