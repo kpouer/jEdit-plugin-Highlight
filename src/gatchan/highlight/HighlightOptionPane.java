@@ -163,9 +163,9 @@ public class HighlightOptionPane extends AbstractOptionPane
 		addComponent(highlightSelection = createCheckBox(PROP_HIGHLIGHT_SELECTION));
 		addComponent(selectionIgnoreCase = createCheckBox(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE));
 		addComponent(selectionEntireWord = createCheckBox(PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD));
-		SpinnerNumberModel model = new SpinnerNumberModel(jEdit.getIntegerProperty(PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD,
+		SpinnerNumberModel model = new SpinnerNumberModel(jEdit.getIntegerProperty(PROP_HIGHLIGHT_SELECTION_MIN_LENGTH,
 				0), 0, 100, 1);
-		addComponent(new JLabel(PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD + ".text"),
+		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_SELECTION_MIN_LENGTH + ".text")),
 				selectionMinLength = new JSpinner(model));
 		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_SELECTION_COLOR + ".text")),
                  selectionColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR)));
