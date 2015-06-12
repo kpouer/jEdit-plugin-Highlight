@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2013 Matthieu Casanova
+ * Copyright (C) 2004, 2015 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -72,6 +72,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 
 	private boolean highlightSelection;
 	private boolean highlightSelectionEntireWord;
+	private int highlightSelectionMinLength;
 
 	/**
 	 * If true the highlight will be appended, if false the highlight will replace the previous one.
@@ -154,6 +155,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		highlightWordAtCaret = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET);
 		highlightSelection = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_SELECTION);
 		highlightSelectionEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD);
+		highlightSelectionMinLength = jEdit.getIntegerProperty(HighlightOptionPane.PROP_HIGHLIGHT_SELECTION_MIN_LENGTH, 0);
 		highlightWordAtCaretEntireWord = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ENTIRE_WORD);
 		highlightWordAtCaretWhitespace = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_WHITESPACE);
 		highlightWordAtCaretOnlyWords = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_AT_CARET_ONLYWORDS);
@@ -715,7 +717,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				if (textArea.getLineLength(line) == 0 ||
 						selectionatOffset == null ||
 						selectionatOffset.getStartLine() != selectionatOffset.getEndLine() ||
-						selectionatOffset.getEnd() - selectionatOffset.getStart() == 0)
+						selectionatOffset.getEnd() - selectionatOffset.getStart()  < highlightSelectionMinLength)
 				{
 					if (selectionHighlight.isEnabled())
 					{
@@ -876,6 +878,14 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				String s = selectionHighlight.getStringToHighlight();
 				selectionHighlight.setStringToHighlight("\\b" + s + "\\b");
 			}
+		} //}}}
+
+		//{{{ PROP_HIGHLIGHT_SELECTION_MIN_LENGTH
+		int selectionMinLength = jEdit.getIntegerProperty(HighlightOptionPane.PROP_HIGHLIGHT_SELECTION_MIN_LENGTH, 0);
+		if (highlightSelectionMinLength != selectionMinLength)
+		{
+			changed = true;
+			highlightSelectionMinLength = selectionMinLength;
 		} //}}}
 
 		//{{{ PROP_HIGHLIGHT_SELECTION_COLOR
