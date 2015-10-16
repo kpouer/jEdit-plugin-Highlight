@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright © 2010 Matthieu Casanova
+ * Copyright © 2010-2015 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -43,7 +43,7 @@ public class FlexColorPainter extends TextAreaExtension
 	private final TextArea textArea;
 	private final Point point = new Point();
 	private final Segment seg;
-	private FlexColorScanner flexColor;
+	private final FlexColorScanner flexColor;
 
 	public FlexColorPainter(TextArea textArea)
 	{
@@ -66,10 +66,15 @@ public class FlexColorPainter extends TextAreaExtension
 		JEditBuffer buffer = textArea.getBuffer();
 		int lineStartOffset = buffer.getLineStartOffset(physicalLine);
 		int lineEndOffset = buffer.getLineEndOffset(physicalLine);
-		int length = Math.min(lineEndOffset - lineStartOffset - 1, MAX_LINE_LENGTH);
-		if (length == 0)
+		int length = buffer.getLineLength(physicalLine);
+
+		int screenToPhysicalOffset = start - lineStartOffset;
+		int l = length - screenToPhysicalOffset - lineEndOffset + end;
+		if (l > MAX_LINE_LENGTH)
+			l = MAX_LINE_LENGTH;
+		if (l == 0)
 			return;
-		buffer.getText(start, length, seg);
+		buffer.getText(lineStartOffset + screenToPhysicalOffset, l, seg);
 
 		flexColor.yyreset(new CharArrayReader(seg.array, seg.offset, seg.count));
 		try
@@ -125,8 +130,6 @@ public class FlexColorPainter extends TextAreaExtension
 		int y3 = y + fm.getHeight() - 1;
 		gfx.drawLine(startX, y2, endX, y2);
 		gfx.drawLine(startX, y3, endX, y3);
-
-
 
 		gfx.setColor(oldColor);
 		gfx.setComposite(oldComposite);
