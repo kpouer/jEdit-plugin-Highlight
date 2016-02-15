@@ -38,8 +38,8 @@ import java.awt.event.ActionListener;
  */
 public final class HighlightDialog extends EnhancedDialog
 {
-	private final JButton ok = new JButton("ok");
-	private final JButton cancel = new JButton("Cancel");
+	private final JButton ok = new JButton(jEdit.getProperty("common.ok"));
+	private final JButton cancel = new JButton(jEdit.getProperty("common.cancel"));
 
 	private final Highlight highlight;
 	private final HighlightTablePanel panel = new HighlightTablePanel();
