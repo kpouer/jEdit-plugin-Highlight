@@ -272,8 +272,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 		if (filled)
 		{
 			int lineHeight = painter.getLineHeight();
-			int charHeight = painter.getFontHeight();
-			int charOffset = lineHeight - charHeight;
+			int charHeight = Math.min(lineHeight, painter.getFontHeight());
+			int charOffset = Math.max(lineHeight - charHeight, 0);
 			if (roundcorner)
 			{
 				gfx.fillRoundRect(startX, y + charOffset, endX - startX, charHeight - 1, 5, 5);
@@ -302,8 +302,8 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	private void drawRect(Graphics2D gfx, int y, int startX, int endX)
 	{
 		int lineHeight = painter.getLineHeight();
-		int charHeight = painter.getFontHeight();
-		int charOffset = lineHeight - charHeight;
+		int charHeight = Math.min(lineHeight, painter.getFontHeight());
+		int charOffset = Math.max(lineHeight - charHeight, 0);
 		if (roundcorner)
 			gfx.drawRoundRect(startX, y + charOffset, endX - startX, charHeight - 1,5,5);
 		else
