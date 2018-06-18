@@ -4,7 +4,7 @@
  * :folding=explicit:collapseFolds=1:
  *
  * Copyright (C) 2009 Szalai Endre
- * Portions Copyright (C) 2009, 2011 Matthieu Casanova
+ * Portions Copyright (C) 2009, 2018 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,17 +23,26 @@
 package gatchan.highlight;
 
 //{{{ Imports
-import org.gjt.sp.jedit.View;
-import org.gjt.sp.jedit.buffer.JEditBuffer;
-import org.gjt.sp.jedit.search.SearchMatcher;
-import org.gjt.sp.jedit.textarea.JEditTextArea;
-import org.gjt.sp.util.IntegerArray;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.concurrent.atomic.LongAccumulator;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.IntStream;
+import javax.swing.JPanel;
+
+import org.gjt.sp.jedit.View;
+import org.gjt.sp.jedit.buffer.JEditBuffer;
+import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.jedit.search.SearchMatcher;
+import org.gjt.sp.jedit.search.SearchMatcher.Match;
+import org.gjt.sp.jedit.textarea.JEditTextArea;
+import org.gjt.sp.util.IntegerArray;
+import org.gjt.sp.util.Log;
+import org.gjt.sp.util.SegmentBuffer;
 //}}}
 
 /**
@@ -55,11 +64,11 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	private Color color;
 
 	//{{{ HighlightOverview constructor
-	public HighlightOverview(final JEditTextArea textArea)
+	HighlightOverview(final JEditTextArea textArea)
 	{
-		Font ff = getFont();
-		Font f = new Font(ff.getName(), Font.BOLD, 8);
-		setFont(f);
+		Font currentFont = getFont();
+		Font newFont = new Font(currentFont.getName(), Font.BOLD, 8);
+		setFont(newFont);
 		this.textArea = textArea;
 		items = new IntegerArray(32);
 		setRequestFocusEnabled(false);
@@ -79,75 +88,77 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	@Override
 	public void highlightUpdated(boolean highlightEnabled)
 	{
+		long start = System.currentTimeMillis();
 		items.clear();
+		JEditBuffer buffer = textArea.getBuffer();
+		int lineCount = buffer.getLineCount();
 		if (!highlightEnabled || (!HighlightManagerTableModel.currentWordHighlight.isEnabled() &&
-								  !HighlightManagerTableModel.selectionHighlight.isEnabled()))
+								  !HighlightManagerTableModel.selectionHighlight.isEnabled()) ||
+				lineCount > jEdit.getIntegerProperty("gatchan.highlight.overview.maxLines", 200000))
 		{
 			repaint();
 			return;
 		}
 
-		JEditBuffer buffer = textArea.getBuffer();
-		int end = buffer.getLength();
-		boolean endOfLine = buffer.getLineEndOffset(
-				buffer.getLineOfOffset(end)) - 1 == end;
-		SearchMatcher matcher;
-		if (HighlightManagerTableModel.selectionHighlight.isEnabled())
-		{
-			matcher = HighlightManagerTableModel.selectionHighlight.getSearchMatcher();
-		}
-		else
-		{
-			matcher = HighlightManagerTableModel.currentWordHighlight.getSearchMatcher();
-		}
-		int counter;
-		try 
-		{
-			int offset = 0;
-			int lastResult = -1;
-			for(counter = 0; ; counter++)
-			{
-				boolean startOfLine = buffer.getLineStartOffset(
-					buffer.getLineOfOffset(offset)) == offset;
+		SearchMatcher matcher = HighlightManagerTableModel.selectionHighlight.isEnabled() ?
+				HighlightManagerTableModel.selectionHighlight.getSearchMatcher() :
+				HighlightManagerTableModel.currentWordHighlight.getSearchMatcher();
 
-				SearchMatcher.Match match = null;
-				try
-				{
-					match = matcher.nextMatch(buffer.getSegment(offset, end - offset),
-						startOfLine,endOfLine,counter == 0, false);
-				}
-				catch (PatternSyntaxException ignored)
-				{
-				}
+		LongAccumulator accumulator = new LongAccumulator((left, right) -> left + right,0L);
+		IntStream lineStream = IntStream.range(0, lineCount);
 
-				if(match == null)
-					break;
-	
-				int newLine = buffer.getLineOfOffset(
-					offset + match.start);
-				if(lastResult != newLine)
-				{
-					items.add(newLine);
-					lastResult = newLine;
-				}
-				int nextLine = newLine + 1;
-				if (nextLine >= buffer.getLineCount())
-					break;
-				offset = buffer.getLineStartOffset(nextLine);
-			}
-		}
-		catch (InterruptedException ie) 
-		{ 
-			return; 
-		}
-		
+		lineStream
+				.parallel()
+				.map(line -> match(buffer, matcher, line))
+				.filter(line -> line >= 0)
+				.forEach(line -> pushLine(accumulator, line));
+
 		View view = textArea.getView();
 		if (view.isActive())
 		{
 			if (view.getTextArea() == textArea)
-				view.getStatus().setMessage(counter + " lines contains the current word");
+				view.getStatus().setMessage(accumulator.longValue() + " lines contains the current word");
 		}
+		long endTime = System.currentTimeMillis();
+		Log.log(Log.MESSAGE, this, "Highlight overview processed in " + (endTime - start) + "ms");
 		repaint();
+	} //}}}
+
+	//{{{ pushLine() method
+	private void pushLine(LongAccumulator accumulator, int line)
+	{
+		synchronized (items)
+		{
+			items.add(line);
+			accumulator.accumulate(1L);
+		}
+	} //}}}
+
+	//{{{ match() method
+	/**
+	 * Search in the buffer
+	 * @param buffer the buffer
+	 * @param matcher the search matcher
+	 * @param line the line to check
+	 * @return the given line if the text was found, or -1 if not
+	 */
+	private static int match(JEditBuffer buffer, SearchMatcher matcher, int line)
+	{
+		try
+		{
+			SegmentBuffer segmentBuffer = new SegmentBuffer(0);
+			buffer.getLineText(line, segmentBuffer);
+			Match match = matcher.nextMatch(segmentBuffer, true, true, true, false);
+			if (match != null)
+			{
+				return line;
+			}
+		} catch (PatternSyntaxException ignored)
+		{
+		} catch (InterruptedException e)
+		{
+		}
+		return -1;
 	} //}}}
 
 	//{{{ paintComponent() method
@@ -186,7 +197,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	} //}}}
 
 	//{{{ yToLine() method
-	private int yToLine(int y, int lineCount)
+	int yToLine(int y, int lineCount)
 	{
 		return (y + ITEM_BORDER - Y_OFFSET) * lineCount / (getHeight() - 2 * Y_OFFSET);
 	} //}}}

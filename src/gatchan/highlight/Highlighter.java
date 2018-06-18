@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2013 Matthieu Casanova
+* Copyright (C) 2004, 2018 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -25,7 +25,8 @@ package gatchan.highlight;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.search.SearchMatcher;
-import org.gjt.sp.jedit.textarea.JEditTextArea;
+import org.gjt.sp.jedit.textarea.TextArea;
+import org.gjt.sp.jedit.textarea.TextArea;
 import org.gjt.sp.jedit.textarea.Selection;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
@@ -40,9 +41,9 @@ import java.util.regex.PatternSyntaxException;
  *
  * @author Matthieu Casanova
  */
-class Highlighter extends TextAreaExtension implements HighlightChangeListener
+public class Highlighter extends TextAreaExtension implements HighlightChangeListener
 {
-	private final JEditTextArea textArea;
+	private final TextArea textArea;
 	private final Point point = new Point();
 
 	private final HighlightManager highlightManager;
@@ -59,7 +60,7 @@ class Highlighter extends TextAreaExtension implements HighlightChangeListener
 	private final TextAreaPainter painter;
 
 	//{{{ Highlighter constructor
-	Highlighter(JEditTextArea textArea)
+	public Highlighter(TextArea textArea)
 	{
 		alpha = ((float)jEdit.getIntegerProperty(HighlightOptionPane.PROP_ALPHA, 50)) / 100f;
 		blend = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
