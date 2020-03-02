@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2015 Matthieu Casanova
+* Copyright (C) 2004, 2020 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -28,8 +28,6 @@ import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
 
 import javax.swing.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 //}}}
 
 /**
@@ -69,6 +67,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 
 	public static final String PROP_HIGHLIGHT_COLORS = "gatchan.highlight.colorsenabled";
 	public static final String PROP_HIGHLIGHT_ROUND_CORNER = "gatchan.highlight.roundcorner";
+	public static final String PROP_HIGHLIGHT_WORD_MINIMUM_LENGTH = "gatchan.highlight.wordMinimumLength";
 
 	private JCheckBox highlightWordAtCaret;
 	private JCheckBox wordAtCaretIgnoreCase;
@@ -97,6 +96,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 	private JCheckBox highlightOverviewSameColor;
 	private JCheckBox highlightColorEnabled;
 	private JCheckBox roundCornerEnabled;
+	private JSpinner worldMinimumLength;
 
 	//{{{ HighlightOptionPane constructor
 	public HighlightOptionPane()
@@ -113,14 +113,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 		addComponent(cycleColor = createCheckBox(PROP_HIGHLIGHT_CYCLE_COLOR));
 		addComponent(new JLabel(jEdit.getProperty(PROP_DEFAULT_COLOR + ".text")),
 			     defaultColor = new ColorWellButton(jEdit.getColorProperty(PROP_DEFAULT_COLOR)));
-		cycleColor.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				defaultColor.setEnabled(!cycleColor.isSelected());
-			}
-		});
+		cycleColor.addActionListener(e -> defaultColor.setEnabled(!cycleColor.isSelected()));
 
 		if (cycleColor.isSelected())
 			defaultColor.setEnabled(false);
@@ -129,14 +122,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 
 		addComponent(new JLabel(jEdit.getProperty(PROP_SQUARE_COLOR + ".text")),
 			     squareColor = new ColorWellButton(jEdit.getColorProperty(PROP_SQUARE_COLOR)));
-		square.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				squareColor.setEnabled(square.isSelected());
-			}
-		});
+		square.addActionListener(e -> squareColor.setEnabled(square.isSelected()));
 		squareColor.setEnabled(square.isSelected());
 		addComponent(highlightHypersearch = createCheckBox(PROP_HIGHLIGHT_HYPERSEARCH_RESULTS));
 		addComponent(new JLabel(jEdit.getProperty(PROP_LAYER_PROPERTY + ".text")),
@@ -148,6 +134,10 @@ public class HighlightOptionPane extends AbstractOptionPane
                                jEdit.getIntegerProperty(PROP_ALPHA, 50)));
 
 		addComponent(roundCornerEnabled = createCheckBox(PROP_HIGHLIGHT_ROUND_CORNER));
+		SpinnerNumberModel wordMinLengthSpinnerModel = new SpinnerNumberModel(
+			jEdit.getIntegerProperty(PROP_HIGHLIGHT_WORD_MINIMUM_LENGTH, 2), 0, 10, 1);
+		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_WORD_MINIMUM_LENGTH + ".text")),
+					 worldMinimumLength = new JSpinner(wordMinLengthSpinnerModel));
 
 		addSeparator(PROP_HIGHLIGHT_WORD_AT_CARET + ".text");
 		addComponent(highlightWordAtCaret = createCheckBox(PROP_HIGHLIGHT_WORD_AT_CARET));
@@ -163,10 +153,10 @@ public class HighlightOptionPane extends AbstractOptionPane
 		addComponent(highlightSelection = createCheckBox(PROP_HIGHLIGHT_SELECTION));
 		addComponent(selectionIgnoreCase = createCheckBox(PROP_HIGHLIGHT_SELECTION_IGNORE_CASE));
 		addComponent(selectionEntireWord = createCheckBox(PROP_HIGHLIGHT_SELECTION_ENTIRE_WORD));
-		SpinnerNumberModel model = new SpinnerNumberModel(jEdit.getIntegerProperty(PROP_HIGHLIGHT_SELECTION_MIN_LENGTH,
+		SpinnerNumberModel selectionMinLengthSpinnerModel = new SpinnerNumberModel(jEdit.getIntegerProperty(PROP_HIGHLIGHT_SELECTION_MIN_LENGTH,
 				0), 0, 100, 1);
 		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_SELECTION_MIN_LENGTH + ".text")),
-				selectionMinLength = new JSpinner(model));
+				selectionMinLength = new JSpinner(selectionMinLengthSpinnerModel));
 		addComponent(new JLabel(jEdit.getProperty(PROP_HIGHLIGHT_SELECTION_COLOR + ".text")),
                  selectionColor = new ColorWellButton(jEdit.getColorProperty(PROP_HIGHLIGHT_SELECTION_COLOR)));
 
@@ -178,14 +168,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 
 		highlightOverviewColor.setEnabled(!highlightOverviewSameColor.isSelected());
 
-		highlightOverviewSameColor.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				highlightOverviewColor.setEnabled(!highlightOverviewSameColor.isSelected());
-			}
-		});
+		highlightOverviewSameColor.addActionListener(e -> highlightOverviewColor.setEnabled(!highlightOverviewSameColor.isSelected()));
 
 		addComponent(highlightColorEnabled = createCheckBox(PROP_HIGHLIGHT_COLORS));
 
@@ -229,6 +212,7 @@ public class HighlightOptionPane extends AbstractOptionPane
 		jEdit.setColorProperty(PROP_HIGHLIGHT_OVERVIEW_COLOR, highlightOverviewColor.getSelectedColor());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_COLORS, highlightColorEnabled.isSelected());
 		jEdit.setBooleanProperty(PROP_HIGHLIGHT_ROUND_CORNER, roundCornerEnabled.isSelected());
+		jEdit.setIntegerProperty(PROP_HIGHLIGHT_WORD_MINIMUM_LENGTH, (Integer) worldMinimumLength.getValue());
 	} //}}}
 
 	//{{{ createCheckBox() method
