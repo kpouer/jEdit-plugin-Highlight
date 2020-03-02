@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2018 Matthieu Casanova
+* Copyright (C) 2004, 2020 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -25,7 +25,6 @@ package gatchan.highlight;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.search.SearchMatcher;
-import org.gjt.sp.jedit.textarea.TextArea;
 import org.gjt.sp.jedit.textarea.TextArea;
 import org.gjt.sp.jedit.textarea.Selection;
 import org.gjt.sp.jedit.textarea.TextAreaExtension;
