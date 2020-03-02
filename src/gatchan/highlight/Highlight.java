@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2010 Matthieu Casanova
+ * Copyright (C) 2004, 2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -125,9 +125,9 @@ public class Highlight
 	} //}}}
 
 	//{{{ init() method
-	public void init(String s, boolean regexp, boolean ignoreCase, Color color)
+	public void init(String stringToHighlight, boolean regexp, boolean ignoreCase, Color color)
 	{
-		if (s.length() == 0)
+		if (stringToHighlight.isEmpty())
 		{
 			valid = false;
 			throw new IllegalArgumentException("The search string cannot be empty");
@@ -136,24 +136,24 @@ public class Highlight
 		if (regexp)
 		{
 			if (searchMatcher == null ||
-				!s.equals(stringToHighlight) ||
+				!stringToHighlight.equals(this.stringToHighlight) ||
 				!this.regexp ||
 				ignoreCase != this.ignoreCase)
 			{
-				searchMatcher = new PatternSearchMatcher(s, ignoreCase);
+				searchMatcher = new PatternSearchMatcher(stringToHighlight, ignoreCase);
 			}
 		}
 		else if (searchMatcher == null ||
-			!s.equals(stringToHighlight) ||
+			!stringToHighlight.equals(this.stringToHighlight) ||
 			this.regexp ||
 			ignoreCase != this.ignoreCase)
 		{
-			searchMatcher = new BoyerMooreSearchMatcher(s, ignoreCase);
+			searchMatcher = new BoyerMooreSearchMatcher(stringToHighlight, ignoreCase);
 		}
-		stringToHighlight = s;
-		this.regexp = regexp;
-		this.ignoreCase = ignoreCase;
-		this.color = color;
+		this.stringToHighlight = stringToHighlight;
+		this.regexp            = regexp;
+		this.ignoreCase        = ignoreCase;
+		this.color             = color;
 	} //}}}
 
 	//{{{ getStringToHighlight() method
@@ -319,9 +319,7 @@ public class Highlight
 			int i = s.indexOf(';', index + 4);
 			Color color = Color.decode(s.substring(index + 4, i));
 
-			// When using String.substring() the new String uses the same char[] so the new String is as big as the first one.
-			// This is minor optimization
-			String searchString = new String(s.substring(i + 1));
+			String searchString = s.substring(i + 1);
 			Highlight highlight = new Highlight();
 			highlight.setEnabled(enabled);
 			highlight.init(searchString, regexp, ignoreCase, color);
@@ -389,7 +387,7 @@ public class Highlight
 			java.util.List<Highlight> highlights = (java.util.List<Highlight>) buffer.getProperty(HIGHLIGHTS_BUFFER_PROPS);
 			if (highlights == null)
 			{
-				highlights = new ArrayList<Highlight>();
+				highlights = new ArrayList<>();
 				buffer.setProperty(HIGHLIGHTS_BUFFER_PROPS, highlights);
 			}
 			highlights.add(this);
