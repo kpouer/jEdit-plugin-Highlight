@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2015 Matthieu Casanova
+ * Copyright (C) 2004, 2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -54,10 +54,10 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 {
 	private static final String ENABLED_PROP = "plugin.Highlight.enabled";
 
-	private final List<Highlight> datas = new ArrayList<Highlight>();
+	private final List<Highlight> datas = new ArrayList<>();
 	private static HighlightManagerTableModel highlightManagerTableModel;
 
-	private final List<HighlightChangeListener> highlightChangeListeners = new ArrayList<HighlightChangeListener>(2);
+	private final List<HighlightChangeListener> highlightChangeListeners = new ArrayList<>(2);
 	private final File highlights;
 
 	private final ReentrantReadWriteLock lock;
@@ -73,6 +73,10 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	private boolean highlightSelection;
 	private boolean highlightSelectionEntireWord;
 	private int highlightSelectionMinLength;
+	/**
+	 * The minimum length of word to be highlighted
+	 */
+	private int minimumWordLength;
 
 	/**
 	 * If true the highlight will be appended, if false the highlight will replace the previous one.
@@ -415,10 +419,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		List<Highlight> highlights = (List<Highlight>) buffer.getProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
 		if (highlights != null)
 		{
-			for (int i = 0; i < highlights.size(); i++)
-			{
-				removeRow(highlights.get(i));
-			}
+			highlights.forEach(this::removeRow);
 		}
 	} //}}}
 
@@ -529,11 +530,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	@Override
 	public void fireHighlightChangeListener(boolean highlightEnable)
 	{
-		for (int i = 0; i < highlightChangeListeners.size(); i++)
-		{
-			HighlightChangeListener listener = highlightChangeListeners.get(i);
-			listener.highlightUpdated(highlightEnable);
-		}
+		highlightChangeListeners.forEach(highlightChangeListener -> highlightChangeListener.highlightUpdated(highlightEnable));
 	} //}}}
 	//}}}
 
@@ -580,19 +577,12 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		@Override
 		public void actionPerformed(ActionEvent e)
 		{
-			List<Highlight> expired = null;
+			List<Highlight> expired = new ArrayList<>();
 			try
 			{
 				lock.readLock().lock();
-				for (int i = 0; i < datas.size(); i++)
-				{
-					Highlight highlight = datas.get(i);
-					if (highlight.isExpired())
-					{
-						if (expired == null)
-						{
-							expired = new ArrayList<Highlight>();
-						}
+				for (Highlight highlight : datas) {
+					if (highlight.isExpired()) {
 						expired.add(highlight);
 					}
 				}
@@ -601,14 +591,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			{
 				lock.readLock().unlock();
 			}
-			if (expired != null)
-			{
-				for (int i = 0; i < expired.size(); i++)
-				{
-					Highlight highlight = expired.get(i);
-					removeRow(highlight);
-				}
-			}
+			expired.forEach(HighlightManagerTableModel.this::removeRow);
 		}
 	} //}}}
 
@@ -617,7 +600,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	public void caretUpdate(CaretEvent e)
 	{
 		JEditTextArea textArea = (JEditTextArea) e.getSource();
-		caretUpdate(textArea);
+		EventQueue.invokeLater(() -> caretUpdate(textArea));
 	}
 
 	public void caretUpdate(JEditTextArea textArea)
@@ -663,7 +646,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				{
 					int wordEnd = TextUtilities.findWordEnd(lineText, offset + 1, noWordSep);
 
-					if (wordEnd - wordStart < 2)
+					if (wordEnd - wordStart < minimumWordLength)
 					{
 						if (currentWordHighlight.isEnabled())
 						{
@@ -903,6 +886,14 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		if (!selectionHighlight.getColor().equals(selectionNewColor))
 		{
 			changedSelection = true;
+		} //}}}
+
+		int minimumWordLength = jEdit.getIntegerProperty(HighlightOptionPane.PROP_HIGHLIGHT_WORD_MINIMUM_LENGTH, 2);
+		//{{{ PROP_HIGHLIGHT_WORD_MINIMUM_LENGTH
+		if (this.minimumWordLength != minimumWordLength)
+		{
+			changed = true;
+			this.minimumWordLength = minimumWordLength;
 		} //}}}
 
 		Highlighter.square = jEdit.getBooleanProperty(HighlightOptionPane.PROP_SQUARE);

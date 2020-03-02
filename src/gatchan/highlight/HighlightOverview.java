@@ -4,7 +4,7 @@
  * :folding=explicit:collapseFolds=1:
  *
  * Copyright (C) 2009 Szalai Endre
- * Portions Copyright (C) 2009, 2018 Matthieu Casanova
+ * Portions Copyright (C) 2009, 2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 package gatchan.highlight;
 
@@ -64,7 +64,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	private Color color;
 
 	//{{{ HighlightOverview constructor
-	HighlightOverview(final JEditTextArea textArea)
+	HighlightOverview(JEditTextArea textArea)
 	{
 		Font currentFont = getFont();
 		Font newFont = new Font(currentFont.getName(), Font.BOLD, 8);
@@ -93,7 +93,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		JEditBuffer buffer = textArea.getBuffer();
 		int lineCount = buffer.getLineCount();
 		if (!highlightEnabled || (!HighlightManagerTableModel.currentWordHighlight.isEnabled() &&
-								  !HighlightManagerTableModel.selectionHighlight.isEnabled()) ||
+								!HighlightManagerTableModel.selectionHighlight.isEnabled()) ||
 				lineCount > jEdit.getIntegerProperty("gatchan.highlight.overview.maxLines", 200000))
 		{
 			repaint();
@@ -104,7 +104,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 				HighlightManagerTableModel.selectionHighlight.getSearchMatcher() :
 				HighlightManagerTableModel.currentWordHighlight.getSearchMatcher();
 
-		LongAccumulator accumulator = new LongAccumulator((left, right) -> left + right,0L);
+		LongAccumulator accumulator = new LongAccumulator(Long::sum, 0L);
 		IntStream lineStream = IntStream.range(0, lineCount);
 
 		lineStream
@@ -189,7 +189,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			gfx.fillRect(ITEM_BORDER, y, ITEM_WIDTH, ITEM_HEIGHT);
 		}
 	} //}}}
-                     
+
 	//{{{ lineToY() method
 	private int lineToY(int line, int lineCount)
 	{
