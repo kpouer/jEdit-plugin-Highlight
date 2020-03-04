@@ -164,7 +164,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 	public void paintComponent(Graphics gfx)
 	{
 		super.paintComponent(gfx);
-		if (items.getSize() == 0)
+		if (items.isEmpty())
 			return;
 
 
