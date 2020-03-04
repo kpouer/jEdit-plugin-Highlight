@@ -153,9 +153,7 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 			{
 				return line;
 			}
-		} catch (PatternSyntaxException ignored)
-		{
-		} catch (InterruptedException e)
+		} catch (PatternSyntaxException | InterruptedException ignored)
 		{
 		}
 		return -1;
