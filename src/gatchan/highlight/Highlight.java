@@ -27,10 +27,12 @@ import org.gjt.sp.jedit.search.PatternSearchMatcher;
 import org.gjt.sp.jedit.search.BoyerMooreSearchMatcher;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.jEdit;
+import org.gjt.sp.util.Log;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 //}}}
 
 /**
@@ -307,16 +309,15 @@ public class Highlight
 	*
 	* @param s the string to parse.
 	* @return the highlight unserialized
-	* @throws InvalidHighlightException exception if the highlight is invalid
 	*/
-	public static Highlight unserialize(String s, boolean getStatus) throws InvalidHighlightException
+	public static Optional<Highlight> unserialize(String s)
 	{
 		try
 		{
 			int index = s.indexOf(';');
 			boolean regexp = s.charAt(index + 1) == '1';
 			boolean ignoreCase = s.charAt(index + 2) == '1';
-			boolean enabled = !getStatus || s.charAt((index + 3)) == '1';
+			boolean enabled = s.charAt(index + 3) == '1';
 			int i = s.indexOf(';', index + 4);
 			Color color = Color.decode(s.substring(index + 4, i));
 
@@ -324,12 +325,13 @@ public class Highlight
 			Highlight highlight = new Highlight();
 			highlight.setEnabled(enabled);
 			highlight.init(searchString, regexp, ignoreCase, color);
-			return highlight;
+			return Optional.of(highlight);
 		}
 		catch (Exception e)
 		{
-			throw new InvalidHighlightException(e);
+			Log.log(Log.ERROR, Highlight.class, e, e);
 		}
+		return Optional.empty();
 	} //}}}
 
 	//{{{ getScope() method

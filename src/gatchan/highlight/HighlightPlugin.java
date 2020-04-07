@@ -37,10 +37,13 @@ import org.gjt.sp.jedit.msg.ViewUpdate;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
 import org.gjt.sp.util.Log;
-import org.gjt.sp.util.IOUtilities;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
 //}}}
 
 /**
@@ -69,8 +72,9 @@ public class HighlightPlugin extends EditPlugin
 	{
 		layer = jEdit.getIntegerProperty(HighlightOptionPane.PROP_LAYER_PROPERTY, TextAreaPainter.HIGHEST_LAYER);
 		highlightOverview = jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_OVERVIEW);
-		File highlightFile = dataMigration();
-		highlightManager = HighlightManagerTableModel.createInstance(highlightFile);
+		Optional<Path> highlightFile = getDataFile();
+
+		highlightManager = HighlightManagerTableModel.createInstance(highlightFile.orElse(null));
 		highlightManager.propertiesChanged();
 		jEdit.visit(new TextAreaInitializer());
 		jEdit.visit(new ViewInitializer());
@@ -497,53 +501,26 @@ public class HighlightPlugin extends EditPlugin
 		return highlightManager.isHighlightEnable();
 	} //}}}
 
-	//{{{ dataMigration() method
+	//{{{ getDataFile() method
 	/**
-	 * Move the files and returns the new saved datas file.
-	 * @return the saved datas file. It can be null
+	 * @return the saved datas file.
 	 */
-	public File dataMigration()
+	public Optional<Path> getDataFile()
 	{
-		String settingsDirectory = jEdit.getSettingsDirectory();
-		if (settingsDirectory == null)
-			return null;
-		// workaround until 4.3pre10
-		File file = new File(settingsDirectory, "plugins");
-		String home = new File(file, getClass().getName()).getPath();
-
-		//todo : use pluginHome
-		if (home == null)
-			return null;
-
-		String PROJECT_DIRECTORY = jEdit.getSettingsDirectory() + File.separator + "HighlightPlugin" + File.separator;
-		File projectDirectory = new File(PROJECT_DIRECTORY);
-		File highlights = new File(projectDirectory, "highlights.ser");
-		File homeFolder = new File(home);
-		if (!homeFolder.exists())
+		File pluginHome = getPluginHome();
+		if (pluginHome == null)
+			return Optional.empty();
+		Path pluginHomePath = pluginHome.toPath();
+		try
 		{
-			Log.log(Log.DEBUG, this, "Home doesn't exist, trying to create it " + home);
-			if (!homeFolder.mkdirs())
-			{
-				Log.log(Log.ERROR, this, "Unable to create home directory, running Highlight plugin with no Home");
-				return null;
-			}
+			Files.createDirectories(pluginHomePath);
+			return Optional.of(Path.of(pluginHomePath.toString(), "highlights.ser"));
 		}
-		if (!homeFolder.isDirectory() || !homeFolder.canWrite())
+		catch (IOException e)
 		{
-			Log.log(Log.ERROR, this, "Unable to write in home folder");
-			return null;
+			Log.log(Log.ERROR, this, "unable to create plugin home folder", e);
 		}
-
-		File newFile = new File(homeFolder, "highlights.ser");
-		if (highlights.isFile())
-		{
-			Log.log(Log.DEBUG, this, "Moving data to new home");
-			IOUtilities.moveFile(highlights, newFile);
-			highlights.delete();
-			projectDirectory.delete();
-			return newFile;
-		}
-		return newFile;
+		return Optional.empty();
 	} //}}}
 
 	//{{{ TextAreaInitializer class

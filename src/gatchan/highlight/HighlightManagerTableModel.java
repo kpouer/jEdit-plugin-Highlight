@@ -28,7 +28,8 @@ import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.Selection;
 import org.gjt.sp.util.Log;
 
-import javax.swing.*;
+import javax.annotation.Nullable;
+import javax.swing.Timer;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
@@ -36,10 +37,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 //}}}
@@ -60,7 +61,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	private static HighlightManagerTableModel highlightManagerTableModel;
 
 	private final Collection<HighlightChangeListener> highlightChangeListeners = new ArrayList<>(2);
-	private final File highlights;
+	private final Path highlightsPath;
 
 	private final ReentrantReadWriteLock lock;
 
@@ -95,7 +96,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	 * @param highlightFile the highlight file. If it is null, no file will be loaded or saved
 	 * @return the Highlight manager
 	 */
-	static HighlightManager createInstance(File highlightFile)
+	static HighlightManager createInstance(@Nullable Path highlightFile)
 	{
 		highlightManagerTableModel = new HighlightManagerTableModel(highlightFile);
 		return highlightManagerTableModel;
@@ -124,34 +125,25 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	} //}}}
 
 	//{{{ HighlightManagerTableModel constructor
-	private HighlightManagerTableModel(File highlightFile)
+	private HighlightManagerTableModel(@Nullable Path highlightFile)
 	{
 		lock = new ReentrantReadWriteLock();
-		highlights = highlightFile;
+		highlightsPath = highlightFile;
 		currentWordHighlight = new Highlight();
 		selectionHighlight = new Highlight();
-		if (highlights != null && highlights.exists())
+		if (highlightsPath != null && Files.exists(highlightsPath))
 		{
-			try(BufferedReader reader = new BufferedReader(new FileReader(highlights)))
+			try
 			{
-				String line = reader.readLine();
-				boolean getStatus = false;
+				List<String> lines = Files.readAllLines(highlightsPath);
+				String line = lines.get(0);
 				if (FILE_VERSION.equals(line))
 				{
-					getStatus = true;
-					line = reader.readLine();
-				}
-				while (line != null)
-				{
-					try
-					{
-						addElement(Highlight.unserialize(line, getStatus), false);
-					}
-					catch (InvalidHighlightException e)
-					{
-						Log.log(Log.WARNING, this, "Unable to read this highlight, please report it : " + line);
-					}
-					line = reader.readLine();
+					lines.stream()
+						.skip(1)
+						.map(Highlight::unserialize)
+						.flatMap(Optional::stream)
+						.forEach(highlight -> addElement(highlight, false));
 				}
 			} catch (IOException e)
 			{
@@ -463,39 +455,33 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	//{{{ save() method
 	private void save()
 	{
-		if (highlights != null)
+		if (highlightsPath != null)
 		{
-			try(PrintWriter writer = new PrintWriter(highlights))
+			StringBuilder builder = new StringBuilder(FILE_VERSION);
+			builder.append('\n');
+			try
 			{
-				File parentFile = highlights.getParentFile();
-				if (!parentFile.isDirectory())
-					parentFile.mkdirs();
-				writer.println(FILE_VERSION);
-				try
-				{
-					lock.writeLock().lock();
-					ListIterator<Highlight> listIterator = datas.listIterator();
-					while (listIterator.hasNext())
+				lock.writeLock().lock();
+				datas
+					.stream()
+					.filter(highlight -> highlight.getScope() == Highlight.PERMANENT_SCOPE)
+					.forEach(highlight ->
 					{
-						Highlight highlight = listIterator.next();
-						if (highlight.getScope() == Highlight.PERMANENT_SCOPE)
-						{
-							writer.println(highlight.serialize());
-						}
-						else
-						{
-							listIterator.remove();
-						}
-					}
-				}
-				finally
-				{
-					lock.writeLock().unlock();
-				}
+						builder.append(highlight.serialize());
+						builder.append('\n');
+					});
+			}
+			finally
+			{
+				lock.writeLock().unlock();
+			}
+			try
+			{
+				Files.writeString(highlightsPath, builder.toString());
 			}
 			catch (IOException e)
 			{
-				Log.log(Log.ERROR, this, e);
+				Log.log(Log.ERROR, this, "Error while saving highlights", e);
 			}
 		}
 		else

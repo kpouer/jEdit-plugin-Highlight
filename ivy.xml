@@ -1,0 +1,6 @@
+<ivy-module version="2.0">
+    <info organisation="jedit-plugins" module="Highlight"/>
+    <dependencies>
+        <dependency org="com.google.code.findbugs" name="jsr305" rev="3.0.2"/>
+    </dependencies>
+</ivy-module>
