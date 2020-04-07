@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2010 Matthieu Casanova
+ * Copyright (C) 2004, 2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,7 +27,6 @@ import org.gjt.sp.jedit.gui.HistoryTextField;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
@@ -62,7 +61,7 @@ public class HighlightTablePanel extends JPanel
 
 	private boolean initialized;
 
-	private Color permanentScopeColor;
+	private final Color permanentScopeColor;
 	private static final Color SESSION_SCOPE_COLOR = new Color(0xcc, 0xcc, 0xff);
 	private static final Color BUFFER_SCOPE_COLOR = new Color(0xff, 0xfc, 0xc0);
 
@@ -100,7 +99,7 @@ public class HighlightTablePanel extends JPanel
 
 	public void setDialog(EnhancedDialog dialog)
 	{
-		expressionField.addActionListener(new MyActionListener(dialog));
+		expressionField.addActionListener(e -> dialog.ok());
 	}
 
 	/**
@@ -126,7 +125,11 @@ public class HighlightTablePanel extends JPanel
 				{
 					ActionListener actionListener = actionListeners[0];
 					colorBox.removeActionListener(actionListener);
-					colorBox.addActionListener(new SpecialColorWellButtonActionListener(actionListener, highlightCellEditor));
+					colorBox.addActionListener(e ->
+					{
+						actionListener.actionPerformed(e);
+						highlightCellEditor.stopCellEditing();
+					});
 				}
 				initialized = true;
 			}
@@ -167,7 +170,7 @@ public class HighlightTablePanel extends JPanel
 	public void save(Highlight highlight) throws InvalidHighlightException
 	{
 		String stringToHighlight = expressionField.getText();
-		if (stringToHighlight.length() == 0)
+		if (stringToHighlight.isEmpty())
 		{
 			throw new InvalidHighlightException("String cannot be empty");
 		}
@@ -186,39 +189,5 @@ public class HighlightTablePanel extends JPanel
 	public void setCellEditor(HighlightCellEditor highlightCellEditor)
 	{
 		this.highlightCellEditor = highlightCellEditor;
-	}
-
-	private static class SpecialColorWellButtonActionListener implements ActionListener
-	{
-		private final ActionListener actionListener;
-		private final HighlightCellEditor highlightCellEditor;
-
-		SpecialColorWellButtonActionListener(ActionListener actionListener,
-						     HighlightCellEditor highlightCellEditor)
-		{
-			this.actionListener = actionListener;
-			this.highlightCellEditor = highlightCellEditor;
-		}
-
-		public void actionPerformed(ActionEvent e)
-		{
-			actionListener.actionPerformed(e);
-			highlightCellEditor.stopCellEditing();
-		}
-	}
-
-	private static class MyActionListener implements ActionListener
-	{
-		private final EnhancedDialog dialog;
-
-		MyActionListener(EnhancedDialog dialog)
-		{
-			this.dialog = dialog;
-		}
-
-		public void actionPerformed(ActionEvent e)
-		{
-			dialog.ok();
-		}
 	}
 }

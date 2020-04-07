@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004 Matthieu Casanova
+ * Copyright (C) 2004-2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,7 +40,7 @@ import java.util.EventObject;
  *
  * @author Matthieu Casanova
  */
-public final class HighlightCellEditor extends AbstractCellEditor implements TableCellEditor, ActionListener, DocumentListener {
+public class HighlightCellEditor extends AbstractCellEditor implements TableCellEditor, ActionListener, DocumentListener {
 	private Highlight highlight;
 	private final HighlightTablePanel renderer = new HighlightTablePanel();
 	
@@ -51,13 +51,15 @@ public final class HighlightCellEditor extends AbstractCellEditor implements Tab
 	} //}}}
 	
 	//{{{ getCellEditorValue() method
-	public Object getCellEditorValue() 
+	@Override
+	public Object getCellEditorValue()
 	{
 		return highlight;
 	} //}}}
 	
 	//{{{ stopCellEditing() method
-	public boolean stopCellEditing() 
+	@Override
+	public boolean stopCellEditing()
 	{
 		try 
 		{
@@ -75,13 +77,15 @@ public final class HighlightCellEditor extends AbstractCellEditor implements Tab
 	} //}}}
 
 	//{{{ isCellEditable() method
-	public boolean isCellEditable(EventObject e) 
+	@Override
+	public boolean isCellEditable(EventObject e)
 	{
 		return true;
 	} //}}}
 	
 	//{{{ getTableCellEditorComponent() method 
-	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) 
+	@Override
+	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
 	{
 		highlight = (Highlight) value;
 		renderer.setHighlight(highlight);
@@ -89,25 +93,29 @@ public final class HighlightCellEditor extends AbstractCellEditor implements Tab
 	} //}}}
 	
 	//{{{ actionPerformed() method
-	public void actionPerformed(ActionEvent e) 
+	@Override
+	public void actionPerformed(ActionEvent e)
 	{
 		stopCellEditing();
 	} //}}}
 	
 	//{{{ changedUpdate() method
-	public void changedUpdate(DocumentEvent e) 
+	@Override
+	public void changedUpdate(DocumentEvent e)
 	{
 		saveHighlight();
 	} //}}}
 	
 	//{{{ insertUpdate() method
-	public void insertUpdate(DocumentEvent e) 
+	@Override
+	public void insertUpdate(DocumentEvent e)
 	{
 		saveHighlight();
 	} //}}}
 	
 	//{{{ removeUpdate() method
-	public void removeUpdate(DocumentEvent e) 
+	@Override
+	public void removeUpdate(DocumentEvent e)
 	{
 		saveHighlight();
 	} //}}}

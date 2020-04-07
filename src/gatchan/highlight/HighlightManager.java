@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004 Matthieu Casanova
+ * Copyright (C) 2004-2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -115,7 +115,5 @@ public interface HighlightManager extends CaretListener
   void getReadLock();
   void releaseLock();
 
-    //{{{ isHighlightSelection() method
-    boolean isHighlightSelection() //}}}
-            ;
+  boolean isHighlightSelection();
 }

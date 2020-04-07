@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004 Matthieu Casanova
+ * Copyright (C) 2004-2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -43,6 +43,7 @@ public class HighlightCellRenderer implements TableCellRenderer
 	private final JButton hypersearch = new JButton(GUIUtilities.loadIcon("Find.png"));
 
 	//{{{ getTableCellRendererComponent() method
+	@Override
 	public Component getTableCellRendererComponent(JTable table,
 						       Object value,
 						       boolean isSelected,
@@ -51,23 +52,18 @@ public class HighlightCellRenderer implements TableCellRenderer
 						       int column)
 	{
 		Highlight highlight = (Highlight) value;
-		if (column == 0)
+		switch (column)
 		{
-			enabled.setSelected(highlight.isEnabled());
-			return enabled;
-		}
-		else if (column == 1)
-		{
-			highlightTablePanel.setHighlight(highlight);
-			return highlightTablePanel;
-		}
-		else if (column == 2)
-		{
-			return remove;
-		}
-		else
-		{
-			return hypersearch;
+			case 0:
+				enabled.setSelected(highlight.isEnabled());
+				return enabled;
+			case 1:
+				highlightTablePanel.setHighlight(highlight);
+				return highlightTablePanel;
+			case 2:
+				return remove;
+			default:
+				return hypersearch;
 		}
 	} //}}}
 

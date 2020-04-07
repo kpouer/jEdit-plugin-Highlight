@@ -32,9 +32,9 @@ import javax.swing.*;
  * @author Matthieu Casanova
  * @version $Id: HighlightPlugin.java,v 1.20 2006/06/21 09:40:32 kpouer Exp $
  */
-public class TextAreaExtensionLayerChooser extends JComboBox
+public class TextAreaExtensionLayerChooser extends JComboBox<String>
 {
-	private static String[] layers = {	TextAreaPainter.LOWEST_LAYER                 + " (LOWEST_LAYER)" ,
+	private static final String[] layers = {TextAreaPainter.LOWEST_LAYER                 + " (LOWEST_LAYER)" ,
 						TextAreaPainter.BACKGROUND_LAYER             + " (BACKGROUND_LAYER)",
 						TextAreaPainter.LINE_BACKGROUND_LAYER        + " (LINE_BACKGROUND_LAYER)",
 						TextAreaPainter.BELOW_SELECTION_LAYER        + " (BELOW_SELECTION_LAYER)",

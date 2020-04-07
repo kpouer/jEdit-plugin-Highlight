@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2010 Matthieu Casanova
+ * Copyright (C) 2004, 2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,24 +29,17 @@ import org.gjt.sp.jedit.gui.EnhancedDialog;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * @author Matthieu Casanova
  * @version $Id: PluginJAR.java 8660 2007-01-17 21:25:11Z kpouer $
  */
-public final class HighlightDialog extends EnhancedDialog
+public class HighlightDialog extends EnhancedDialog
 {
-	private final JButton ok = new JButton(jEdit.getProperty("common.ok"));
-	private final JButton cancel = new JButton(jEdit.getProperty("common.cancel"));
-
 	private final Highlight highlight;
 	private final HighlightTablePanel panel = new HighlightTablePanel();
-	private final JComboBox scopeCombo = new JComboBox(new Integer[]{Integer.valueOf(Highlight.PERMANENT_SCOPE),
-									 Integer.valueOf(Highlight.SESSION_SCOPE),
-									 Integer.valueOf(Highlight.BUFFER_SCOPE)});
-	private JSpinner spinner;
+	private final JComboBox<Integer> scopeCombo = new JComboBox<>(new Integer[]{Highlight.PERMANENT_SCOPE, Highlight.SESSION_SCOPE, Highlight.BUFFER_SCOPE});
+	private final JSpinner spinner;
 
 	//{{{ HighlightDialog constructors
 	public HighlightDialog(View owner, Highlight highlight)
@@ -65,12 +58,13 @@ public final class HighlightDialog extends EnhancedDialog
 		spinner = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 5));
 		spinner.setToolTipText(jEdit.getProperty("gatchan.highlight.expire.tooltip"));
 
-		MyActionListener myActionListener = new MyActionListener();
-		ok.addActionListener(myActionListener);
-		cancel.addActionListener(myActionListener);
+		JButton ok = new JButton(jEdit.getProperty("common.ok"));
+		ok.addActionListener(e -> ok());
+		JButton cancel = new JButton(jEdit.getProperty("common.cancel"));
+		cancel.addActionListener(e -> cancel());
 		JPanel buttonsPanel = new JPanel();
 
-		BoxLayout layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
+		LayoutManager layout = new BoxLayout(buttonsPanel, BoxLayout.X_AXIS);
 		buttonsPanel.setLayout(layout);
 		buttonsPanel.add(Box.createGlue());
 		buttonsPanel.add(ok);
@@ -97,6 +91,7 @@ public final class HighlightDialog extends EnhancedDialog
 	}
 
 	//{{{ ok() method
+	@Override
 	public void ok()
 	{
 		try
@@ -108,7 +103,7 @@ public final class HighlightDialog extends EnhancedDialog
 				highlight.setDuration(expire * 1000);
 			}
 			Integer selectedItem = (Integer) scopeCombo.getSelectedItem();
-			int scope = selectedItem.intValue();
+			int scope = selectedItem;
 			highlight.setScope(scope);
 			if (scope == Highlight.BUFFER_SCOPE)
 			{
@@ -126,30 +121,16 @@ public final class HighlightDialog extends EnhancedDialog
 	} //}}}
 
 	//{{{ cancel() method
+	@Override
 	public void cancel()
 	{
 		dispose();
 	} //}}}
 
-	//{{{ MyActionListener class
-	private final class MyActionListener implements ActionListener
-	{
-		public void actionPerformed(ActionEvent e)
-		{
-			if (e.getSource() == ok)
-			{
-				ok();
-			}
-			else if (e.getSource() == cancel)
-			{
-				cancel();
-			}
-		}
-	} //}}}
-
 	//{{{ MyListCellRenderer class
 	private static class MyListCellRenderer extends DefaultListCellRenderer
 	{
+		@Override
 		public Component getListCellRendererComponent(JList list,
 							      Object value,
 							      int index,
@@ -166,7 +147,7 @@ public final class HighlightDialog extends EnhancedDialog
 				setBackground(list.getBackground());
 				setForeground(list.getForeground());
 			}
-			int scope = ((Integer) value).intValue();
+			int scope = (Integer) value;
 			switch (scope)
 			{
 				case Highlight.PERMANENT_SCOPE:

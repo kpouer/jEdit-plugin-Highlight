@@ -37,9 +37,11 @@ import java.awt.event.ActionListener;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 //}}}
 
 /**
@@ -57,7 +59,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	private final List<Highlight> datas = new ArrayList<>();
 	private static HighlightManagerTableModel highlightManagerTableModel;
 
-	private final List<HighlightChangeListener> highlightChangeListeners = new ArrayList<>(2);
+	private final Collection<HighlightChangeListener> highlightChangeListeners = new ArrayList<>(2);
 	private final File highlights;
 
 	private final ReentrantReadWriteLock lock;
@@ -209,7 +211,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 
 	//{{{ getColumnClass() method
 	@Override
-	public Class getColumnClass(int columnIndex)
+	public Class<?> getColumnClass(int columnIndex)
 	{
 		return columnIndex == 0 ? Boolean.class : Highlight.class;
 	} //}}}
@@ -232,11 +234,11 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
-		Object o;
+		Highlight highlight;
 		try
 		{
 			lock.readLock().lock();
-			o = datas.get(rowIndex);
+			highlight = datas.get(rowIndex);
 		}
 		finally
 		{
@@ -244,9 +246,9 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		}
 		if (columnIndex == 0)
 		{
-			return ((Highlight) o).isEnabled();
+			return highlight.isEnabled();
 		}
-		return o;
+		return highlight;
 	} //}}}
 
 	//{{{ setValueAt() method
@@ -416,7 +418,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	@Override
 	public void bufferClosed(Buffer buffer)
 	{
-		List<Highlight> highlights = (List<Highlight>) buffer.getProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
+		Iterable<Highlight> highlights = (Iterable<Highlight>) buffer.getProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
 		if (highlights != null)
 		{
 			highlights.forEach(this::removeRow);
@@ -577,15 +579,14 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		@Override
 		public void actionPerformed(ActionEvent e)
 		{
-			List<Highlight> expired = new ArrayList<>();
+			List<Highlight> expired;
 			try
 			{
 				lock.readLock().lock();
-				for (Highlight highlight : datas) {
-					if (highlight.isExpired()) {
-						expired.add(highlight);
-					}
-				}
+				expired = datas
+					.stream()
+					.filter(Highlight::isExpired)
+					.collect(Collectors.toList());
 			}
 			finally
 			{

@@ -30,6 +30,7 @@ import org.gjt.sp.jedit.jEdit;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collection;
 //}}}
 
 /**
@@ -374,7 +375,7 @@ public class Highlight
 	{
 		if (this.buffer != null)
 		{
-			java.util.List<Highlight> highlights = (java.util.List<Highlight>) this.buffer.getProperty(HIGHLIGHTS_BUFFER_PROPS);
+			Collection<Highlight> highlights = (Collection<Highlight>) this.buffer.getProperty(HIGHLIGHTS_BUFFER_PROPS);
 			highlights.remove(this);
 			if (highlights.isEmpty())
 			{
@@ -384,7 +385,7 @@ public class Highlight
 		this.buffer = buffer;
 		if (buffer != null)
 		{
-			java.util.List<Highlight> highlights = (java.util.List<Highlight>) buffer.getProperty(HIGHLIGHTS_BUFFER_PROPS);
+			Collection<Highlight> highlights = (Collection<Highlight>) buffer.getProperty(HIGHLIGHTS_BUFFER_PROPS);
 			if (highlights == null)
 			{
 				highlights = new ArrayList<>();

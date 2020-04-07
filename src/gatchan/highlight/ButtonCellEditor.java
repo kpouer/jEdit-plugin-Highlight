@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004 Matthieu Casanova
+ * Copyright (C) 2004-2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -62,12 +62,14 @@ public class ButtonCellEditor extends AbstractCellEditor implements TableCellEdi
 	} //}}}
 
 	//{{{ getCellEditorValue() method
+	@Override
 	public Object getCellEditorValue()
 	{
 		return highlight;
 	} //}}}
 
 	//{{{ getTableCellEditorComponent() method
+	@Override
 	public Component getTableCellEditorComponent(JTable table,
 						     Object value,
 						     boolean isSelected,
@@ -82,6 +84,7 @@ public class ButtonCellEditor extends AbstractCellEditor implements TableCellEdi
 	} //}}}
 
 	//{{{ actionPerformed() method
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		stopCellEditing();

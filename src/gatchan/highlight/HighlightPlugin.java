@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2013 Matthieu Casanova
+ * Copyright (C) 2004, 2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -88,9 +88,9 @@ public class HighlightPlugin extends EditPlugin
 		jEdit.resetProperty("plugin.gatchan.highlight.HighlightPlugin.activate");
 
 		Buffer[] buffers = jEdit.getBuffers();
-		for (int i = 0; i < buffers.length; i++)
+		for (Buffer buffer : buffers)
 		{
-			buffers[i].unsetProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
+			buffer.unsetProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
 		}
 
 		jEdit.visit(new TextAreaUninitializer());
@@ -150,7 +150,7 @@ public class HighlightPlugin extends EditPlugin
 	} //}}}
 
 	//{{{ addHighlightOverview() method
-	private void addHighlightOverview(JEditTextArea textArea)
+	private static void addHighlightOverview(JEditTextArea textArea)
 	{
 		HighlightOverview currentOverview = (HighlightOverview) textArea.getClientProperty(HighlightOverview.class);
 		if (currentOverview == null)
@@ -184,15 +184,12 @@ public class HighlightPlugin extends EditPlugin
 	 * Initialize the view with a hypersearch results highlighter.
 	 *
 	 * @param view the view whose hypersearch results to initialize
-	 * @return the new highlighter for the hypersearch results of the view
 	 */
-	private HighlightHypersearchResults initView(View view)
+	private static void initView(View view)
 	{
 		HighlightHypersearchResults highlighter = new HighlightHypersearchResults(view);
 		highlighter.start();
-		view.getDockableWindowManager().putClientProperty(
-			HighlightHypersearchResults.class, highlighter);
-		return highlighter;
+		view.getDockableWindowManager().putClientProperty(HighlightHypersearchResults.class, highlighter);
 	} //}}}
 
 	//{{{ uninitView() method
@@ -445,7 +442,7 @@ public class HighlightPlugin extends EditPlugin
 		String currentWord = getCurrentWord(textArea);
 		HighlightDialog d = new HighlightDialog(view);
 
-		if (currentWord != null && currentWord.length() != 0)
+		if (currentWord != null && !currentWord.isEmpty())
 		{
 			d.setString(currentWord);
 		}
@@ -513,6 +510,8 @@ public class HighlightPlugin extends EditPlugin
 		// workaround until 4.3pre10
 		File file = new File(settingsDirectory, "plugins");
 		String home = new File(file, getClass().getName()).getPath();
+
+		//todo : use pluginHome
 		if (home == null)
 			return null;
 
@@ -550,6 +549,7 @@ public class HighlightPlugin extends EditPlugin
 	//{{{ TextAreaInitializer class
 	private class TextAreaInitializer extends JEditVisitorAdapter
 	{
+		@Override
 		public void visit(JEditTextArea textArea)
 		{
 			initTextArea(textArea);
@@ -557,8 +557,9 @@ public class HighlightPlugin extends EditPlugin
 	} //}}}
 
 	//{{{ TextAreaUninitializer class
-	private class TextAreaUninitializer extends JEditVisitorAdapter
+	private static class TextAreaUninitializer extends JEditVisitorAdapter
 	{
+		@Override
 		public void visit(JEditTextArea textArea)
 		{
 			uninitTextArea(textArea);
@@ -566,8 +567,9 @@ public class HighlightPlugin extends EditPlugin
 	} //}}}
 	
 	//{{{ ViewInitializer class
-	private class ViewInitializer extends JEditVisitorAdapter
+	private static class ViewInitializer extends JEditVisitorAdapter
 	{
+		@Override
 		public void visit(View view)
 		{
 			initView(view);
@@ -575,8 +577,9 @@ public class HighlightPlugin extends EditPlugin
 	} //}}}
 
 	//{{{ ViewUninitializer class
-	private class ViewUninitializer extends JEditVisitorAdapter
+	private static class ViewUninitializer extends JEditVisitorAdapter
 	{
+		@Override
 		public void visit(View view)
 		{
 			uninitView(view);

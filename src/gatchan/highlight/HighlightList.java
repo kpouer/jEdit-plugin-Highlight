@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2010 Matthieu Casanova
+ * Copyright (C) 2004, 2020 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,6 +23,8 @@ package gatchan.highlight;
 
 //{{{ Imports
 import org.gjt.sp.jedit.*;
+import org.gjt.sp.jedit.textarea.TextAreaMouseHandler;
+import org.gjt.sp.util.GenericGUIUtilities;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -40,7 +42,7 @@ import java.awt.event.MouseEvent;
  * @author Matthieu Casanova
  * @version $Id: HighlightList.java,v 1.17 2005/09/12 20:07:37 kpouer Exp $
  */
-public final class HighlightList extends JPanel implements HighlightChangeListener
+public class HighlightList extends JPanel implements HighlightChangeListener
 {
 	private JPopupMenu popupMenu;
 	private JMenuItem remove;
@@ -52,7 +54,7 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 	private JCheckBoxMenuItem permanentScope;
 	private JCheckBoxMenuItem sessionScope;
 	private JCheckBoxMenuItem bufferScope;
-	private MyActionListener actionListener;
+	private final MyActionListener actionListener;
 
 	//{{{ HighlightList constructor
 	public HighlightList()
@@ -98,11 +100,13 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 
 		table.addMouseListener(new MouseAdapter()
 		{
+			@Override
 			public void mouseClicked(MouseEvent e)
 			{
 				final int row = table.rowAtPoint(e.getPoint());
-				if (row == -1) return;
-				if (GUIUtilities.isRightButton(e.getModifiers()))
+				if (row == -1)
+					return;
+				if (TextAreaMouseHandler.isRightButton(e))
 				{
 					showPopupMenu(e, row);
 				}
@@ -171,11 +175,12 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 
 		remove.setEnabled(tableModel.getRowCount() > 0);
 		removeAction.setRow(row);
-		GUIUtilities.showPopupMenu(popupMenu, e.getComponent(), e.getX(), e.getY());
+		GenericGUIUtilities.showPopupMenu(popupMenu, e.getComponent(), e.getX(), e.getY());
 		e.consume();
 	} //}}}
 
 	//{{{ addNotify() method
+	@Override
 	public void addNotify()
 	{
 		super.addNotify();
@@ -183,6 +188,7 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 	} //}}}
 
 	//{{{ removeNotify() method
+	@Override
 	public void removeNotify()
 	{
 		super.removeNotify();
@@ -194,6 +200,7 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 	} //}}}
 
 	//{{{ highlightUpdated() method
+	@Override
 	public void highlightUpdated(boolean highlightEnable)
 	{
 		enableHighlights.setSelected(highlightEnable);
@@ -205,7 +212,7 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 	 *
 	 * @author Matthieu Casanova
 	 */
-	private static final class RemoveAction extends AbstractAction
+	private static class RemoveAction extends AbstractAction
 	{
 		private int row;
 
@@ -222,7 +229,8 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 			this.row = row;
 		}
 
-		public final void actionPerformed(ActionEvent e)
+		@Override
+		public void actionPerformed(ActionEvent e)
 		{
 			tableModel.removeRow(row);
 		}
@@ -234,7 +242,7 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 	 *
 	 * @author Matthieu Casanova
 	 */
-	private final class MyActionListener implements ActionListener
+	private class MyActionListener implements ActionListener
 	{
 		private final JButton newButton;
 		private final JButton clear;
@@ -256,6 +264,7 @@ public final class HighlightList extends JPanel implements HighlightChangeListen
 			this.row = row;
 		}
 
+		@Override
 		public final void actionPerformed(ActionEvent e)
 		{
 			Object source = e.getSource();
