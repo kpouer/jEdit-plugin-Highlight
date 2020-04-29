@@ -108,7 +108,6 @@ public class HighlightOverview extends JPanel implements HighlightChangeListener
 		IntStream lineStream = IntStream.range(0, lineCount);
 
 		lineStream
-				.parallel()
 				.map(line -> match(buffer, matcher, line))
 				.filter(line -> line >= 0)
 				.forEach(line -> pushLine(accumulator, line));
