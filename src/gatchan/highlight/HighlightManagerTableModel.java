@@ -590,6 +590,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 		EventQueue.invokeLater(() -> caretUpdate(textArea));
 	}
 
+	@Override
 	public void caretUpdate(JEditTextArea textArea)
 	{
 		int line = textArea.getCaretLine();

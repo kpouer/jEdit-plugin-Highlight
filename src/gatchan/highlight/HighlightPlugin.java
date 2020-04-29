@@ -273,6 +273,10 @@ public class HighlightPlugin extends EditPlugin
 		{
 			uninitView(view);
 		}
+		else if (what == ViewUpdate.EDIT_PANE_CHANGED)
+		{
+			highlightManager.caretUpdate(view.getTextArea());
+		}
 	}
 
 	//{{{ handleEditPaneMessage() method

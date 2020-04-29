@@ -159,7 +159,7 @@ public class Highlighter extends TextAreaExtension implements HighlightChangeLis
 			highlightManager.releaseLock();
 		}
 		tempLineContent = lineContent;
-		if (textArea.getSelectionCount() == 0)
+		if (jEdit.getActiveView().getTextArea().getSelectionCount() == 0)
 		{
 			highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, physicalLine, y,
 				screenToPhysicalOffset, tempLineContent);

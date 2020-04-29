@@ -22,6 +22,7 @@
 package gatchan.highlight;
 
 import org.gjt.sp.jedit.Buffer;
+import org.gjt.sp.jedit.textarea.JEditTextArea;
 
 import javax.swing.event.CaretListener;
 
@@ -33,7 +34,6 @@ import javax.swing.event.CaretListener;
  */
 public interface HighlightManager extends CaretListener
 {
-
   /**
    * Add a Highlight listener.
    *
@@ -107,6 +107,8 @@ public interface HighlightManager extends CaretListener
    * @param buffer the removed buffer
    */
   void bufferClosed(Buffer buffer);
+
+  void caretUpdate(JEditTextArea textArea);
 
   boolean isHighlightWordAtCaret();
 
