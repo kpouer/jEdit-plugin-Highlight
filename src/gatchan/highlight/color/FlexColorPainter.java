@@ -76,9 +76,9 @@ public class FlexColorPainter extends TextAreaExtension
 			return;
 		buffer.getText(lineStartOffset + screenToPhysicalOffset, l, seg);
 
-		flexColor.yyreset(new CharArrayReader(seg.array, seg.offset, seg.count));
-		try
+		try (CharArrayReader charArrayReader = new CharArrayReader(seg.array, seg.offset, seg.count))
 		{
+			flexColor.yyreset(charArrayReader);
 			ColorToken token = flexColor.yylex();
 			while (token != null)
 			{
