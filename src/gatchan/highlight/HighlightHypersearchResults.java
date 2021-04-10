@@ -21,9 +21,7 @@
  */
 package gatchan.highlight;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.util.*;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
@@ -31,12 +29,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
+import gatchan.highlight.hypersearch.HyperSearchResultValue;
 import org.gjt.sp.jedit.View;
 import org.gjt.sp.jedit.jEdit;
 import org.gjt.sp.jedit.search.HyperSearchResult;
 import org.gjt.sp.jedit.search.HyperSearchResults;
-import org.gjt.sp.jedit.search.SearchMatcher;
-import org.gjt.sp.jedit.search.SearchMatcher.Match;
 
 public class HighlightHypersearchResults implements HighlightChangeListener
 {
@@ -119,142 +116,8 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 			if (!(obj instanceof HyperSearchResult))
 				return defaultComponent;
 			HyperSearchResult result = (HyperSearchResult) obj;
-			String s = getHighlightedString(result.toString());
 			return renderer.getTreeCellRendererComponent(tree,
-				new DefaultMutableTreeNode(s), sel, expanded, leaf, row, hasFocus);
-		}
-
-		private String getHighlightedString(String s)
-		{
-			HighlightManager manager = HighlightManagerTableModel.getManager();
-			List<HighlightPosition> highlights = new LinkedList<>();
-			try
-			{
-				manager.getReadLock();
-				int highlightCount = manager.countHighlights();
-				for (int hi = 0; hi < highlightCount; hi++)
-				{
-					Highlight highlight = manager.getHighlight(hi);
-					addHighlight(highlights, s, highlight);
-				}
-			}
-			finally
-			{
-				manager.releaseLock();
-			}
-			if (manager.isHighlightWordAtCaret())
-				addHighlight(highlights, s, HighlightManagerTableModel.currentWordHighlight);
-			if (manager.isHighlightSelection())
-				addHighlight(highlights, s, HighlightManagerTableModel.selectionHighlight);
-
-			Collections.sort(highlights);
-			StringBuilder sb = new StringBuilder("<html><body>");
-			int i = 0;
-			for (HighlightPosition hlPos : highlights)
-			{
-				appendString2html(sb, s.substring(i, hlPos.getPos()));
-				if (hlPos.isStart())
-				{
-					sb.append("<font style bgcolor=\"#");
-					Color c = hlPos.getHighlight().getColor();
-					sb.append(Integer.toHexString(c.getRGB()).substring(2));
-					sb.append("\">");
-				}
-				else
-				{
-					sb.append("</font>");
-				}
-				i = hlPos.getPos();
-			}
-			appendString2html(sb, s.substring(i));
-			sb.append("</body></html>");
-			return sb.toString();
-		}
-
-		private void addHighlight(Collection<HighlightPosition> highlights, String s, Highlight highlight)
-		{
-			SearchMatcher matcher = highlight.getSearchMatcher();
-			try
-			{
-				Match m;
-				int i = 0;
-				while ((m = matcher.nextMatch(s.substring(i), true, true, true, false)) != null)
-				{
-					highlights.add(new HighlightPosition(i + m.start, highlight, true));
-					highlights.add(new HighlightPosition(i + m.end, highlight, false));
-					i += m.end;
-				}
-			}
-			catch (InterruptedException ie) 
-			{
-			}
-		}
-
-		private static void appendString2html(StringBuilder sb, CharSequence s)
-		{
-			int length = s.length();
-			for (int i = 0; i < length; i++)
-			{
-				char c = s.charAt(i);
-				String r;
-				switch (c)
-				{
-					case '"':
-						r = "&quot;";
-						break;
-					/*case '\'':
-						r = "&apos;";
-						break;  */
-					case '&':
-						r = "&amp;";
-						break;
-					case '<':
-						r = "&lt;";
-						break;
-					case '>':
-						r = "&gt;";
-						break;
-					default:
-						r = String.valueOf(c);
-						break;
-				}
-				sb.append(r);
-			}
-		}
-
-		private class HighlightPosition implements Comparable<HighlightPosition>
-		{
-			private final int pos;
-			private final Highlight highlight;
-			private final boolean start;
-
-			HighlightPosition(int p, Highlight h, boolean s)
-			{
-				pos = p;
-				highlight = h;
-				start = s;
-			}
-
-			public int getPos()
-			{
-				return pos;
-			}
-
-			public Highlight getHighlight()
-			{
-				return highlight;
-			}
-
-			public boolean isStart()
-			{
-				return start;
-			}
-
-			@Override
-			public int compareTo(HighlightPosition hlPos)
-			{
-				return Integer.compare(pos, hlPos.pos);
-			}
+				new DefaultMutableTreeNode(new HyperSearchResultValue(result.toString())), sel, expanded, leaf, row, hasFocus);
 		}
 	}
 }
