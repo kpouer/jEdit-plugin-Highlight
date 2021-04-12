@@ -107,17 +107,22 @@ public class HighlightHypersearchResults implements HighlightChangeListener
 		{
 			Component defaultComponent = renderer.getTreeCellRendererComponent(tree,
 				value, sel, expanded, leaf, row, hasFocus);
-			if (!(value instanceof DefaultMutableTreeNode))
-				return defaultComponent;
-			if (!jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_HYPERSEARCH_RESULTS))
-				return defaultComponent;
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-			Object obj = node.getUserObject();
-			if (!(obj instanceof HyperSearchResult))
-				return defaultComponent;
-			HyperSearchResult result = (HyperSearchResult) obj;
-			return renderer.getTreeCellRendererComponent(tree,
-				new DefaultMutableTreeNode(new HyperSearchResultValue(result.toString())), sel, expanded, leaf, row, hasFocus);
+			if (value instanceof DefaultMutableTreeNode)
+			{
+				if (jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_HYPERSEARCH_RESULTS))
+				{
+					DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+					Object obj = node.getUserObject();
+
+					if (obj instanceof HyperSearchResult)
+					{
+						HyperSearchResult result = (HyperSearchResult) obj;
+						return renderer.getTreeCellRendererComponent(tree,
+							new DefaultMutableTreeNode(new HyperSearchResultValue(result.toString())), sel, expanded, leaf, row, hasFocus);
+					}
+				}
+			}
+			return defaultComponent;
 		}
 	}
 }
