@@ -31,6 +31,7 @@ import org.gjt.sp.util.Log;
 import java.awt.*;
 import java.io.CharArrayReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import javax.swing.text.Segment;
 
@@ -42,13 +43,11 @@ public class FlexColorPainter extends TextAreaExtension
 	public static final int MAX_LINE_LENGTH = 10000;
 	private final TextArea textArea;
 	private final Point point = new Point();
-	private final Segment seg;
 	private final FlexColorScanner flexColor;
 
 	public FlexColorPainter(TextArea textArea)
 	{
 		this.textArea = textArea;
-		seg = new Segment();
 		flexColor = new FlexColorScanner(new StringReader(""));
 	}
 
@@ -72,11 +71,12 @@ public class FlexColorPainter extends TextAreaExtension
 		int l = (int) (length - screenToPhysicalOffset - lineEndOffset + end);
 		if (l > MAX_LINE_LENGTH)
 			l = MAX_LINE_LENGTH;
-		if (l == 0)
+		else if (l == 0)
 			return;
-		buffer.getText(lineStartOffset + screenToPhysicalOffset, l, seg);
 
-		try (CharArrayReader charArrayReader = new CharArrayReader(seg.array, seg.offset, seg.count))
+		// in fact it returns a Segment
+		Segment lineSegment = (Segment) buffer.getLineSegment(physicalLine);
+		try (Reader charArrayReader = new CharArrayReader(lineSegment.array, lineSegment.offset + screenToPhysicalOffset, lineSegment.length() - screenToPhysicalOffset))
 		{
 			flexColor.yyreset(charArrayReader);
 			ColorToken token = flexColor.yylex();
@@ -97,7 +97,6 @@ public class FlexColorPainter extends TextAreaExtension
 		{
 			Log.log(Log.ERROR, this, e);
 		}
-		seg.array = null;
 	}
 
 	private void paint(ColorToken token, Graphics2D gfx, int physicalLine, long start, int y)

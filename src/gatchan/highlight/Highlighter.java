@@ -137,8 +137,9 @@ public class Highlighter extends TextAreaExtension implements HighlightChangeLis
 		int l = (int) (length - screenToPhysicalOffset - lineEndOffset + end);
 		if (l > MAX_LINE_LENGTH)
 			l = MAX_LINE_LENGTH;
-		CharSequence lineContent = buffer.getSegment(lineStartOffset + screenToPhysicalOffset,
-			l);
+		else if (l == 0)
+			return;
+		CharSequence lineContent = buffer.getSegment(lineStartOffset + screenToPhysicalOffset, l);
 		if (lineContent.length() == 0)
 			return;
 
@@ -149,8 +150,7 @@ public class Highlighter extends TextAreaExtension implements HighlightChangeLis
 			for (int i = 0; i < highlightManager.countHighlights(); i++)
 			{
 				Highlight highlight = highlightManager.getHighlight(i);
-				highlight(highlight, buffer, gfx, physicalLine, y, screenToPhysicalOffset,
-					tempLineContent);
+				highlight(highlight, buffer, gfx, physicalLine, y, screenToPhysicalOffset, tempLineContent);
 				tempLineContent = lineContent;
 			}
 		}
@@ -159,16 +159,13 @@ public class Highlighter extends TextAreaExtension implements HighlightChangeLis
 			highlightManager.releaseLock();
 		}
 		tempLineContent = lineContent;
+		Highlight highlight;
 		if (jEdit.getActiveView().getTextArea().getSelectionCount() == 0)
-		{
-			highlight(HighlightManagerTableModel.currentWordHighlight, buffer, gfx, physicalLine, y,
-				screenToPhysicalOffset, tempLineContent);
-		}
+			highlight = HighlightManagerTableModel.currentWordHighlight;
 		else
-		{
-			highlight(HighlightManagerTableModel.selectionHighlight, buffer, gfx, physicalLine, y,
-				screenToPhysicalOffset, tempLineContent);
-		}
+			highlight = HighlightManagerTableModel.selectionHighlight;
+
+		highlight(highlight, buffer, gfx, physicalLine, y, screenToPhysicalOffset, tempLineContent);
 	} //}}}
 
 	//{{{ highlight() method
@@ -210,16 +207,10 @@ public class Highlighter extends TextAreaExtension implements HighlightChangeLis
 					int caretOffsetInLine = (int) (textArea.getCaretPosition() - textArea.getLineStartOffset(textArea.getCaretLine()));
 					int endOffset = match.end + i + screenToPhysicalOffset;
 					int startOffset = match.start + i + screenToPhysicalOffset;
-					if (highlight != HighlightManagerTableModel.currentWordHighlight ||
-					    textArea.getCaretLine() != physicalLine ||
-					     caretOffsetInLine < startOffset || caretOffsetInLine > endOffset)
-					{
-						_highlight(highlight.getColor(), gfx, physicalLine, startOffset, endOffset, y, true);
-					}
-					else
-					{
-						_highlight(highlight.getColor(), gfx, physicalLine, startOffset, endOffset, y, false);
-					}
+					boolean filled = highlight != HighlightManagerTableModel.currentWordHighlight ||
+						textArea.getCaretLine() != physicalLine ||
+						caretOffsetInLine < startOffset || caretOffsetInLine > endOffset;
+					_highlight(highlight.getColor(), gfx, physicalLine, startOffset, endOffset, y, filled);
 				}
 				highlight.updateLastSeen();
 				i += match.end;
@@ -230,14 +221,9 @@ public class Highlighter extends TextAreaExtension implements HighlightChangeLis
 					length + match.end);
 			}
 		}
-		catch (PatternSyntaxException e)
+		catch (PatternSyntaxException | InterruptedException e)
 		{
-			// the regexp was invalid
 			highlight.setValid(false);
-		}
-		catch (InterruptedException ie) 
-		{
-			highlight.setValid(false);	
 		}
 	} //}}}
 
