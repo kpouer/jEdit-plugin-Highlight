@@ -3,7 +3,7 @@
 * :tabSize=8:indentSize=8:noTabs=false:
 * :folding=explicit:collapseFolds=1:
 *
-* Copyright (C) 2004, 2020 Matthieu Casanova
+* Copyright (C) 2004, 2022 Matthieu Casanova
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -90,7 +90,7 @@ public class Highlighter extends TextAreaExtension implements HighlightChangeLis
 
 	//{{{ paintScreenLineRange() method
 	@Override
-	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, int[] start, int[] end, int y, int lineHeight)
+	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, long[] start, long[] end, int y, int lineHeight)
 	{
 		if (highlightManager.isHighlightEnable() &&
 		    highlightManager.countHighlights() != 0 ||
@@ -122,19 +122,19 @@ public class Highlighter extends TextAreaExtension implements HighlightChangeLis
 	public void paintValidLine(Graphics2D gfx,
 				   int screenLine,
 				   int physicalLine,
-				   int start,
-				   int end,
+				   long start,
+				   long end,
 				   int y)
 	{
 		JEditBuffer buffer = textArea.getBuffer();
-		int lineStartOffset = buffer.getLineStartOffset(physicalLine);
-		int lineEndOffset = buffer.getLineEndOffset(physicalLine);
+		long lineStartOffset = buffer.getLineStartOffset(physicalLine);
+		long lineEndOffset = buffer.getLineEndOffset(physicalLine);
 		int length = buffer.getLineLength(physicalLine);
 
-		int screenToPhysicalOffset = start - lineStartOffset;
+		int screenToPhysicalOffset = (int) (start - lineStartOffset);
 
 
-		int l = length - screenToPhysicalOffset - lineEndOffset + end;
+		int l = (int) (length - screenToPhysicalOffset - lineEndOffset + end);
 		if (l > MAX_LINE_LENGTH)
 			l = MAX_LINE_LENGTH;
 		CharSequence lineContent = buffer.getSegment(lineStartOffset + screenToPhysicalOffset,
@@ -202,12 +202,12 @@ public class Highlighter extends TextAreaExtension implements HighlightChangeLis
 								false);
 				if (match == null || match.end == match.start)
 					break;
-				int offset = match.start + i +
+				long offset = match.start + i +
 					     screenToPhysicalOffset + textArea.getLineStartOffset(physicalLine);
 				Selection selectionAtOffset = textArea.getSelectionAtOffset(offset);
 				if (selectionAtOffset == null)
 				{
-					int caretOffsetInLine = textArea.getCaretPosition() - textArea.getLineStartOffset(textArea.getCaretLine());
+					int caretOffsetInLine = (int) (textArea.getCaretPosition() - textArea.getLineStartOffset(textArea.getCaretLine()));
 					int endOffset = match.end + i + screenToPhysicalOffset;
 					int startOffset = match.start + i + screenToPhysicalOffset;
 					if (highlight != HighlightManagerTableModel.currentWordHighlight ||

@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004, 2020 Matthieu Casanova
+ * Copyright (C) 2004, 2022 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,6 +22,7 @@
 package gatchan.highlight;
 
 //{{{ imports
+import com.kpouer.ceos.swing.event.CeosCaretEvent;
 import org.gjt.sp.jedit.buffer.JEditBuffer;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
@@ -30,7 +31,6 @@ import org.gjt.sp.util.Log;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Timer;
-import javax.swing.event.CaretEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import java.awt.event.ActionEvent;
@@ -584,7 +584,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 
 	//{{{ caretUpdate() method
 	@Override
-	public void caretUpdate(CaretEvent e)
+	public void caretUpdate(CeosCaretEvent e)
 	{
 		JEditTextArea textArea = (JEditTextArea) e.getSource();
 		EventQueue.invokeLater(() -> caretUpdate(textArea));
@@ -593,11 +593,11 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 	@Override
 	public void caretUpdate(JEditTextArea textArea)
 	{
-		int line = textArea.getCaretLine();
+		int caretLine = textArea.getCaretLine();
 		boolean updated = false;
 		if (highlightWordAtCaret)
 		{
-			if (textArea.getLineLength(line) == 0 || textArea.getSelectionCount() != 0)
+			if (textArea.getLineLength(caretLine) == 0 || textArea.getSelectionCount() != 0)
 			{
 				if (currentWordHighlight.isEnabled())
 				{
@@ -607,17 +607,17 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			}
 			else
 			{
-				int lineStart = textArea.getLineStartOffset(line);
-				int offset = textArea.getCaretPosition() - lineStart;
+				long lineStart = textArea.getLineStartOffset(caretLine);
+				int offsetInLine = (int) (textArea.getCaretPosition() - lineStart);
 
 				JEditBuffer buffer = textArea.getBuffer();
-				CharSequence lineText = buffer.getLineSegment(line);
+				CharSequence lineText = buffer.getLineSegment(caretLine);
 				String noWordSep = buffer.getStringProperty("noWordSep");
 
-				if (offset != 0)
-					offset--;
+				if (offsetInLine != 0)
+					offsetInLine--;
 
-				int wordStart = TextUtilities.findWordStart(lineText, offset, noWordSep);
+				int wordStart = TextUtilities.findWordStart(lineText, offsetInLine, noWordSep);
 				char ch = lineText.charAt(wordStart);
 				if ((!highlightWordAtCaretWhitespace && Character.isWhitespace(ch)) ||
 				    (highlightWordAtCaretOnlyWords &&
@@ -632,7 +632,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 				}
 				else
 				{
-					int wordEnd = TextUtilities.findWordEnd(lineText, offset + 1, noWordSep);
+					int wordEnd = TextUtilities.findWordEnd(lineText, offsetInLine + 1, noWordSep);
 
 					if (wordEnd - wordStart < minimumWordLength)
 					{
@@ -685,7 +685,7 @@ public class HighlightManagerTableModel extends AbstractTableModel implements Hi
 			else
 			{
 				Selection selectionatOffset = textArea.getSelectionAtOffset(textArea.getCaretPosition());
-				if (textArea.getLineLength(line) == 0 ||
+				if (textArea.getLineLength(caretLine) == 0 ||
 						selectionatOffset == null ||
 						selectionatOffset.getStartLine() != selectionatOffset.getEndLine() ||
 						selectionatOffset.getEnd() - selectionatOffset.getStart()  < highlightSelectionMinLength)

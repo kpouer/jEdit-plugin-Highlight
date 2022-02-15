@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright (C) 2004-2020 Matthieu Casanova
+ * Copyright (C) 2004-2022 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,6 +21,7 @@
  */
 package gatchan.highlight;
 
+import com.kpouer.ceos.swing.event.CeosCaretListener;
 import org.gjt.sp.jedit.Buffer;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 
@@ -32,7 +33,7 @@ import javax.swing.event.CaretListener;
  * @author Matthieu Casanova
  * @version $Id: HighlightManager.java,v 1.6 2005/09/12 20:07:37 kpouer Exp $
  */
-public interface HighlightManager extends CaretListener
+public interface HighlightManager extends CeosCaretListener
 {
   /**
    * Add a Highlight listener.

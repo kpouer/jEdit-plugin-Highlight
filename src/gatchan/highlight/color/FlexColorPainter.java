@@ -3,7 +3,7 @@
  * :tabSize=8:indentSize=8:noTabs=false:
  * :folding=explicit:collapseFolds=1:
  *
- * Copyright © 2010-2015 Matthieu Casanova
+ * Copyright © 2010-2022 Matthieu Casanova
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -54,22 +54,22 @@ public class FlexColorPainter extends TextAreaExtension
 
 	//{{{ paintScreenLineRange() method
 	@Override
-	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, int[] start, int[] end, int y, int lineHeight)
+	public void paintScreenLineRange(Graphics2D gfx, int firstLine, int lastLine, int[] physicalLines, long[] start, long[] end, int y, int lineHeight)
 	{
 		if (jEdit.getBooleanProperty(HighlightOptionPane.PROP_HIGHLIGHT_COLORS))
 			super.paintScreenLineRange(gfx, firstLine, lastLine, physicalLines, start, end, y, lineHeight);
 	} //}}}
 
 	@Override
-	public void paintValidLine(Graphics2D gfx, int screenLine, int physicalLine, int start, int end, int y)
+	public void paintValidLine(Graphics2D gfx, int screenLine, int physicalLine, long start, long end, int y)
 	{
 		JEditBuffer buffer = textArea.getBuffer();
-		int lineStartOffset = buffer.getLineStartOffset(physicalLine);
-		int lineEndOffset = buffer.getLineEndOffset(physicalLine);
+		long lineStartOffset = buffer.getLineStartOffset(physicalLine);
+		long lineEndOffset = buffer.getLineEndOffset(physicalLine);
 		int length = buffer.getLineLength(physicalLine);
 
-		int screenToPhysicalOffset = start - lineStartOffset;
-		int l = length - screenToPhysicalOffset - lineEndOffset + end;
+		int screenToPhysicalOffset = (int) (start - lineStartOffset);
+		int l = (int) (length - screenToPhysicalOffset - lineEndOffset + end);
 		if (l > MAX_LINE_LENGTH)
 			l = MAX_LINE_LENGTH;
 		if (l == 0)
@@ -100,11 +100,11 @@ public class FlexColorPainter extends TextAreaExtension
 		seg.array = null;
 	}
 
-	private void paint(ColorToken token, Graphics2D gfx, int physicalLine, int start, int y)
+	private void paint(ColorToken token, Graphics2D gfx, int physicalLine, long start, int y)
 	{
-		int phycialLineStartOffset = textArea.getLineStartOffset(physicalLine);
-		int screenStartOffset = start + token.getStart();
-		int screenEndOffset = start + token.getEnd();
+		long phycialLineStartOffset = textArea.getLineStartOffset(physicalLine);
+		long screenStartOffset = start + token.getStart();
+		long screenEndOffset = start + token.getEnd();
 		Point p = textArea.offsetToXY(physicalLine, screenStartOffset - phycialLineStartOffset, point);
 
 		if (p == null)
