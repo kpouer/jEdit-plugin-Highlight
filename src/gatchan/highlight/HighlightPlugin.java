@@ -91,11 +91,7 @@ public class HighlightPlugin extends EditPlugin
 		EditBus.removeFromBus(this);
 		jEdit.resetProperty("plugin.gatchan.highlight.HighlightPlugin.activate");
 
-		Buffer[] buffers = jEdit.getBuffers();
-		for (Buffer buffer : buffers)
-		{
-			buffer.unsetProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS);
-		}
+        jEdit.getBufferManager().forEach(buffer -> buffer.unsetProperty(Highlight.HIGHLIGHTS_BUFFER_PROPS));
 
 		jEdit.visit(new TextAreaUninitializer());
 		jEdit.visit(new ViewUninitializer());
