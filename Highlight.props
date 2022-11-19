@@ -28,8 +28,13 @@ plugin.gatchan.highlight.HighlightPlugin.menu=\
                                                 gatchan-disableHighlights \
                                                 gatchan-toggleHighlights \
                                                 - \
+                                                gatchan-import \
+                                                gatchan-export \
+                                                - \
                                                 highlighter-panel
 
+gatchan-import.label=Import
+gatchan-export.label=Export
 gatchan-highlight.label=Highlight
 gatchan-highlight-session.label=Highlight (session scope)
 gatchan-highlight-buffer.label=Highlight (buffer scope)

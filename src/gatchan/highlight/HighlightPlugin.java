@@ -25,6 +25,9 @@ package gatchan.highlight;
 import gatchan.highlight.color.FlexColorPainter;
 import org.gjt.sp.jedit.*;
 import org.gjt.sp.jedit.EditBus.EBHandler;
+import org.gjt.sp.jedit.browser.VFSBrowser;
+import org.gjt.sp.jedit.browser.VFSFileChooserDialog;
+import org.gjt.sp.jedit.io.VFSManager;
 import org.gjt.sp.jedit.textarea.TextArea;
 import org.gjt.sp.jedit.visitors.JEditVisitorAdapter;
 import org.gjt.sp.jedit.search.SearchAndReplace;
@@ -36,11 +39,13 @@ import org.gjt.sp.jedit.msg.PropertiesChanged;
 import org.gjt.sp.jedit.msg.ViewUpdate;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
 import org.gjt.sp.jedit.textarea.TextAreaPainter;
+import org.gjt.sp.util.IOUtilities;
 import org.gjt.sp.util.Log;
 
 import java.awt.Color;
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -520,4 +525,55 @@ public class HighlightPlugin extends EditPlugin
 		}
 		return Optional.empty();
 	} //}}}
+
+	public static void exportFile()
+	{
+		Log.log(Log.MESSAGE, HighlightPlugin.class, "exportFile");
+		var string = highlightManager.exportToString();
+		var vfsFileChooserDialog = new VFSFileChooserDialog(jEdit.getActiveView(),
+			System.getProperty("user.home"),
+			VFSBrowser.SAVE_DIALOG,
+			false,
+			true);
+		var selectedFiles = vfsFileChooserDialog.getSelectedFiles();
+		if (selectedFiles.length == 1)
+		{
+			var savePath = selectedFiles[0];
+			var vfs = VFSManager.getVFSForPath(savePath);
+			var vfsSession = vfs.createVFSSession(savePath, jEdit.getActiveView());
+			try (var outputStream = vfs._createOutputStream(vfsSession, savePath, jEdit.getActiveView()))
+			{
+				IOUtilities.copyStream(null, new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)), outputStream,  false);
+			}
+			catch (IOException e)
+			{
+				Log.log(Log.ERROR, HighlightPlugin.class, e);
+			}
+			finally
+			{
+				try
+				{
+					vfs._endVFSSession(vfsSession, jEdit.getActiveView());
+				}
+				catch (IOException e)
+				{
+					Log.log(Log.ERROR, HighlightPlugin.class, e);
+				}
+			}
+		}
+	}
+
+	public static void importFile()
+	{
+		Log.log(Log.MESSAGE, HighlightPlugin.class, "importFile");
+		var selectedFiles = GUIUtilities.showVFSFileDialog(jEdit.getActiveView(),
+			System.getProperty("user.home"),
+			VFSBrowser.OPEN_DIALOG, false);
+		if (selectedFiles.length == 1)
+		{
+			var loadPath = selectedFiles[0];
+			var tmpBuffer = jEdit.openTemporary(jEdit.getActiveView(), null, loadPath, false);
+			highlightManager.importFromString(tmpBuffer.getText());
+		}
+	}
 }

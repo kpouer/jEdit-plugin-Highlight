@@ -23,6 +23,7 @@ package gatchan.highlight;
 
 import org.gjt.sp.jedit.Buffer;
 import org.gjt.sp.jedit.textarea.JEditTextArea;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.event.CaretListener;
 
@@ -34,6 +35,8 @@ import javax.swing.event.CaretListener;
  */
 public interface HighlightManager extends CaretListener
 {
+  void importFromString(String str);
+
   /**
    * Add a Highlight listener.
    *
@@ -115,7 +118,9 @@ public interface HighlightManager extends CaretListener
   void propertiesChanged();
 
   void getReadLock();
-  void releaseLock();
 
+  void releaseLock();
   boolean isHighlightSelection();
+
+  @NotNull String exportToString();
 }
