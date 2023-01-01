@@ -1,5 +1,15 @@
 <!DOCTYPE ACTIONS SYSTEM "actions.dtd">
 <ACTIONS>
+	<ACTION NAME="gatchan-export">
+		<CODE>
+			gatchan.highlight.HighlightPlugin.exportFile();
+		</CODE>
+	</ACTION>
+	<ACTION NAME="gatchan-import">
+		<CODE>
+			gatchan.highlight.HighlightPlugin.importFile();
+		</CODE>
+	</ACTION>
 	<ACTION NAME="gatchan-highlight">
 		<CODE>
 			textArea.requestFocus();
